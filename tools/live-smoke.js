@@ -22,6 +22,9 @@ const urls = [
   '/paper/',
   '/paper/index.html',
   '/velocity/',
+  '/folia/',
+  '/folia/faq/',
+  '/folia/reference/region-logic/',
   // deep pages (URL parity with docs.papermc.io)
   '/paper/getting-started/',
   '/paper/dev/command-api/basics/introduction/',
@@ -33,6 +36,7 @@ const urls = [
   '/snapshots.html',
   '/sections/paper.html',
   '/sections/velocity.html',
+  '/sections/folia.html',
   '/categories/paper-dev-command.html',
   '/assets/site.css',
   '/assets/site.js',
