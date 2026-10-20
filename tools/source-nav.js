@@ -2,7 +2,7 @@
 /**
  * tools/source-nav.js
  * ---------------------------------------------------------------------------
- * 从 archives/{paper,velocity}/html/** 的原始 HTML 快照中提取 docs.papermc.io
+ * 从 archive/{paper,velocity,folia}/html/** 的原始 HTML 快照中提取 docs.papermc.io
  * 自己的 Starlight 侧边栏导航树（ul.top-level），产出 data/source-nav.json。
  *
  * 设计原则：结构 / 分组标签 / 顺序 / 嵌套层级与上游逐字一致，不做任何自行归类。
@@ -37,6 +37,7 @@ const META_JSON = (ARGS.find((a) => a.startsWith('--meta-json=')) || '').split('
 const SECTIONS = [
   { id: 'paper', title: 'Paper', sourceHref: '/paper/' },
   { id: 'velocity', title: 'Velocity', sourceHref: '/velocity/' },
+  { id: 'folia', title: 'Folia', sourceHref: '/folia/' },
 ];
 
 /**
@@ -60,6 +61,15 @@ const SAMPLE_PAGES = {
     'html/dev/api/index.html',
     'html/reference/system-properties/index.html',
     'html/getting-started/index.html',
+  ],
+  // folia 归档只有 6 页，全部纳入取样（覆盖根页 / 单层目录 / 双层目录三种深度）
+  folia: [
+    'html/index.html',
+    'html/admin/index.html',
+    'html/admin/reference/index.html',
+    'html/faq/index.html',
+    'html/reference/overview/index.html',
+    'html/reference/region-logic/index.html',
   ],
 };
 
@@ -250,15 +260,23 @@ function buildSection(section, manifest, manifestByRel) {
         continue;
       }
       // 树里有、本 section manifest 没有：可能是别的 section 的页面外链 —— 剔除，不进 groups。
-      const other = SECTIONS.find((s) => s.id !== sectionId);
-      const otherRel = hrefToRel(href, other.id);
-      if (otherRel && otherManifestRels[other.id].has(otherRel)) {
+      // （分区共 3 个，逐个匹配其它 section；命中哪个归哪个）
+      let matchedOther = null;
+      for (const other of SECTIONS) {
+        if (other.id === sectionId) continue;
+        const otherRel = hrefToRel(href, other.id);
+        if (otherRel && otherManifestRels[other.id].has(otherRel)) {
+          matchedOther = { other, otherRel };
+          break;
+        }
+      }
+      if (matchedOther) {
         crossSectionLinks.push({
           href,
           label: n.label,
-          otherSection: other.id,
-          otherRel,
-          note: `上游 ${section.title} 侧栏链接到 ${other.title} section 的页面；已从 groups 中剔除（该页在 ${other.title} section 的树中收录）`,
+          otherSection: matchedOther.other.id,
+          otherRel: matchedOther.otherRel,
+          note: `上游 ${section.title} 侧栏链接到 ${matchedOther.other.title} section 的页面；已从 groups 中剔除（该页在 ${matchedOther.other.title} section 的树中收录）`,
         });
       } else {
         unknownLinks.push({

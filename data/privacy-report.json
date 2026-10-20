@@ -1,27 +1,27 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-20T15:31:50.047Z",
+  "generated_at": "2026-10-20T23:47:08.437Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 713,
-    "scanned_text_files": 640,
+    "files": 750,
+    "scanned_text_files": 677,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
     "self_output_note": "data/privacy-report.json 是本扫描器的输出，must_fix / files_with_hits / rules / history 均不含命中片段原文，故不纳入扫描",
-    "ignored_paths": 3
+    "ignored_paths": 4
   },
   "summary": {
     "must_fix": 0,
-    "public_url": 310,
+    "public_url": 326,
     "loopback_ok": 109,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 505
+    "total_hits": 521
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -69,9 +69,9 @@
     {
       "id": "owner-handle",
       "note": "账号 / 仓库所有者标识（出现在公网地址里属正当信息）",
-      "total": 310,
+      "total": 326,
       "must_fix": 0,
-      "public_url": 310,
+      "public_url": 326,
       "loopback_ok": 0,
       "upstream": 0
     },
@@ -116,9 +116,9 @@
   "files_with_hits": [
     {
       "file": "sitemap.xml",
-      "total": 138,
+      "total": 144,
       "must_fix": 0,
-      "public_url": 138,
+      "public_url": 144,
       "loopback_ok": 0,
       "upstream": 0
     },
@@ -196,9 +196,9 @@
     },
     {
       "file": "README.md",
-      "total": 8,
+      "total": 9,
       "must_fix": 0,
-      "public_url": 7,
+      "public_url": 8,
       "loopback_ok": 1,
       "upstream": 0
     },
@@ -442,69 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-20T11:30:52.246Z",
-      "files": 706,
-      "must_fix": 7,
-      "public_url": 10,
-      "loopback_ok": 104,
-      "upstream": 139,
-      "clean": false
-    },
-    {
-      "at": "2026-10-20T11:32:50.775Z",
-      "files": 707,
-      "must_fix": 7,
-      "public_url": 10,
-      "loopback_ok": 108,
-      "upstream": 139,
-      "clean": false
-    },
-    {
-      "at": "2026-10-20T12:06:20.912Z",
-      "files": 864,
-      "must_fix": 0,
-      "public_url": 31,
-      "loopback_ok": 154,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-20T12:58:36.009Z",
-      "files": 712,
-      "must_fix": 1,
-      "public_url": 307,
-      "loopback_ok": 113,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-20T13:27:19.159Z",
-      "files": 715,
-      "must_fix": 0,
-      "public_url": 307,
-      "loopback_ok": 113,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-20T14:07:20.558Z",
-      "files": 714,
-      "must_fix": 0,
-      "public_url": 307,
-      "loopback_ok": 113,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-20T14:26:53.736Z",
-      "files": 715,
-      "must_fix": 0,
-      "public_url": 309,
-      "loopback_ok": 109,
-      "upstream": 86,
-      "clean": true
-    },
-    {
       "at": "2026-10-20T14:28:10.601Z",
       "files": 715,
       "must_fix": 0,
@@ -518,6 +455,78 @@
       "files": 713,
       "must_fix": 0,
       "public_url": 310,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T17:49:13.268Z",
+      "files": 714,
+      "must_fix": 2,
+      "public_url": 310,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T17:51:00.325Z",
+      "files": 714,
+      "must_fix": 2,
+      "public_url": 310,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T17:52:51.951Z",
+      "files": 713,
+      "must_fix": 0,
+      "public_url": 310,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T20:07:07.135Z",
+      "files": 747,
+      "must_fix": 0,
+      "public_url": 325,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T20:33:48.680Z",
+      "files": 747,
+      "must_fix": 0,
+      "public_url": 325,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T23:44:43.455Z",
+      "files": 750,
+      "must_fix": 5,
+      "public_url": 326,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T23:45:01.235Z",
+      "files": 750,
+      "must_fix": 5,
+      "public_url": 326,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T23:47:08.437Z",
+      "files": 750,
+      "must_fix": 0,
+      "public_url": 326,
       "loopback_ok": 109,
       "upstream": 86,
       "clean": true

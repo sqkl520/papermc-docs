@@ -7,11 +7,11 @@
  * 页面产物路径 = rel 直接展开：`paper/dev/project-setup/index.html`，与上游 URL 逐段一致。
  *
  * 主导航 = docs.papermc.io 自己的源侧栏结构（data/source-nav.json，经 site/nav.js 建模）：
- *   · 侧栏逐字渲染上游分组标签与嵌套顺序，Paper / Velocity 两个 section 并列
+ *   · 侧栏逐字渲染上游分组标签与嵌套顺序，Paper / Velocity / Folia 三个 section 并列
  *   · 组标题可点：pagesNotInSourceNav 的“组首页”挂在对应分组上
  *   · 面包屑 = 源结构路径（Paper › Development › API › Command API › Basics › Introduction）
  *   · 上一页 / 下一页 = 同 section 内的源结构先序遍历
- *   · 我自建的 15 个中文分类降级为侧栏底部的「按主题浏览（自定义）」折叠区块
+ *   · 我自建的 17 个中文分类降级为侧栏底部的「按主题浏览（自定义）」折叠区块
  *
  * Every internal URL is built as `prefix + <site-relative path>`, where `prefix` is the
  * relative path from the current document's directory back to the site root. That keeps
@@ -23,9 +23,15 @@ const U = require('./util');
 const NAV = require('./nav');
 
 const SITE_TITLE = 'PaperMC 文档库';
-const SITE_TAGLINE = 'docs.papermc.io（Paper + Velocity）离线镜像 · 与上游 URL 逐段一致的静态文档站';
+const SITE_TAGLINE = 'docs.papermc.io（Paper + Velocity + Folia）离线镜像 · 与上游 URL 逐段一致的静态文档站';
 /** 公网部署地址（project pages）；canonical / sitemap / robots 里使用 */
 const PUBLIC_BASE = 'https://sqkl520.github.io/papermc-docs/';
+/** 落地页分区入口卡片的中文标题（与上游分区一一对应） */
+const SECTION_CARD_TITLE = {
+  paper: 'Paper 服务端文档',
+  velocity: 'Velocity 代理端文档',
+  folia: 'Folia 区域化服务端文档',
+};
 const REPO_LICENSE_FALLBACK = 'THIRD-PARTY-NOTICES.md';
 /** 仓库根的实际许可/来源声明文件名：构建期探测（治理文件可能被改名），兜底用 fallback */
 let REPO_LICENSE = REPO_LICENSE_FALLBACK;
@@ -223,9 +229,12 @@ function sidebarHtml(site, prefix, active) {
     html += '</ul></details>';
   }
   html += '<div class="side-empty" id="side-empty">没有匹配的页面</div>';
+  const sideTotal = (nav && nav.sections.length)
+    ? nav.sections.reduce((n, s) => n + s.preorder.length, 0)
+    : (site.sections || []).reduce((n, s) => n + (s.pageCount || 0), 0);
   html += '<div class="side-section">'
     + '<a class="side-section-title" href="' + libUrl(prefix, 'index.html') + '">文档库首页</a>'
-    + '<a class="side-section-title" href="' + libUrl(prefix, 'all-pages.html') + '">全部文章（135）</a>'
+    + '<a class="side-section-title" href="' + libUrl(prefix, 'all-pages.html') + '">全部文章（' + sideTotal + '）</a>'
     + '<a class="side-section-title" href="' + libUrl(prefix, 'snapshots.html') + '">原始快照索引</a></div>';
   html += '</nav>';
   return html;
@@ -412,7 +421,7 @@ function heroSearchHtml(prefix, stats) {
     + '<input id="hero-search" type="search" data-hero-search placeholder="搜索 ' + stats.pages
     + ' 个页面：标题 / 中文摘要 / 标签 / 正文…（也可按 Ctrl+K）" autocomplete="off" spellcheck="false">'
     + '<button class="tbtn" type="button" data-open-search>🔍 打开搜索</button>'
-    + '<a class="tbtn" href="' + libUrl(prefix, 'all-pages.html') + '">📄 全部文章（135）</a>'
+    + '<a class="tbtn" href="' + libUrl(prefix, 'all-pages.html') + '">📄 全部文章（' + stats.pages + '）</a>'
     + '</div>';
 }
 
@@ -420,7 +429,8 @@ function heroSearchHtml(prefix, stats) {
 function infoFooter(prefix) {
   return '<footer class="page-footer info-footer">'
     + '<span>来源：<a class="external" href="https://docs.papermc.io/paper/" target="_blank" rel="noopener">docs.papermc.io/paper</a>'
-    + ' · <a class="external" href="https://docs.papermc.io/velocity/" target="_blank" rel="noopener">docs.papermc.io/velocity</a></span>'
+    + ' · <a class="external" href="https://docs.papermc.io/velocity/" target="_blank" rel="noopener">docs.papermc.io/velocity</a>'
+    + ' · <a class="external" href="https://docs.papermc.io/folia/" target="_blank" rel="noopener">docs.papermc.io/folia</a></span>'
     + '<span>内容版权归 <b>PaperMC</b> 及其贡献者所有（BSD-2-Clause）'
     + ' · <a href="' + U.attr(libUrl(prefix, REPO_LICENSE)) + '">' + REPO_LICENSE + '</a></span>'
     + '<span>更新方式：仓库根执行 <code>node tools/build-site.js</code> 即可全量重建本站</span>'
@@ -442,7 +452,7 @@ function overviewPage(site, stats, opts) {
     + heroSearchHtml(prefix, stats)
     + '</div>';
 
-  // 两个大入口卡：Paper / Velocity
+  // 三个大入口卡：Paper / Velocity / Folia
   content += '<div class="entry-cards">';
   for (const sec of secs) {
     const pages = sec.preorder ? sec.preorder.length : (sec.pageCount || 0);
@@ -450,14 +460,14 @@ function overviewPage(site, stats, opts) {
     const depth = sec.maxDepth !== undefined ? sec.maxDepth : '—';
     content += '<a class="entry-card" href="' + U.attr(prefix + sec.id + '/index.html') + '">'
       + '<span class="ec-kicker">' + U.escapeHtml(sec.title) + '</span>'
-      + '<span class="ec-title">' + U.escapeHtml(sec.id === 'velocity' ? 'Velocity 代理端文档' : 'Paper 服务端文档') + '</span>'
+      + '<span class="ec-title">' + U.escapeHtml(SECTION_CARD_TITLE[sec.id] || (sec.title + ' 文档')) + '</span>'
       + '<span class="ec-meta"><b>' + pages + '</b> 个页面 · <b>' + groups + '</b> 个分组 · 最大深度 ' + depth + '</span>'
       + '<span class="ec-url">/' + U.escapeHtml(sec.id) + '/</span></a>';
   }
   content += '</div>';
 
   content += '<div class="quickbar">'
-    + '<a class="qa" href="' + libUrl(prefix, 'all-pages.html') + '"><b>全部文章（' + stats.pages + '）</b><span>135 行扁平清单 · 页内过滤</span></a>'
+    + '<a class="qa" href="' + libUrl(prefix, 'all-pages.html') + '"><b>全部文章（' + stats.pages + '）</b><span>' + stats.pages + ' 行扁平清单 · 页内过滤</span></a>'
     + '<a class="qa" href="' + libUrl(prefix, 'snapshots.html') + '"><b>原始快照索引</b><span>渲染页 / HTML 快照 / 上游 index.md 对照</span></a>'
     + '<a class="qa" href="#tax"><b>按主题浏览（' + site.categories.length + ' 类）</b><span>自定义中文主题视图（次要入口）</span></a>'
     + '</div>';
@@ -479,7 +489,7 @@ function overviewPage(site, stats, opts) {
     + ' <span class="side-count">' + cat.pages.length + '</span></a>').join('') + '</div>';
 
   content += '<div class="section-head"><h2>关于本站</h2></div>'
-    + '<p class="page-desc">本站是 docs.papermc.io（Paper / Velocity）的离线镜像。'
+    + '<p class="page-desc">本站是 docs.papermc.io（Paper / Velocity / Folia）的离线镜像。'
     + '页面路径与上游 URL 逐段一致（例如上游 <code>/paper/dev/command-api/basics/introduction/</code> '
     + '对应本站 <code>paper/dev/command-api/basics/introduction/index.html</code>）。'
     + '原始镜像（Markdown / 页面源 / HTML 快照 / 图片）保存在 <code>archive/</code> 下，'
@@ -492,7 +502,7 @@ function overviewPage(site, stats, opts) {
   content += infoFooter(prefix);
   return shell({
     site, prefix, title: SITE_TITLE + ' · ' + SITE_TAGLINE.split('·')[0].trim(),
-    description: 'docs.papermc.io（Paper + Velocity）离线镜像文档站，URL 与上游逐段一致，支持全站检索',
+    description: 'docs.papermc.io（Paper / Velocity / Folia）离线镜像文档站，URL 与上游逐段一致，支持全站检索',
     canonical: PUBLIC_BASE,
     active: {}, crumbs: '', toc: null, content, pager: '', page: null,
   });
@@ -535,7 +545,7 @@ function sectionPage(site, sec, opts) {
   });
 }
 
-/** library/all-pages.html — 135 页扁平清单（源树先序），支持页内过滤与 Ctrl+F */
+/** library/all-pages.html — 141 页扁平清单（源树先序），支持页内过滤与 Ctrl+F */
 function allPagesPage(site, rows, opts) {
   const prefix = opts.prefix || '';
   const crumbs = crumbsHtml([
@@ -682,7 +692,7 @@ function robotsTxt() {
 }
 
 /**
- * sitemap.xml —— 135 个内容页 + 落地页 / all-pages.html / snapshots.html，全部公网绝对 URL。
+ * sitemap.xml —— 141 个内容页 + 落地页 / all-pages.html / snapshots.html，全部公网绝对 URL。
  * rows: [{loc, lastmod}]
  */
 function sitemapXml(rows) {
@@ -703,7 +713,9 @@ function sitemapXml(rows) {
  * 相对路径此时未必解析得到 assets/），只保留三个相对链接：首页 / 全部文章 / 原始快照索引。
  * 另附一段脚本：在 project pages 子路径（/<repo>/…）下把相对链接改写回 /<repo>/…。
  */
-function notFoundPage() {
+function notFoundPage(opts) {
+  const o = opts || {};
+  const pageCount = Number.isFinite(o.pageCount) ? o.pageCount : null;
   return '<!DOCTYPE html>\n<html lang="zh-CN" data-theme="auto">\n<head>\n'
     + '<meta charset="utf-8">\n'
     + '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
@@ -731,8 +743,8 @@ function notFoundPage() {
     + '  <h1>页面不存在</h1>\n'
     + '  <p class="mut">请求的路径不在这份离线文档库里。可以回到下面任一入口：</p>\n'
     + '  <ul>\n'
-    + '    <li><a href="./index.html" data-gh-pages-link="./index.html">文档库首页 —— <code>index.html</code></a>：两个分区入口、全站搜索与统计</li>\n'
-    + '    <li><a href="./all-pages.html" data-gh-pages-link="./all-pages.html">全部文章（135）—— <code>all-pages.html</code></a>：一份带过滤框的扁平清单</li>\n'
+    + '    <li><a href="./index.html" data-gh-pages-link="./index.html">文档库首页 —— <code>index.html</code></a>：三个分区入口（Paper / Velocity / Folia）、全站搜索与统计</li>\n'
+    + '    <li><a href="./all-pages.html" data-gh-pages-link="./all-pages.html">全部文章（' + (pageCount === null ? '…' : pageCount) + '）—— <code>all-pages.html</code></a>：一份带过滤框的扁平清单</li>\n'
     + '    <li><a href="./snapshots.html" data-gh-pages-link="./snapshots.html">原始快照索引 —— <code>snapshots.html</code></a>：渲染页 / HTML 快照 / 页面源 Markdown 对照</li>\n'
     + '  </ul>\n'
     + '  <p>正文页路径与上游 <a class="ext" href="https://docs.papermc.io/" target="_blank" rel="noopener">docs.papermc.io</a> 逐段一致，'

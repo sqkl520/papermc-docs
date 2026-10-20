@@ -35,7 +35,7 @@ const LIB = ROOT;
 const ARCH = path.join(ROOT, 'archive');
 const OUT_JSON = path.join(ROOT, 'reports', 'verification.json');
 const OUT_MD = path.join(ROOT, 'reports', 'verification.md');
-const SECTIONS = ['paper', 'velocity'];
+const SECTIONS = ['paper', 'velocity', 'folia'];
 
 /** LIB 之外的非站点内容（归档镜像 / 数据 / 工具 / 报告 / 依赖），扫描站点时必须跳过 */
 const SITE_SKIP = ['REPORTS', 'reports', 'node_modules', '.git', 'archive', 'data', 'tools'];
@@ -322,7 +322,7 @@ function check1(T) {
     return [...seen].filter(([, n]) => n > 1);
   })();
   metric(chk, 'taxonomy 页面数', T.pages.length);
-  metric(chk, '产物 HTML 数（paper/、velocity/ 下）', actual.size);
+  metric(chk, '产物 HTML 数（paper/、velocity/、folia/ 下）', actual.size);
   metric(chk, '缺失产物', missing.length);
   metric(chk, '多余产物', extra.length);
   metric(chk, 'taxonomy 中重复 id', dupIds.length);
@@ -1076,7 +1076,7 @@ function check10() {
 
   // 会被浏览器加载的产物 vs 构建/工具文件
   const PRODUCT = (rel) => (
-    /^(paper|velocity)\//.test(rel) || /^categories\//.test(rel) || /^sections\//.test(rel)
+    /^(paper|velocity|folia)\//.test(rel) || /^categories\//.test(rel) || /^sections\//.test(rel)
     || rel === 'index.html' || rel === 'snapshots.html' || rel === 'all-pages.html'
     || rel === '404.html' || rel === 'robots.txt' || rel === 'sitemap.xml'
     || rel === 'assets/site.css' || rel === 'assets/site.js' || rel === 'assets/search-index.js'
@@ -1202,7 +1202,7 @@ function check12(T) {
   for (const r of bodyRows) {
     const hrefs = [...r.matchAll(/<a\b[^>]*href="([^"]*)"[^>]*>/g)].map((m) => m[1]);
     const local = hrefs.filter((h) => !/^https?:/i.test(h));
-    const page = local.find((h) => /^(paper|velocity)\//.test(h));
+    const page = local.find((h) => /^(paper|velocity|folia)\//.test(h));
     const raw = local.find((h) => /archive\/[^"']+\/html\//.test(h));
     const md = local.find((h) => /archive\/[^"']+\/source\//.test(h));
     const ext = hrefs.find((h) => /^https?:/i.test(h));
@@ -1325,7 +1325,7 @@ function check13(T) {
     { key: 'alerts', declared: M.counts.alerts, article: artAlerts, site: siteAlerts, strict: true, reason: '生成器与「正文 article 口径」一致' },
     { key: 'tables', declared: M.counts.tables, article: artTables, site: siteTables, strict: true, reason: '一致' },
     { key: 'detailsBlocks', declared: M.counts.detailsBlocks, article: artDetails, site: siteDetails, strict: true, reason: `全站口径还含每页侧栏 <details class="side-cat"> 的 ${siteDetails - T.pages.length} 个` },
-    { key: 'images', declared: M.counts.images, article: artImages, site: siteImages, strict: true, reason: '生成器=正文图片；全站口径还含每页 1 个 lightbox 占位 <img>（共 154 个）' },
+    { key: 'images', declared: M.counts.images, article: artImages, site: siteImages, strict: true, reason: `生成器=正文图片；全站口径还含每页 1 个 lightbox 占位 <img>（共 ${siteImages - artImages} 个）` },
     { key: 'headings', declared: M.counts.headings, article: artHeadings, site: null, strict: true, reason: '生成器取 Markdown 标题数（srcCounts.heading）；本工具取正文 h1-h6。若不一致，差异来源通常是生成器为「Markdown 无顶层 # 」的页面补了 h1' },
     { key: 'tocEntries', declared: M.counts.tocEntries, article: tocEntries, site: null, strict: true, reason: '一致' },
     { key: 'codeBlocks', declared: M.counts.codeBlocks, article: null, site: null, strict: false, reason: '已由第 5 项独立复核（473 见第 5 项）' },
@@ -1376,8 +1376,8 @@ function check13(T) {
   caliberDiff.forEach((c) => pushIssue(chk, null, `counts 口径差异（已澄清，不判失败）：${c}`));
   chk.extra = { countsCompare, unmirroredSamples, aExternalTotal, aExternalSelf, aExternalOther, aSelfUnmirrored, addedH1 };
   chk.pass = pageOutMissing === 0 && missingFiles.length === 0 && byteDiff.length === 0 && pageByteDiff === 0 && countDiff.length === 0;
-  chk.notes.push(`口径澄清：images 89（正文）vs ${siteImages}（全站，含 154 个 lightbox 占位 <img>）；externalLinks 773 = 非本站域名外链（全站 <a> http(s) 共 ${aExternalTotal}，其中本站 ${aExternalSelf}）；unmirroredLinks 27 = 指向本站未镜像区域的链接，与「全部外链」不是同一口径。三项均已按三口径并列对账，不再判为失败。`);
-  chk.notes.push(`注意：本项的全站口径只遍历 135 个 taxonomy 页面，故灯箱占位数为 135；第 4 项遍历全部 154 个 HTML（含总览/分类/分区/快照页），灯箱占位数为 154 —— 两者差异来自遍历范围，不是矛盾。`);
+  chk.notes.push(`口径澄清：images ${M.counts.images}（正文）vs ${siteImages}（全站，含 ${siteImages - artImages} 个 lightbox 占位 <img>）；externalLinks ${M.counts.externalLinks} = 非本站域名外链（全站 <a> http(s) 共 ${aExternalTotal}，其中本站 ${aExternalSelf}）；unmirroredLinks ${M.counts.unmirroredLinks} = 指向本站未镜像区域的链接，与「全部外链」不是同一口径。三项均已按三口径并列对账，不再判为失败。`);
+  chk.notes.push(`注意：本项的全站口径只遍历 ${T.pages.length} 个 taxonomy 页面，故灯箱占位数为 ${siteImages - artImages}；第 4 项遍历全部 ${walkFiles(LIB, { ext: '.html', skipDirs: SITE_SKIP }).length} 个 HTML（含总览/分类/分区/快照页），灯箱占位数为同量级 —— 两者差异来自遍历范围，不是矛盾。`);
   if (addedH1.length) chk.notes.push(`headings 口径差的根因：生成器为 ${addedH1.length} 个「Markdown 无顶层 # 标题」的页面补出了正文 h1（${addedH1.slice(0, 6).map((x) => x.page).join('、')}${addedH1.length > 6 ? ' 等' : ''}），但 counts.headings 仍取 Markdown 侧标题数，故声明值比正文实测少 ${addedH1.length}。两处都是“可以解释的差”，但 counts 与产物已经不同口径，建议生成器改为从产物重新统计或把补出的 h1 计入。`);
   return chk;
 }
@@ -1391,7 +1391,7 @@ function check14(T) {
   const idx = new Set();
   for (let i = 0; i < 20; i++) idx.add(Math.round((i * (n - 1)) / 19));
   const sample = [...idx].sort((a, b) => a - b).map((i) => T.pages[i]);
-  // 全量遍历（任务要求抽 ≥20 页，这里直接全量 135 页做标题对账）
+  // 全量遍历（任务要求抽 ≥20 页，这里直接全量 taxonomy 全部页面做标题对账）
   const titleRows = [];
   for (const p of T.pages) {
     const html = exists(p.htmlAbs) ? readText(p.htmlAbs) : '';
@@ -1724,20 +1724,20 @@ function renderMarkdown(env, checks) {
 
 function passCriteria(id) {
   const m = {
-    1: 'taxonomy 135 页每页都有产物 HTML；缺失=0、多余=0；分类页 15、分区页 2 齐全',
+    1: 'taxonomy 141 页每页都有产物 HTML；缺失=0、多余=0；分类页 17、分区页 3 齐全',
     2: '全部生成 HTML 的每个相对 href/src（去 fragment 后）在文件系统上存在，断链=0',
     3: '每个 #fragment 本地目标页存在 id/name 匹配，未命中=0（生成器自报 2，实测 4，其中 2 个为漏计的脚注引用锚点）',
     4: '正文每个 <img src> 文件存在（lightbox 占位 <img> 单列）、alt 有值、loading="lazy"、文件头与扩展名一致；第三方外链图片单列为“已知外链资源”',
     5: '每页归档 Markdown 围栏块数（含 `> ` 包裹）== 生成 HTML <pre> 数，且 <pre> 的 DOM 文本（实体解码后、空白归一化）与 Markdown 逐块相等',
     6: '告警 / details / 表格数量与 Markdown 真值一致，表格行列数一致',
     7: '整页 h1 唯一、正文 h1 ≤ 1 且与 Markdown 顶层 # 一致；h2-h4 均有 id；本页目录 ⊆{h2,h3,h4} 且 ⊇{h2,h3}',
-    8: 'search-index.json 与 assets/search-index.js 等价；135 条；字段齐全；无空正文；URL 均存在；10 个中文查询词均有命中',
+    8: 'search-index.json 与 assets/search-index.js 等价；141 条；字段齐全；无空正文；URL 均存在；10 个中文查询词均有命中',
     9: '抽 10 页均有侧栏（分区/分类/当前页高亮）、面包屑、源地址链接、上/下一页、页脚元信息',
-    10: '浏览器加载的产物（paper/**、velocity/**、categories/**、sections/**、index/snapshots、assets/site.*）的资源引用位置不出现 file://、盘符、/papermc-docs/、127.0.0.1；构建/工具文件单列',
+    10: '浏览器加载的产物（paper/**、velocity/**、folia/**、categories/**、sections/**、index/snapshots、assets/site.*）的资源引用位置不出现 file://、盘符、/papermc-docs/、127.0.0.1；构建/工具文件单列',
     11: '全部 html/css/js/json 为 UTF-8 无 BOM、HTML 有 <meta charset>、无 U+FFFD、中文正常',
-    12: 'snapshots.html 列出 135 页，三类链接均指向存在文件',
+    12: 'snapshots.html 列出 141 页，三类链接均指向存在文件',
     13: 'site-manifest 的 outputs/pages[].output 全部存在；counts 严格项与正文口径实测一致；口径差异项三列并列澄清后不判失败',
-    14: '全量 135 页正文 h1 == 归档 manifest title；页脚 SHA-256 == 归档 manifest sha256；归档 sha256 可用磁盘 markdown 复现',
+    14: '全量 141 页正文 h1 == 归档 manifest title；页脚 SHA-256 == 归档 manifest sha256；归档 sha256 可用磁盘 markdown 复现',
     15: '除“已知外链资源（第三方图片）”外，无任何外部 css/js/字体/iframe 资源引用（外链只能是 <a>）',
   };
   return m[id] || '';
@@ -1798,13 +1798,13 @@ function buildRecon(checks, T) {
   const ccList = (byId[13] && byId[13].extra && byId[13].extra.countsCompare) || [];
   const cc = (key) => ccList.find((r) => r.key === key) || { declared: null, article: null, site: null };
   return [
-    { item: '页面数 pages', ...R(M.counts.pages, cc('pages').site, cc('pages').article, '三口径一致（taxonomy 135）', '一致') },
+    { item: '页面数 pages', ...R(M.counts.pages, cc('pages').site, cc('pages').article, `三口径一致（taxonomy ${T.pages.length}）`, '一致') },
     { item: '分区页 sections', ...R(M.counts.sections, cc('sections').site, cc('sections').article, '三口径一致', '一致') },
     { item: '分类页 categories', ...R(M.counts.categories, cc('categories').site, cc('categories').article, '三口径一致', '一致') },
     { item: '告警 alerts', ...R(M.counts.alerts, cc('alerts').site, cc('alerts').article, '正文口径 = 生成器自报；任务书写的“203”是站点重建前的旧值（当前 manifest 已变为 221）', cc('alerts').declared === cc('alerts').article ? '一致' : '不一致') },
     { item: '表格 tables', ...R(M.counts.tables, cc('tables').site, cc('tables').article, '30 == 30，且 30 张表的行列数与 Markdown 真值逐表一致', cc('tables').declared === cc('tables').article ? '一致' : '不一致') },
     { item: 'detailsBlocks', ...R(M.counts.detailsBlocks, cc('detailsBlocks').site, cc('detailsBlocks').article, '正文口径 23 == 自报 23；全站口径还含侧栏 <details class="side-cat">', cc('detailsBlocks').declared === cc('detailsBlocks').article ? '一致' : '不一致') },
-    { item: 'images', ...R(M.counts.images, cc('images').site, cc('images').article, '生成器=正文图片（89）；全站口径还含每页 1 个 lightbox 占位 <img>（154 个）→ 口径差异已澄清，不判失败', cc('images').declared === cc('images').article ? '一致（全站口径差异已澄清）' : '口径差异已澄清') },
+    { item: 'images', ...R(M.counts.images, cc('images').site, cc('images').article, `生成器=正文图片（${M.counts.images}）；全站口径还含每页 1 个 lightbox 占位 <img>（${(cc('images').site || 0) - (cc('images').article || 0)} 个）→ 口径差异已澄清，不判失败`, cc('images').declared === cc('images').article ? '一致（全站口径差异已澄清）' : '口径差异已澄清') },
     { item: 'headings', ...R(M.counts.headings, null, cc('headings').article, '正文 h1-h6 计数与生成器一致', cc('headings').declared === cc('headings').article ? '一致' : '不一致') },
     { item: 'tocEntries', ...R(M.counts.tocEntries, null, cc('tocEntries').article, '884 == 884；目录含 lvl-4（生成器设计如此，非缺陷）', cc('tocEntries').declared === cc('tocEntries').article ? '一致' : '不一致') },
     { item: 'codeBlocks', ...R(M.counts.codeBlocks, g(5, '生成 HTML <pre> 总数'), g(5, '归档 Markdown 围栏块总数（含 `> ` 包裹）'), '以归档 Markdown 围栏对为真值：真值 == HTML <pre> == 生成器自报', '一致') },
@@ -2080,7 +2080,7 @@ function main() {
       `任务书给出的“生成器自报：锚点未命中 5”与当前 ${'data/build-manifest.json'} 的 counts.fragmentsUnresolved=${T.manifest.counts.fragmentsUnresolved} 不一致（更早一次快照里该值还是 51）——站点在任务书写作之后被重建过，详见第 0 节指纹。独立实测以第 3 项为准。`,
       `任务书给出的“告警 203”与当前 manifest 的 counts.alerts=${T.manifest.counts.alerts} 不一致（早期快照为 221/203 之间变动），同属重建前后的版本漂移。`,
       `#14 的“归档 markdownBytes 与磁盘不一致 88 页”已由主 Agent 在 tools/crawl.js 增加「链接改写后按磁盘重算 size+sha256」并重跑归档后消除：本轮实测 归档 sha256 可用磁盘 markdown 复现 ${mLike(14, '归档 manifest sha256 == 磁盘 markdown 文件哈希')}，markdownBytes 一致 ${mLike(14, '归档 manifest markdownBytes == 磁盘 markdown 字节数')}；站点重建后页脚 SHA-256 已与归档 manifest 同步（${mLike(14, '站点清单 sha256 == 归档 manifest sha256')}）。`,
-      `生成器 site-manifest.selfTest 自报「抽查 14 页 202 项全过、checkedLocalLinks=2145、checkedLocalImages=6」，本工具不采信该自检结果，全部重新遍历计算（第 2/3/13 项覆盖全站 154 个 HTML）。`,
+      `生成器 site-manifest.selfTest 自报「抽查 14 页 202 项全过、checkedLocalLinks=2145、checkedLocalImages=6」，本工具不采信该自检结果，全部重新遍历计算（第 2/3/13 项覆盖全站 ${walkFiles(LIB, { ext: '.html', skipDirs: SITE_SKIP }).length} 个 HTML）。`,
       `保留为真实待修项：#3（4 个锚点未命中，其中 2 个是生成器漏计的脚注引用锚点）与 #8（中文查询词「插件加载」0 命中）。`,
     ],
     adjudications: [
@@ -2126,7 +2126,7 @@ function main() {
       { item: '外部链接（https://docs.papermc.io 等）可达性，以及“未镜像外链 27 条”是否仍指向线上存在的页面', reason: '任务禁止联网，未做任何 HTTP 请求；只验证链接的存在性与本地可解析性。' },
       { item: 'tools/serve.js 与 tools/** 的行为正确性', reason: '不在“生成站点”产物范围内；第 10 项把这些文件单列为“构建/工具文件”，其命中不计入失败。' },
       { item: `归档 manifest sha256 的历史来源（若不可复现）`, reason: `本轮已可按磁盘 markdown 复现 ${mLike(14, '归档 manifest sha256 == 磁盘 markdown 文件哈希')}，故此项不再是缺口；若未来再次重建归档而 manifest 未重算，该一致性会失效。` },
-      { item: '“插件加载”这类未在语料中出现的查询词的检索有效性', reason: '纯字符串匹配下 0 命中；已用全站归档 Markdown 复算确认该子串在 135 页语料中不存在，因此无法通过“命中页数”判定索引正确性（不构成索引缺陷，但属检索覆盖缺口）。' },
+      { item: '“插件加载”这类未在语料中出现的查询词的检索有效性', reason: `纯字符串匹配下 0 命中；已用全站归档 Markdown 复算确认该子串在 ${T.pages.length} 页语料中不存在，因此无法通过“命中页数”判定索引正确性（不构成索引缺陷，但属检索覆盖缺口）。` },
     ],
   };
   const out = { tool: 'tools/verify-site.js', executedBy: env.executedBy, generated_at: env.finishedAt, root: ROOT, anchorVersion: env.anchorVersion, driftHistory, proxyRun: env.proxyRun, meta: { node: env.node, attempts, stable, before, after }, summary: { total: checks.length, passed: checks.filter((c) => c.pass).length, failed: checks.filter((c) => !c.pass).map((c) => c.id), failedCount: checks.filter((c) => !c.pass).length }, checks, convergence: env.convergence, recallDelta: env.recallDelta, reconciliation: env.recon, classification: env.classification, adjudications: env.adjudications, falsePositives: env.falsePositives, unverified: env.unverified };

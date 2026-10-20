@@ -1,0 +1,13 @@
+# Folia Documentation
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+Folia is a fork of Paper which adds regionized multithreading to the dedicated server.
+
+<CardGrid>
+  <LinkCard
+    title="Administration"
+    description="Information and tutorials regarding the administration of a Folia server."
+    href="/folia/admin"
+  />
+</CardGrid>

@@ -9,8 +9,8 @@
 
 | 项目 | 结论 |
 | --- | --- |
-| 镜像完整性 | Paper 103 页 + Velocity 32 页 = **135 页**，每页同时保留渲染 Markdown、站点原始 Markdown、整页 HTML 快照 |
-| 归档正文质量 | 135 页全部具备 front matter 与 H1；代码围栏全部闭合；无 HTML 片段/实体残留（见第 3 节复跑命令） |
+| 镜像完整性 | Paper 103 + Velocity 32 + Folia 6 = **141 页**，每页同时保留渲染 Markdown、站点原始 Markdown、整页 HTML 快照 |
+| 归档正文质量 | 141 页全部具备 front matter 与 H1；代码围栏全部闭合；无 HTML 片段/实体残留（见第 3 节复跑命令） |
 | 站内链接 | 站点产物的相对 `href`/`src` 全部指向磁盘上真实存在的文件 —— 由 `tools/check-site.js` 与 `tools/verify-site.js` 断言，**每次重建后必须复跑** |
 | 隐私 | `node tools/privacy-scan.js` 退出码 0：仓库中**没有**必须修复的本机痕迹（绝对路径、临时目录、用户名、个人邮箱） |
 | 离线可用性 | 页面链接全为相对路径，搜索索引同时以 `.js` 内联，因此 `file://` 直接打开也能搜索；仅"未本地化资源"与第三方外链需要联网 |

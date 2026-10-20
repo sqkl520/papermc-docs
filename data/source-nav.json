@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T15:45:26.827Z",
+  "generated_at": "2026-10-20T18:56:33.660Z",
   "method": "extracted from Starlight sidebar (ul.top-level) of the archived HTML snapshots",
   "extracted_from": [
     "archive/paper/html/index.html",
@@ -14,7 +14,13 @@
     "archive/velocity/html/dev/getting-started/index.html",
     "archive/velocity/html/dev/api/index.html",
     "archive/velocity/html/reference/system-properties/index.html",
-    "archive/velocity/html/getting-started/index.html"
+    "archive/velocity/html/getting-started/index.html",
+    "archive/folia/html/index.html",
+    "archive/folia/html/admin/index.html",
+    "archive/folia/html/admin/reference/index.html",
+    "archive/folia/html/faq/index.html",
+    "archive/folia/html/reference/overview/index.html",
+    "archive/folia/html/reference/region-logic/index.html"
   ],
   "consistent_across_pages": true,
   "sections": [
@@ -1097,6 +1103,64 @@
           "reason": "站点根 index 页（/velocity/）；上游 Starlight 未在 ul.top-level 侧栏中单独列出"
         }
       ]
+    },
+    {
+      "id": "folia",
+      "title": "Folia",
+      "sourceHref": "/folia/",
+      "pageCount": 6,
+      "groups": [
+        {
+          "kind": "group",
+          "label": "Administration",
+          "children": [
+            {
+              "kind": "group",
+              "label": "Reference",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Overview",
+                  "href": "/folia/reference/overview/",
+                  "rel": "reference/overview/index",
+                  "title": "Overview"
+                },
+                {
+                  "kind": "page",
+                  "label": "Region logic",
+                  "href": "/folia/reference/region-logic/",
+                  "rel": "reference/region-logic/index",
+                  "title": "Region logic"
+                },
+                {
+                  "kind": "page",
+                  "label": "Frequently asked questions",
+                  "href": "/folia/faq/",
+                  "rel": "faq/index",
+                  "title": "Frequently asked questions"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pagesNotInSourceNav": [
+        {
+          "rel": "admin/index",
+          "title": "Administration",
+          "reason": "作为侧栏分组「Administration」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/reference/index",
+          "title": "Reference",
+          "reason": "作为侧栏分组「Administration > Reference」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "index",
+          "title": "Folia Documentation",
+          "reason": "站点根 index 页（/folia/）；上游 Starlight 未在 ul.top-level 侧栏中单独列出"
+        }
+      ]
     }
   ],
   "stats": {
@@ -1113,6 +1177,14 @@
       "pagesInNav": 23,
       "pagesNotInNav": 9,
       "groups": 9,
+      "maxDepth": 3,
+      "duplicateHrefs": 0
+    },
+    "folia": {
+      "pagesInManifest": 6,
+      "pagesInNav": 3,
+      "pagesNotInNav": 3,
+      "groups": 2,
       "maxDepth": 3,
       "duplicateHrefs": 0
     }

@@ -15,12 +15,14 @@ const path = require('path');
 const REPO = path.resolve(__dirname, '..');
 const ARCHIVE = path.join(REPO, 'archive');
 const UPSTREAM = 'https://docs.papermc.io';
+/** 站点镜像的分区目录（paper / velocity / folia） */
+const SECTIONS = ['paper', 'velocity', 'folia'];
 
 let total = 0;
 let same = 0;
 const bad = [];
 
-for (const section of ['paper', 'velocity']) {
+for (const section of SECTIONS) {
   const man = JSON.parse(fs.readFileSync(path.join(ARCHIVE, section, 'manifest.json'), 'utf8'));
   for (const p of man.pages || []) {
     total++;
@@ -47,7 +49,7 @@ if (bad.length) {
 const sitemap = fs.readFileSync(path.join(REPO, 'sitemap.xml'), 'utf8');
 const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
 let inSitemap = 0;
-for (const section of ['paper', 'velocity']) {
+for (const section of SECTIONS) {
   const man = JSON.parse(fs.readFileSync(path.join(ARCHIVE, section, 'manifest.json'), 'utf8'));
   for (const p of man.pages || []) {
     const want = 'https://sqkl520.github.io/papermc-docs/' + section + '/' + p.rel.replace(/\/?index$/, '') + '/';

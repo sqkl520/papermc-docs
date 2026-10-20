@@ -12,7 +12,7 @@
  *           data/source-nav.json（权威源侧栏结构：主导航的唯一依据）
  *           data/taxonomy.json (optional; falls back to manifest/INDEX.md structure)
  * Writes  : index.html(落地页), 404.html, robots.txt, sitemap.xml, all-pages.html, snapshots.html,
- *           <section>/<rel>.html(135), categories/**, sections/**,
+ *           <section>/<rel>.html(141), categories/**, sections/**,
  *           assets/{site.css,site.js,search-index.js,favicon.svg}, search-index.json,
  *           data/build-manifest.json
  *
@@ -41,6 +41,7 @@ const T0 = Date.now();
 const SECTIONS = [
   { id: 'paper', title: 'Paper', subtitle: 'Minecraft 服务端本体（docs.papermc.io/paper）', archive: 'archive/paper' },
   { id: 'velocity', title: 'Velocity', subtitle: 'Minecraft 代理端（docs.papermc.io/velocity）', archive: 'archive/velocity' },
+  { id: 'folia', title: 'Folia', subtitle: 'Minecraft 区域化多线程服务端（docs.papermc.io/folia）', archive: 'archive/folia' },
 ];
 
 const warnings = [];
@@ -617,7 +618,7 @@ function computeSiteTotals(written) {
     totals.anchorsAll += (html.match(/<a\b[^>]*\shref="/g) || []).length;
     totals.anchorsExternal += (html.match(/<a\b[^>]*\shref="https?:/g) || []).length;
     totals.anchorsUnmirrored += (html.match(/class="[^"]*unmirrored/g) || []).length;
-    totals.anchorsInternalPage += (html.match(/<a\b[^>]*href="[^"]*(?:paper|velocity)\/[^"]*\.html/g) || []).length;
+    totals.anchorsInternalPage += (html.match(/<a\b[^>]*href="[^"]*(?:paper|velocity|folia)\/[^"]*\.html/g) || []).length;
     totals.anchorsFragmentOnly += (html.match(/<a\b[^>]*href="#/g) || []).length;
     totals.anchorsUnresolved += (html.match(/class="[^"]*anchor-missing/g) || []).length;
     for (const m of html.matchAll(/<a\b[^>]*href="(https?:\/\/[^"]+)"/g)) externals.add(m[1]);
@@ -628,14 +629,14 @@ function computeSiteTotals(written) {
 
 /**
  * 清掉上一次构建的站点产物。站点根 = 仓库根，所以这里**只**删生成物：
- * 两个分区目录、assets/、分类页/分区页目录，以及根级 HTML / JSON / XML / TXT 产物。
+ * 三个分区目录、assets/、分类页/分区页目录，以及根级 HTML / JSON / XML / TXT 产物。
  * archive/、data/、tools/、reports/、node_modules/、.git/ 与仓库治理文件一律不动。
  */
 const GENERATED_ROOT_FILES = [
   'index.html', '404.html', 'robots.txt', 'sitemap.xml',
   'all-pages.html', 'snapshots.html', 'search-index.json',
 ];
-const GENERATED_DIRS = ['paper', 'velocity', 'categories', 'sections', 'assets'];
+const GENERATED_DIRS = ['paper', 'velocity', 'folia', 'categories', 'sections', 'assets'];
 
 function cleanOutputs() {
   for (const d of GENERATED_DIRS) U.rmrf(path.join(U.SITE, d));
@@ -776,7 +777,7 @@ function writeEverything(state) {
   });
   const idxBytes = U.writeFile(idxAbs, idxHtml);
 
-  // library/all-pages.html —— 135 页扁平清单，按源结构先序
+  // library/all-pages.html —— 141 页扁平清单，按源结构先序
   const allRows = [];
   if (nav) {
     for (const sec of nav.sections) {
@@ -820,10 +821,10 @@ function writeEverything(state) {
   const searchJsBytes = U.writeFile(path.join(U.SITE, 'assets', 'search-index.js'), state.search.js);
 
   // 404.html（相对链接回首页；样式内联）
-  const notFoundBytes = U.writeFile(path.join(U.SITE, '404.html'), L.notFoundPage());
+  const notFoundBytes = U.writeFile(path.join(U.SITE, '404.html'), L.notFoundPage({ pageCount: pages.length }));
   // robots.txt
   const robotsBytes = U.writeFile(path.join(U.SITE, 'robots.txt'), L.robotsTxt());
-  // sitemap.xml：135 个内容页 + 落地页 + all-pages.html + snapshots.html（公网绝对 URL）
+  // sitemap.xml：141 个内容页 + 落地页 + all-pages.html + snapshots.html（公网绝对 URL）
   const sitemapRows = [{ loc: L.PUBLIC_BASE, lastmod: (state.generatedAt || '').slice(0, 10) }];
   for (const sec of (nav ? nav.sections : [])) {
     for (const e of sec.preorder) {
@@ -1148,7 +1149,7 @@ function runSelfTest(state) {
   push(null, '全部页面均已生成', missingOut.length === 0, missingOut.length + ' 个缺失');
 
   // exactly one <h1> in EVERY produced HTML file (pages + index + all-pages + sections + categories + snapshots)
-  // 只遍历“站点产物”：根级 4 个 HTML + 两个分区目录 + categories/sections。
+  // 只遍历“站点产物”：根级 4 个 HTML + 三个分区目录 + categories/sections。
   // 站点根 = 仓库根，所以不能整目录递归（会扫到 archive/** 的原始 HTML 快照与 node_modules）。
   const allHtmlAbs = [];
   (function collectHtml(dir) {
@@ -1177,7 +1178,7 @@ function runSelfTest(state) {
   push(null, '每页 article 内恰好 1 个 h1', artH1Bad === 0, artH1Bad + ' 页异常');
 
   // build-time fields must not leak into index / all-pages / sections / categories / snapshots
-  const debugChipRe = /order\s+\d+|data-order=|<span class="ord">|分类 id:|<span class="chip">(paper|velocity)<\/span>|chip">[a-z-]+\/index</;
+  const debugChipRe = /order\s+\d+|data-order=|<span class="ord">|分类 id:|<span class="chip">(paper|velocity|folia)<\/span>|chip">[a-z-]+\/index</;
   const catChipBad = site.categories.filter((c) => {
     const f = path.join(U.SITE, 'categories', c.id + '.html');
     if (!fs.existsSync(f)) return true;
@@ -1190,9 +1191,9 @@ function runSelfTest(state) {
   // ---- 源结构主导航 ----
   const navModel = state.site.sourceNav;
   const navPreorderTotal = navModel.sections.reduce((n, s) => n + s.preorder.length, 0);
-  push(null, '源结构覆盖：先序页数 = 产物页数（135）', navPreorderTotal === pages.length && navModel.coverage.ok,
+  push(null, '源结构覆盖：先序页数 = 产物页数（' + pages.length + '）', navPreorderTotal === pages.length && navModel.coverage.ok,
     navPreorderTotal + '/' + pages.length + ' coverage=' + navModel.coverage.ok);
-  push(null, '源结构覆盖：每 section 页数 = manifest 页数（paper 103 / velocity 32）',
+  push(null, '源结构覆盖：每 section 页数 = manifest 页数（' + navModel.sections.map((s) => s.id + ' ' + s.manifestPageCount).join(' / ') + '）',
     navModel.sections.every((s) => s.preorder.length === s.manifestPageCount),
     navModel.sections.map((s) => s.id + ' ' + s.preorder.length + '/' + s.manifestPageCount).join(' '));
   push(null, '组首页 rel↔分组路径 映射全部命中（' + navModel.mapping.checked + ' 条）',
@@ -1200,12 +1201,12 @@ function runSelfTest(state) {
     'unattached=' + navModel.mapping.unattached.length + ' mismatch=' + navModel.mapping.mismatched.length);
   const notInNavTotal = navModel.sections.reduce((n, s) => n + s.pagesNotInNav, 0);
   const homeTotal = navModel.sections.reduce((n, s) => n + s.groupHomes, 0);
-  push(null, '29 个组首页/根页全部分配（' + homeTotal + ' 个挂到组 + 2 个分区根页挂到分区标题）',
-    notInNavTotal === 29 && homeTotal + 2 === 29, 'notInNav=' + notInNavTotal + ' groupHomes=' + homeTotal);
+  push(null, notInNavTotal + ' 个组首页/根页全部分配（' + homeTotal + ' 个挂到组 + ' + navModel.sections.length + ' 个分区根页挂到分区标题）',
+    notInNavTotal === homeTotal + navModel.sections.length, 'notInNav=' + notInNavTotal + ' groupHomes=' + homeTotal);
   const idxProbe = fs.existsSync(path.join(U.SITE, 'index.html')) ? U.readText(path.join(U.SITE, 'index.html')) : '';
-  const idxNavLinks = new Set([...idxProbe.matchAll(/href="((?:paper|velocity)\/[^"]+\.html)"/g)].map((m) => m[1]));
+  const idxNavLinks = new Set([...idxProbe.matchAll(/href="((?:paper|velocity|folia)\/[^"]+\.html)"/g)].map((m) => m[1]));
   const unreachable = pages.filter((p) => !idxNavLinks.has(p.section + '/' + p.rel + '.html'));
-  push(null, '135 页全部可从 library/index.html 主导航到达（' + idxNavLinks.size + ' 个页面链接）',
+  push(null, pages.length + ' 页全部可从 library/index.html 主导航到达（' + idxNavLinks.size + ' 个页面链接）',
     unreachable.length === 0 && idxNavLinks.size === pages.length,
     unreachable.length + ' 页不可达：' + unreachable.slice(0, 3).map((p) => p.id).join(', '));
 
@@ -1262,7 +1263,7 @@ function runSelfTest(state) {
   const allRowHrefs = [...allTxt.matchAll(/<td class="lnk"><a href="([^"]+)"/g)].map((m) => m[1]);
   const expectRowHrefs = [];
   for (const sec of navModel.sections) for (const e of sec.preorder) expectRowHrefs.push(sec.id + '/' + e.rel + '.html');
-  push(null, 'all-pages.html 行数 = 135 且顺序 = 源结构先序',
+  push(null, 'all-pages.html 行数 = ' + pages.length + ' 且顺序 = 源结构先序',
     allRowHrefs.length === pages.length && JSON.stringify(allRowHrefs) === JSON.stringify(expectRowHrefs),
     allRowHrefs.length + '/' + pages.length);
   push(null, 'all-pages.html 有页内过滤框（Ctrl+F 之外的第二条路）',
@@ -1275,7 +1276,7 @@ function runSelfTest(state) {
   const sideStart = sidebarProbe.indexOf('<nav class="sidebar"');
   const sidebarHtmlOnly = sideStart === -1 ? '' : sidebarProbe.slice(sideStart, sidebarProbe.indexOf('</nav>', sideStart));
   const sideAnchors = [...sidebarHtmlOnly.matchAll(/<a\b[^>]*>/g)].map((m) => m[0]);
-  const sidePageAnchors = sideAnchors.filter((t) => /href="[^"]*(?:paper|velocity)\/(?!\.\.)/.test(t));
+  const sidePageAnchors = sideAnchors.filter((t) => /href="[^"]*(?:paper|velocity|folia)\/(?!\.\.)/.test(t));
   const sideMissing = sidePageAnchors.filter((t) => !/data-search="/.test(t));
   push(null, '侧栏 data-search 覆盖全部页面条目', sidePageAnchors.length > 0 && sideMissing.length === 0,
     sidePageAnchors.length + ' 条页面链接，缺 data-search ' + sideMissing.length);
@@ -1401,7 +1402,7 @@ function main() {
     log('      source-nav.json sha256=' + String(nav.sha256).slice(0, 16) + '… '
       + nav.sections.map((s) => s.id + ': ' + s.preorder.length + ' 页 / ' + s.groupCount + ' 组 / 深度 ' + s.maxDepth
         + '（导航 ' + s.pagesInNav + ' + 组首页/根页 ' + s.pagesNotInNav + '）').join(' | '));
-    log('      覆盖校验：' + (nav.coverage.ok ? 'PASS（135 页全部可从源结构到达）' : 'FAIL → ' + nav.coverage.problems.join('; ')));
+    log('      覆盖校验：' + (nav.coverage.ok ? 'PASS（' + pages.length + ' 页全部可从源结构到达）' : 'FAIL → ' + nav.coverage.problems.join('; ')));
   } else {
     log('      源结构缺失 → 侧栏回退到分区/分类模式');
   }
@@ -1579,7 +1580,11 @@ function main() {
         pagesInNav: nav.sections.reduce((n, s) => n + s.pagesInNav, 0),
         pagesNotInNav: nav.sections.reduce((n, s) => n + s.pagesNotInNav, 0),
         reachableFromMainNav: nav.sections.reduce((n, s) => n + s.preorder.length, 0),
-        note: '135 = 106 个上游 <a> 导航项 + 29 个组首页/分区根页（挂在组标题或分区标题上，先序插入）',
+        note: nav.sections.reduce((n, s) => n + s.preorder.length, 0) + ' = '
+          + nav.sections.reduce((n, s) => n + s.pagesInNav, 0) + ' 个上游 <a> 导航项 + '
+          + nav.sections.reduce((n, s) => n + s.pagesNotInNav, 0)
+          + ' 个组首页/分区根页（挂在组标题或分区标题上，先序插入）：'
+          + nav.sections.map((s) => s.id + ' ' + s.pagesInNav + '+' + s.pagesNotInNav).join(' + '),
       },
       groupHomeMapping: {
         method: 'rel ↔ 分组路径（目录前缀 → 逐段标签匹配，与 tools/source-nav.js 的 reasonForMissing 同算法）',
@@ -1621,34 +1626,40 @@ function main() {
     })),
     counts: stats,
     countsMeta: {
-      pages: '归档 manifest 中的页面数（paper 103 + velocity 32）',
+      pages: '归档 manifest 中的页面数（' + SECTIONS.map((s) => s.id + ' ' + (manifests[s.id] ? (manifests[s.id].pages || []).length : 0)).join(' + ')
+        + ' = ' + stats.pages + '）',
       categories: 'taxonomy.json 的分类数（回退模式为目录结构推导）',
-      codeBlocks: '生成页中的代码块（<figure class="code-block">）总数 = 围栏块 437（顶层 427 + 引用/告警内 10）',
+      codeBlocks: '生成页中的代码块（<figure class="code-block">）总数 = 围栏块 ' + stats.codeFencePairs
+        + '（顶层 ' + stats.codeFencePairsPlain + ' + 引用/告警内 ' + stats.codeFencePairsQuoted + '）',
       codeFencePairs: '源 Markdown 中的围栏块对数（顶层 + 以 "> " 前缀包裹在引用/告警里的）',
       codeBlocksWithTitle: 'info string 里带 title="…" 的代码块数（figcaption 显示文件名）',
       alerts: '源 Markdown 中的 GitHub 告警数（NOTE/TIP/IMPORTANT/WARNING/CAUTION/DANGER，含上游 md-features.json 漏掉的 DANGER）',
       tables: '生成页中的 GFM 表格总数（md-features.json 的 "gfm table header" 统计的是表格行，不是表格数）',
-      images: '源 Markdown 中的图片引用数（![](...)），89 = 87 本地 + 1 第三方外链 + 1 data: URI；不含每页灯箱占位 <img>',
+      images: '源 Markdown 中的图片引用数（![](...)），' + stats.images + ' = ' + stats.imagesLocal
+        + ' 本地 + ' + stats.imagesExternal + ' 第三方外链 + 1 data: URI；不含每页灯箱占位 <img>',
       detailsBlocks: '源 Markdown 中的原始 <details> 折叠块数',
       headings: '生成页 article 内的 h1-h6 总数（= Markdown 标题数 - 被外壳接管的 h1 + 为无 h1 页面补的标题）',
       tocEntries: '“本页目录”条目总数（h2-h4）',
       linksRewritten: '相对 .md 链接 + 指向 docs.papermc.io 的绝对链接中被改写本地化的条数',
       externalLinks: '源 Markdown 中指向站外的链接条数（docs.papermc.io 之外）',
-      unmirroredLinks: '源 Markdown 中指向 docs.papermc.io 未镜像区域（misc 10 / adventure 15 / folia 2）的条数',
+      unmirroredLinks: '源 Markdown 中指向 docs.papermc.io 未镜像区域（misc / adventure 等）的条数；folia 已纳入镜像，指向它的绝对链接改为本地化（计入 linksRewritten/crossSectionLinks）',
       unresolvedLinks: '无法本地化的相对链接条数（当前 0）',
       fragmentsUnresolved: '锚点目标页确实不存在该标题的条数（已加可见标记 anchor-missing）',
       fragmentsRecovered: '按配置键路径从嵌套列表键补回的锚点 id 数',
       imagesLocal: '本地相对路径图片（已校验文件存在）',
       imagesExternal: '第三方外链图片（保持在线，加 visible 提示）',
       footnotesResolved: '已补 id 的脚注锚点数',
-      sourceNavGroups: '源侧栏（source-nav.json）分组总数：paper 20 + velocity 9 = 29',
-      sourceNavPagesInNav: '上游侧栏 <a> 导航项总数：paper 83 + velocity 23 = 106',
-      sourceNavPagesNotInNav: '组首页 / 分区根页总数：paper 20 + velocity 9 = 29（挂在组标题或分区标题上，未丢弃）',
+      sourceNavGroups: '源侧栏（source-nav.json）分组总数：' + nav.sections.map((s) => s.id + ' ' + s.groupCount).join(' + ')
+        + ' = ' + stats.sourceNavGroups,
+      sourceNavPagesInNav: '上游侧栏 <a> 导航项总数：' + nav.sections.map((s) => s.id + ' ' + s.pagesInNav).join(' + ')
+        + ' = ' + stats.sourceNavPagesInNav,
+      sourceNavPagesNotInNav: '组首页 / 分区根页总数：' + nav.sections.map((s) => s.id + ' ' + s.pagesNotInNav).join(' + ')
+        + ' = ' + stats.sourceNavPagesNotInNav + '（挂在组标题或分区标题上，未丢弃）',
       subsections: '生成页 article 内的 h2-h6 小节总数（其中 h2-h4 进入“本页目录”= tocEntries）',
     },
     siteTotals: state.siteTotals,
     siteTotalsMeta: {
-      htmlFiles: '生成的全部 HTML 文件数（135 页 + 15 分类 + 2 分区 + index + all-pages + snapshots）',
+      htmlFiles: '生成的全部 HTML 文件数（' + stats.pages + ' 页 + ' + stats.categories + ' 分类 + ' + stats.sections + ' 分区 + index + all-pages + snapshots）',
       imgAll: '全部 HTML 中的 <img> 出现次数（含每页灯箱占位图，故远大于 counts.images）',
       imgInArticle: '仅正文 <article> 内的 <img>（与 counts.images + data-uri 可对账）',
       imgExternal: '正文中标注为 class="external-image" 的第三方外链图片',
@@ -1661,10 +1672,10 @@ function main() {
     linkStats: linker.stats,
     linkStatsLegend: {
       rewrittenRelativeMd: '相对 .md 链接 → 对应生成页 HTML 的相对路径（保留 #fragment）',
-      rewrittenAbsoluteDocs: 'https://docs.papermc.io/<section>/… → 命中 manifest 的本地生成页（含跨区域 velocity→paper）',
-      rewrittenCrossSection: '上两类改写中跨区域的条数（velocity 页面链接 paper 页面）',
+      rewrittenAbsoluteDocs: 'https://docs.papermc.io/<section>/… → 命中 manifest 的本地生成页（含跨区域 velocity→paper、paper→folia）',
+      rewrittenCrossSection: '上两类改写中跨区域的条数（如 velocity 页面链接 paper 页面、paper 页面链接 folia 页面）',
       unresolvedLocal: '相对链接无法定位到已镜像页面（越出归档或目标缺失）→ 保留原样并加 class="unresolved"；具体条目见 warnings(kind=link-*)',
-      unmirrored: '指向未镜像区域（/misc、/adventure、/folia 等）→ 保留绝对 URL，class="external unmirrored" + title="未镜像，需联网" + target="_blank"',
+      unmirrored: '指向未镜像区域（/misc、/adventure、第三方站点等）→ 保留绝对 URL，class="external unmirrored" + title="未镜像，需联网" + target="_blank"',
       external: '站外链接 → class="external" + target="_blank" rel="noopener"',
       samePageFragment: '本页 #fragment 命中标题 id，无需改写',
       fragmentsResolvedFuzzy: '锚点经模糊匹配（忽略分隔符 / 唯一前缀）改写为真实标题 id',
@@ -1692,7 +1703,7 @@ function main() {
       withTitle: stats.codeBlocksWithTitle,
       note: '围栏块总数 = 顶层围栏块 ' + stats.codeFencePairsPlain + ' + 写在引用/告警里（以 "> " 前缀包裹）的围栏块 '
         + stats.codeFencePairsQuoted + ' = ' + stats.codeFencePairs + '；'
-        + '渲染出的 <pre> 数量与之一致（tools/check-site.js 独立复核 437 = 437，差异 ' + stats.codeBlocksExtra + '）',
+        + '渲染出的 <pre> 数量与之一致（tools/check-site.js 独立复核 ' + stats.codeFencePairs + ' = ' + stats.codeBlocks + '，差异 ' + stats.codeBlocksExtra + '）',
     },
     search: Object.assign({}, search.stats, {
       jsonPath: 'search-index.json',

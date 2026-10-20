@@ -18,7 +18,7 @@ const path = require('path');
 const REPO = path.resolve(__dirname, '..');
 const LIB = process.argv[2] ? path.resolve(process.argv[2]) : REPO;
 const ARCHIVE = process.argv[3] ? path.resolve(process.argv[3]) : path.join(REPO, 'archive');
-const ARCHIVES = ['paper', 'velocity'];
+const ARCHIVES = ['paper', 'velocity', 'folia'];
 
 /** directories that are not part of the rendered site */
 const SITE_SKIP = new Set(['node_modules', 'tools', 'reports', 'archive', 'data', '.git', 'assets']);

@@ -18,7 +18,7 @@
  * ── 新布局的产物位置（本脚本的路径常量全部按这个来） ────────────────────
  *   站点本体（随仓库发布，扫描判失败）：index.html / 404.html / all-pages.html /
  *     snapshots.html / robots.txt / sitemap.xml / assets/** / categories/** /
- *     sections/** / paper/** / velocity/**（paper、velocity 两段正文页 URL 与上游
+ *     sections/** / paper/** / velocity/** / folia/**（paper、velocity、folia 三段正文页 URL 与上游
  *     docs.papermc.io 逐段一致，旧的 library/pages/<section>/<rel>.html 已上移一层）
  *   站点数据：search-index.json（+ assets/search-index.js 兜底）、
  *     data/{taxonomy,crosslinks,md-features,build-manifest}.json
@@ -65,8 +65,8 @@ const DEFAULT_SEED = 20261019;
 const CJK = /[\u3400-\u9fff\uf900-\ufaff\uff00-\uffef]/;
 
 /* ---- 新布局的站点目录常量（站点根 = 仓库根） --------------------------- */
-// 站点本体里「目录级」的两段正文（paper/velocity）+ 生成出来的分类页 / 分区页
-const SITE_DIRS = ['paper', 'velocity', 'categories', 'sections'];
+// 站点本体里「目录级」的三段正文（paper/velocity/folia）+ 生成出来的分类页 / 分区页
+const SITE_DIRS = ['paper', 'velocity', 'folia', 'categories', 'sections'];
 // 站点根下的固定 HTML 产物
 const SITE_ROOT_HTML = ['index.html', '404.html', 'all-pages.html', 'snapshots.html'];
 // 站点根下的固定文本产物（robots / sitemap 里是公网绝对 URL，属允许项）
@@ -74,7 +74,7 @@ const SITE_ROOT_TEXT = ['robots.txt', 'sitemap.xml'];
 // assets/** 只扫文本资源：图片/字体是二进制，读进来只会产生噪声命中
 const SITE_ASSET_TEXT_RE = /\.(css|js|mjs|json|svg|txt|xml|webmanifest)$/i;
 // 「生成站点本体」的前缀 —— 这些文件里的相对路径 / 本机地址问题一律判失败，其余只报警告
-const SITE_FAIL_PREFIXES = ['assets/', 'categories/', 'sections/', 'paper/', 'velocity/'];
+const SITE_FAIL_PREFIXES = ['assets/', 'categories/', 'sections/', 'paper/', 'velocity/', 'folia/'];
 
 /* ============================== CLI ====================================== */
 
@@ -171,7 +171,7 @@ function collect(tops, re) {
 
 /**
  * 站点本体的 HTML 文件（仓库相对路径，保持和旧代码一样只给下游「路径数组」）：
- * 站点根的 4 个固定页 + paper/velocity/categories/sections 下的全部 HTML。
+ * 站点根的 4 个固定页 + paper/velocity/folia/categories/sections 下的全部 HTML。
  */
 function siteHtmlFiles() {
   return uniq(SITE_ROOT_HTML.concat(collect(SITE_DIRS, /\.html?$/i))).filter(exists);
@@ -467,7 +467,7 @@ function simulateIgnore(paths) {
 }
 
 function analyzeRepo(opts, checksNote) {
-  const all = collect(['archive', 'paper', 'velocity', 'categories', 'sections', 'assets', 'data', 'reports', 'tools',
+  const all = collect(['archive', 'paper', 'velocity', 'folia', 'categories', 'sections', 'assets', 'data', 'reports', 'tools',
     '.nojekyll', '404.html', 'index.html', 'all-pages.html', 'snapshots.html', 'robots.txt', 'sitemap.xml',
     'package.json', 'package-lock.json', 'README.md', 'LICENSE-PaperMC-docs.txt', '.gitignore'], null);
   const tracked = gitTrackedPaths();
@@ -584,7 +584,7 @@ async function main() {
   const archivesHtml = collect(['archive'], /\.html?$/i);         // 上游 HTML 快照（只读归档，发布但不算站点本体）
   const toolsHtml = collect(['tools'], /\.html?$/i);              // tools/** 下的 HTML（若有）
   const categories = collect(['categories'], /\.html$/i);
-  const pages = uniq(collect(['paper'], /\.html$/i).concat(collect(['velocity'], /\.html$/i)));  // 旧 library/pages/**
+  const pages = uniq(collect(['paper'], /\.html$/i).concat(collect(['velocity'], /\.html$/i), collect(['folia'], /\.html$/i)));  // 旧 library/pages/**
   const paperImages = collect(['archive/paper/assets'], /\.(webp|png|jpe?g|gif|svg|ico)$/i);
   // 注意：collect() 只拿 basename 去匹配 filter，所以 _astro 目录要在**完整相对路径**上筛。
   const astroImages = paperImages.concat(collect(['archive'], /\.(webp|png|jpe?g|gif|svg|ico)$/i))
@@ -611,11 +611,13 @@ async function main() {
   // 站点根的固定产物（index.html 现在是真落地页，不是 meta refresh 跳转页）
   ['index.html', 'all-pages.html', 'snapshots.html', '404.html', 'robots.txt', 'sitemap.xml']
     .forEach((p) => T(p, 'required'));
-  // 两个分区的入口页（= 旧 library/pages/<section>/index.html）+ 分区源结构页
+  // 三个分区的入口页（= 旧 library/pages/<section>/index.html）+ 分区源结构页
   T('paper/index.html');
   T('velocity/index.html');
+  T('folia/index.html');
   T('sections/paper.html');
   T('sections/velocity.html');
+  T('sections/folia.html');
   // 抽样的分类页（categories/*.html）与正文页（paper|velocity/**/*.html）
   catPick.forEach((p) => T(p, 'sampled-category'));
   pagePick.forEach((p) => T(p, 'sampled-page'));
@@ -692,10 +694,10 @@ async function main() {
       for (const r of s.protoRel) failures.push({ file: s.file, ref: r.value, reason: '协议相对 //host/… 在 Pages 上会跳到外站' });
     }
     // 站点本体 = 根 index.html / 404.html / all-pages.html / snapshots.html / robots.txt / sitemap.xml /
-    //            assets/** / categories/** / sections/** / paper/** / velocity/**。
+    //            assets/** / categories/** / sections/** / paper/** / velocity/** / folia/**。
     // 只判「本地绝对形式」：以 "/" 开头、盘符、file://、协议相对；https 公网绝对 URL（canonical、
     // sitemap.xml、robots.txt 里的 https://sqkl520.github.io/papermc-docs/…）是允许项，不会被匹配到。
-    add('no-absolute-refs', '站点本体（根 index.html / 404.html / all-pages.html / snapshots.html / robots.txt / sitemap.xml / assets/** / categories/** / sections/** / paper/** / velocity/**）零本地绝对路径引用', 'fail',
+    add('no-absolute-refs', '站点本体（根 index.html / 404.html / all-pages.html / snapshots.html / robots.txt / sitemap.xml / assets/** / categories/** / sections/** / paper/** / velocity/** / folia/**）零本地绝对路径引用', 'fail',
       failures.length === 0, counts, failures);
     checks[checks.length - 1].files = scans.filter((s) => s.total).length;
   }
@@ -718,7 +720,7 @@ async function main() {
 
   /* ---------- 9. 相对路径在子路径下逐个取回 ---------- */
   {
-    const pagesToResolve = siteHtml;   // 站点根 4 个固定页 + paper/velocity/categories/sections 下的全部 HTML
+    const pagesToResolve = siteHtml;   // 站点根 4 个固定页 + paper/velocity/folia/categories/sections 下的全部 HTML
     const byUrl = new Map();
     let refCount = 0;
     for (const p of pagesToResolve) {
@@ -806,7 +808,7 @@ async function main() {
     else if (!/window\.__LIBRARY_SEARCH__\s*=/.test(js.body.toString('utf8'))) {
       failures.push({ file: 'assets/search-index.js', ref: '-', reason: '未包含 window.__LIBRARY_SEARCH__ 赋值（file:// 场景的兜底失效）' });
     }
-    const nPages = pages.length;   // paper/**/*.html + velocity/**/*.html（= 旧 library/pages/**，135 页）
+    const nPages = pages.length;   // paper/**/*.html + velocity/**/*.html + folia/**/*.html（= 旧 library/pages/**，141 页）
     add('search-index', '搜索索引（JSON + JS 双份）可取回、可解析、与页面数一致', 'fail',
       failures.length === 0,
       { jsonBytes: jsonBytes, jsBytes: js ? js.bytes : -1, indexPages: pagesCount, renderedPages: nPages, generatedAt: generatedAt },
@@ -847,7 +849,7 @@ async function main() {
         if (isSiteFile(s.file)) siteFail.push(item); else otherWarn.push(item);
       }
     }
-    add('localhost-refs', '生成站点本体（index.html / 404.html / all-pages.html / snapshots.html / assets/** / categories/** / sections/** / paper/** / velocity/**）无 127.0.0.1 / localhost 资源引用', 'fail',
+    add('localhost-refs', '生成站点本体（index.html / 404.html / all-pages.html / snapshots.html / assets/** / categories/** / sections/** / paper/** / velocity/** / folia/**）无 127.0.0.1 / localhost 资源引用', 'fail',
       siteFail.length === 0, { siteHits: siteFail.length, otherHits: otherWarn.length, scanned: scans.length }, siteFail);
     add('localhost-refs-entry', '非生成站点文件（archive/** 上游快照、tools/** 源码）里的本机地址引用（只报告，不改别人的文件）', 'warn',
       otherWarn.length === 0, { hits: otherWarn.length },
@@ -858,7 +860,7 @@ async function main() {
   /* ---------- 15. 中文 / percent-encoded URL ---------- */
   {
     const failures = [];
-    const nonAscii = collect(['archive', 'paper', 'velocity', 'assets', 'categories', 'sections'], null).filter((p) => /[^\x00-\x7F]/.test(p));
+    const nonAscii = collect(['archive', 'paper', 'velocity', 'folia', 'assets', 'categories', 'sections'], null).filter((p) => /[^\x00-\x7F]/.test(p));
     const q = await request(BASE + 'index.html?q=' + encodeURIComponent('插件 加载'));
     if (q.status !== 200) failures.push({ file: 'index.html', ref: BASE + 'index.html?q=%E6%8F%92%E4%BB%B6', reason: '带中文查询串的请求 HTTP ' + q.status });
     const encSeg = encodeURIComponent('中文目录');
@@ -943,7 +945,7 @@ async function main() {
     const titleM = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(rootText);
     const siteTitle = titleM ? titleM[1].trim() : '';
     if (!siteTitle) failures.push({ file: 'index.html', ref: '-', reason: '落地页缺少 <title> 站点标题' });
-    // 两个分区入口：落地页里的相对链接解算后必须正好落到 /<repo>/paper[/index.html] 与 /<repo>/velocity[/index.html]
+    // 三个分区入口：落地页里的相对链接解算后必须正好落到 /<repo>/paper|velocity|folia[/index.html]
     const linksTo = (sec) => extractRefs(rootText).some((r) => {
       if (classify(r.value) !== 'relative') return false;
       let u;
@@ -953,12 +955,14 @@ async function main() {
     });
     const linkPaper = linksTo('paper');
     const linkVelocity = linksTo('velocity');
+    const linkFolia = linksTo('folia');
     if (!linkPaper) failures.push({ file: 'index.html', ref: '-', reason: '落地页没有指向 paper/ 的相对链接' });
     if (!linkVelocity) failures.push({ file: 'index.html', ref: '-', reason: '落地页没有指向 velocity/ 的相对链接' });
-    add('root-entry', '根 index.html 是真落地页（200 / 中文 / 站点标题 / 无 meta refresh / 链接 paper 与 velocity）；全站无 <base> 标签', 'fail',
+    if (!linkFolia) failures.push({ file: 'index.html', ref: '-', reason: '落地页没有指向 folia/ 的相对链接' });
+    add('root-entry', '根 index.html 是真落地页（200 / 中文 / 站点标题 / 无 meta refresh / 链接 paper、velocity 与 folia）；全站无 <base> 标签', 'fail',
       failures.length === 0,
       { indexStatus: rootResp ? rootResp.status : -1, title: siteTitle, metaRefresh: metaRefresh,
-        links: { paper: linkPaper, velocity: linkVelocity }, baseTagFiles: withBase.length, scanned: strictHtml.length },
+        links: { paper: linkPaper, velocity: linkVelocity, folia: linkFolia }, baseTagFiles: withBase.length, scanned: strictHtml.length },
       failures,
       'Pages 上 https://<user>.github.io/<repo>/ 直接返回这份 index.html（目录索引）：它必须自己承担首页职责，不能再靠 meta refresh 跳到 <repo>/library/index.html（旧路径已取消）。');
   }
@@ -1115,6 +1119,7 @@ function summarize(c) {
     case 'harness-subpath-isolation': return '域名根 ' + s.rootStatus + ' · 子路径外 ' + s.outsideStatus;
     case 'root-entry': return '落地页「' + s.title + '」· HTTP ' + s.indexStatus + ' · meta refresh ' + (s.metaRefresh ? '有' : '无') +
       ' · 分区链接 ' + (s.links && s.links.paper ? 'paper✓' : 'paper✗') + ' ' + (s.links && s.links.velocity ? 'velocity✓' : 'velocity✗') +
+      ' ' + (s.links && s.links.folia ? 'folia✓' : 'folia✗') +
       ' · <base> ' + s.baseTagFiles + ' 处';
     case 'anchor-targets': return s.anchorsChecked + ' 个锚点 / ' + s.pages + ' 页';
     case 'size-limits': return '最大文件 ' + s.largestPath + ' (' + (s.largestBytes / 1048576).toFixed(2) + ' MiB) · 跟踪 ' + s.trackedMiB + ' MiB';

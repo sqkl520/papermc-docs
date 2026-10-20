@@ -8,14 +8,14 @@
 
 | 入口 | 说明 |
 | --- | --- |
-| [站点首页](https://sqkl520.github.io/papermc-docs/) | 落地页：两个分区入口、搜索、统计 |
-| [全部文章](https://sqkl520.github.io/papermc-docs/all-pages.html) | **135 篇**扁平清单（分区 / 源结构路径 / 标签 / 中文摘要），带页内过滤 |
-| [Paper 分区](https://sqkl520.github.io/papermc-docs/paper/) · [Velocity 分区](https://sqkl520.github.io/papermc-docs/velocity/) | 与上游一致的导航树 |
+| [站点首页](https://sqkl520.github.io/papermc-docs/) | 落地页：三个分区入口、搜索、统计 |
+| [全部文章](https://sqkl520.github.io/papermc-docs/all-pages.html) | **141 篇**扁平清单（分区 / 源结构路径 / 标签 / 中文摘要），带页内过滤 |
+| [Paper](https://sqkl520.github.io/papermc-docs/paper/) · [Velocity](https://sqkl520.github.io/papermc-docs/velocity/) · [Folia](https://sqkl520.github.io/papermc-docs/folia/) 三个分区 | 与上游一致的导航树 |
 | [快照索引](https://sqkl520.github.io/papermc-docs/snapshots.html) | 每页的"渲染页 / 原始 HTML 快照 / 上游 Markdown / 线上原文"四类链接 |
 
-- 镜像规模：**135 篇**（Paper 103 · Velocity 32），逐页保留 渲染 Markdown、上游 Markdown、原始 HTML 快照、图片
+- 镜像规模：**141 篇**（Paper 103 · Velocity 32 · Folia 6），逐页保留 渲染 Markdown、上游 Markdown、原始 HTML 快照、图片
 - **URL 与上游逐段一致**：`docs.papermc.io/paper/dev/project-setup/` → `<站点>/paper/dev/project-setup/`
-- **导航与上游侧栏逐字一致**：Paper 20 组 / Velocity 9 组，最大嵌套 5 层，标签取自上游原文
+- **导航与上游侧栏逐字一致**：Paper 20 组 / Velocity 9 组 / Folia 2 组，最大嵌套 5 层，标签取自上游原文
 - 中文全文检索、面包屑、上一页/下一页（源树先序）、本页目录、亮暗主题、键盘可达
 
 ---
@@ -109,7 +109,7 @@ npm run checks   # 归档校验 → 构建 → 链接与代码块 → 站点 15 
 | `npm run validate` | 归档完整性（清单引用、断链、代码围栏配对、哈希与磁盘一致） |
 | `npm run check` | 站点全部相对链接存在性 + 代码块数量与归档逐页比对 |
 | `npm run verify` | 站点 15 项独立验证（覆盖率、锚点、图片、目录、清单自洽、离线可用性…） |
-| `npm run url-parity` | **每页 URL 与上游路径逐段一致**（135/135）+ sitemap 覆盖 |
+| `npm run url-parity` | **每页 URL 与上游路径逐段一致**（141/141）+ sitemap 覆盖 |
 | `npm run privacy` | 隐私扫描：仓库内不得出现本机路径/用户名/个人邮箱 |
 | `npm run pages-smoke` | 模拟 GitHub Pages 项目页子路径，验证相对链接与 `.nojekyll` |
 | `npm run live` | 对已发布站点做端到端冒烟（`--local` 可打本地服务器） |
@@ -127,7 +127,7 @@ npm run checks   # 归档校验 → 构建 → 链接与代码块 → 站点 15 
 
 ## 7. 已知限制
 
-- 指向未镜像区域的外链（`/adventure`、`/misc`、`/folia` 等 27 处）保持在线访问，站内已标注。
+- 指向未镜像区域的外链（`/adventure`、`/misc` 等 25 处）保持在线访问，站内已标注。
 - 1 张第三方图片（xkcd 漫画）未镜像，站内标注"外链图片（需联网）"。
 - 原始 HTML 快照自带上游绝对路径，离线打开**无样式**，仅供内容核对。
 - 2 处上游本身就失效的锚点退化为"跳页顶 + 可见标记"。

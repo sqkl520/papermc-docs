@@ -14,6 +14,13 @@
       "subtitle": "Minecraft 代理端",
       "archive": "archives/velocity",
       "pageCount": 32
+    },
+    {
+      "id": "folia",
+      "title": "Folia",
+      "subtitle": "Minecraft 区域化多线程服务端（docs.papermc.io/folia）",
+      "archive": "archive/folia",
+      "pageCount": 6
     }
   ],
   "categories": [
@@ -121,6 +128,20 @@
       "section": "velocity",
       "order": 60,
       "description": "命令 API、事件系统、调度器、插件消息以及从 Velocity 1.x 迁移插件"
+    },
+    {
+      "id": "folia-start",
+      "title": "Folia 入门与文档索引",
+      "section": "folia",
+      "order": 10,
+      "description": "入口层：Folia 文档首页、上游 Administration / Reference 两个分组的索引页与常见问题，先用它判断 Folia 是否适合自己的服务端"
+    },
+    {
+      "id": "folia-region",
+      "title": "区域化原理参考",
+      "section": "folia",
+      "order": 20,
+      "description": "Folia 的核心参考：区域化运行时总览（调度器、区间操作与传送）与区域调度器内部逻辑（区域切分、合并与 tick 标记）"
     }
   ],
   "pages": [
@@ -2157,6 +2178,102 @@
         "性能调优"
       ],
       "summary": "说明选用 Velocity 的理由，从玩家体验、性能设计与安全性和模组支持等角度展开"
+    },
+    {
+      "id": "folia:index",
+      "section": "folia",
+      "rel": "index",
+      "url": "https://docs.papermc.io/folia/",
+      "title": "Folia Documentation",
+      "description": "",
+      "category": "folia-start",
+      "order": 10,
+      "tags": [
+        "分区导航",
+        "服主运维",
+        "参考手册"
+      ],
+      "summary": "Folia 文档离线镜像首页，说明区域化多线程服务端的适用边界，并给出管理、参考与常见问题三类入口"
+    },
+    {
+      "id": "folia:admin/index",
+      "section": "folia",
+      "rel": "admin/index",
+      "url": "https://docs.papermc.io/folia/admin/",
+      "title": "Administration",
+      "description": "",
+      "category": "folia-start",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "服主运维",
+        "参考手册"
+      ],
+      "summary": "Folia 管理文档的分组索引页，指向参考手册与常见问题两条主线，是服主查阅 Folia 文档的起点"
+    },
+    {
+      "id": "folia:admin/reference/index",
+      "section": "folia",
+      "rel": "admin/reference/index",
+      "url": "https://docs.papermc.io/folia/admin/reference/",
+      "title": "Reference",
+      "description": "",
+      "category": "folia-start",
+      "order": 30,
+      "tags": [
+        "分组索引",
+        "参考手册",
+        "调度与并发"
+      ],
+      "summary": "Folia 参考手册索引页，汇总区域化概览与区域调度逻辑两篇参考文档，并同时收录上游常见问题条目"
+    },
+    {
+      "id": "folia:faq/index",
+      "section": "folia",
+      "rel": "faq/index",
+      "url": "https://docs.papermc.io/folia/faq/",
+      "title": "Frequently asked questions",
+      "description": "Questions frequently asked by our community, answered by us!",
+      "category": "folia-start",
+      "order": 40,
+      "tags": [
+        "服主运维",
+        "排错",
+        "兼容性"
+      ],
+      "summary": "Folia 常见问题速查：哪些服务端类型适合 Folia、硬件与配置建议，以及 Folia 禁用的原版命令清单"
+    },
+    {
+      "id": "folia:reference/overview/index",
+      "section": "folia",
+      "rel": "reference/overview/index",
+      "url": "https://docs.papermc.io/folia/reference/overview/",
+      "title": "Overview",
+      "description": "An overview of how Folia works.",
+      "category": "folia-region",
+      "order": 10,
+      "tags": [
+        "调度与并发",
+        "参考手册",
+        "插件开发"
+      ],
+      "summary": "区域化运行时总览：独立区域规则、区内与区间操作、EntityScheduler 等调度器、传送实现与服务端关闭流程"
+    },
+    {
+      "id": "folia:reference/region-logic/index",
+      "section": "folia",
+      "rel": "reference/region-logic/index",
+      "url": "https://docs.papermc.io/folia/reference/region-logic/",
+      "title": "Region logic",
+      "description": "An overview to how Folia's regionizer works.",
+      "category": "folia-region",
+      "order": 20,
+      "tags": [
+        "调度与并发",
+        "世界配置",
+        "参考手册"
+      ],
+      "summary": "区域调度器内部逻辑：区域对象的切分与合并、区块增删、tick 标记流程，以及区域化器保证的四条不变式"
     }
   ]
 }

@@ -1,0 +1,62 @@
+{
+  "rows": [
+    {
+      "rel": "admin/index.md",
+      "bytes": 599,
+      "codeBlocks": 0,
+      "headings": 2,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/reference/index.md",
+      "bytes": 487,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "faq/index.md",
+      "bytes": 2756,
+      "codeBlocks": 0,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "index.md",
+      "bytes": 346,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/overview/index.md",
+      "bytes": 14757,
+      "codeBlocks": 0,
+      "headings": 18,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/region-logic/index.md",
+      "bytes": 12052,
+      "codeBlocks": 0,
+      "headings": 27,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    }
+  ],
+  "problems": [],
+  "warnings": [],
+  "missingSource": [],
+  "archiveIssues": []
+}

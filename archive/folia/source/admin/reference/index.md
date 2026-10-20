@@ -1,0 +1,7 @@
+# Reference
+
+import PageCards from "/src/components/PageCards.astro";
+
+A reference of how Folia works.
+
+<PageCards />

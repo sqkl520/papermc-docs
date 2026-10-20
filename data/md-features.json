@@ -1,5 +1,5 @@
 {
-  "archive/paper": {
+  "archive\\paper": {
     "pages": 103,
     "totalBytes": 685073,
     "counts": {
@@ -117,7 +117,7 @@
       }
     }
   },
-  "archive/velocity": {
+  "archive\\velocity": {
     "pages": 32,
     "totalBytes": 141136,
     "counts": {
@@ -217,6 +217,49 @@
       "deep indent list (>=3 levels)": {
         "file": "dev/velocity-plugin-json/index.md",
         "sample": " - "
+      }
+    }
+  },
+  "archive\\folia": {
+    "pages": 6,
+    "totalBytes": 30997,
+    "counts": {
+      "link (relative md)": 8,
+      "h1": 6,
+      "h4+": 17,
+      "hr": 12,
+      "inline code": 26,
+      "h2": 13,
+      "h3": 18
+    },
+    "examples": {
+      "link (relative md)": {
+        "file": "admin/index.md",
+        "sample": "](../reference/overview/index.md)"
+      },
+      "h1": {
+        "file": "admin/index.md",
+        "sample": "# "
+      },
+      "h4+": {
+        "file": "admin/index.md",
+        "sample": "#### "
+      },
+      "hr": {
+        "file": "admin/index.md",
+        "sample": "---"
+      },
+      "inline code": {
+        "file": "faq/index.md",
+        "sample": "`-XX:ConcGCThreads=n`"
+      },
+      "h2": {
+        "file": "faq/index.md",
+        "sample": "## "
+      },
+      "h3": {
+        "file": "reference/overview/index.md",
+        "sample": "### "
       }
     }
   }
