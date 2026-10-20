@@ -1,0 +1,7 @@
+# How-to guides
+
+import PageCards from "/src/components/PageCards.astro";
+
+How-to guides for setting up specific features of Paper and managing the server.
+
+<PageCards />

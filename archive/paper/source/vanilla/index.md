@@ -1,0 +1,47 @@
+# Vanilla-like experience
+
+This page lists all changes that result in a different experience than Vanilla.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import { filterVanilla } from "/src/utils/config";
+import { parse } from "yaml";
+
+import ServerPropertiesYML from "/src/config/paper/server-properties.yml?raw";
+import PaperWorldDefaultsYML from "/src/config/paper/paper-world-defaults.yml?raw";
+import PaperGlobalYML from "/src/config/paper/paper-global.yml?raw";
+import SpigotYML from "/src/config/paper/spigot.yml?raw";
+
+Due to the way the Bukkit API is implemented in Paper, the gameplay experience between Vanilla and Paper can have inconsistencies.
+This can be furthered by efforts to fix bugs present in Vanilla Minecraft.
+Whilst many people may not notice the inconsistencies, there are situations where they become problematic.
+One example is that technical players may struggle getting their machines to work like they should.
+This page aims to provide a starting point for players who want to get as close to Vanilla as possible.
+
+:::note
+
+This page is inspired by [Earthcomputer's collection](https://gist.github.com/Earthcomputer/2296da33b8cc91dba81b48103c0e1fe3) of Vanilla breaking changes.
+
+:::
+
+:::caution
+
+This guide will only help you to get as close to Vanilla as possible.
+Unfortunately, it currently is not possible to get a 100% Vanilla experience in Paper.
+
+:::
+## server.properties
+<ConfigNode data={filterVanilla(parse(ServerPropertiesYML))} lang="properties" path={["server_properties"]} />
+
+## paper-world-defaults.yml
+<ConfigNode data={filterVanilla(parse(PaperWorldDefaultsYML))} path={["paper_world_defaults"]} />
+
+## paper-global.yml
+<ConfigNode data={filterVanilla(parse(PaperGlobalYML))} path={["paper_global"]} />
+
+## spigot.yml
+<ConfigNode data={filterVanilla(parse(SpigotYML))} path={["spigot"]} />
+
+## Further considerations
+
+* `settings.timeout-time` in `spigot.yml` mirrors the watchdog setting in the `server.properties` file. Keep in mind that the `spigot.yml` setting is in seconds while the default setting is in milliseconds.
+* `watchdog` in `paper-global.yml` controls the watchdog early warning. While this is only a warning, you might want to disable it as it can get annoying.

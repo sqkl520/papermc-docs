@@ -1,0 +1,23 @@
+# spigot.yml
+
+An explanation of Spigot's configuration file.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import SpigotYML from "/src/config/paper/spigot.yml?raw";
+import { parse } from "yaml";
+
+:::note
+
+The below YAML shows you the structure and default values for `spigot.yml`
+
+Click on a leaf node to view the description for that setting.
+
+:::
+
+:::note
+
+To override a per-world option, create a new key under `world-settings` with the level-name (name of the folder).
+
+:::
+
+<ConfigNode data={parse(SpigotYML)} />

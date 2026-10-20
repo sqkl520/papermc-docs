@@ -1,0 +1,300 @@
+{
+  "rows": [
+    {
+      "rel": "admin/getting-started/index.md",
+      "bytes": 723,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/how-to/index.md",
+      "bytes": 561,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/index.md",
+      "bytes": 1938,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/reference/index.md",
+      "bytes": 1024,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "built-in-commands/index.md",
+      "bytes": 3467,
+      "codeBlocks": 0,
+      "headings": 12,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "comparisons-to-other-proxies/index.md",
+      "bytes": 6472,
+      "codeBlocks": 0,
+      "headings": 6,
+      "tableRows": 9,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "configuration/index.md",
+      "bytes": 8624,
+      "codeBlocks": 0,
+      "headings": 9,
+      "tableRows": 50,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "credits/index.md",
+      "bytes": 3967,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 22,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api-basics/index.md",
+      "bytes": 5951,
+      "codeBlocks": 4,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/index.md",
+      "bytes": 586,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/index.md",
+      "bytes": 13136,
+      "codeBlocks": 4,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/creating-your-first-plugin/index.md",
+      "bytes": 9644,
+      "codeBlocks": 4,
+      "headings": 19,
+      "tableRows": 22,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/dependency-management/index.md",
+      "bytes": 2656,
+      "codeBlocks": 3,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/event-api/index.md",
+      "bytes": 11100,
+      "codeBlocks": 10,
+      "headings": 11,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/getting-started/index.md",
+      "bytes": 672,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/how-to/index.md",
+      "bytes": 476,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/index.md",
+      "bytes": 1460,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/pitfalls/index.md",
+      "bytes": 2699,
+      "codeBlocks": 1,
+      "headings": 3,
+      "tableRows": 11,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/plugin-messaging/index.md",
+      "bytes": 7728,
+      "codeBlocks": 5,
+      "headings": 8,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/porting-plugins-from-velocity-1/index.md",
+      "bytes": 1776,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/scheduler-api/index.md",
+      "bytes": 4105,
+      "codeBlocks": 5,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/velocity-plugin-json/index.md",
+      "bytes": 3320,
+      "codeBlocks": 10,
+      "headings": 3,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "faq/index.md",
+      "bytes": 6210,
+      "codeBlocks": 7,
+      "headings": 12,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "getting-started/index.md",
+      "bytes": 6319,
+      "codeBlocks": 5,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "index.md",
+      "bytes": 1503,
+      "codeBlocks": 0,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "migration/index.md",
+      "bytes": 727,
+      "codeBlocks": 0,
+      "headings": 2,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "player-information-forwarding/index.md",
+      "bytes": 6107,
+      "codeBlocks": 0,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/system-properties/index.md",
+      "bytes": 5193,
+      "codeBlocks": 1,
+      "headings": 22,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "security/index.md",
+      "bytes": 5716,
+      "codeBlocks": 0,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "server-compatibility/index.md",
+      "bytes": 4471,
+      "codeBlocks": 0,
+      "headings": 13,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "tuning/index.md",
+      "bytes": 7592,
+      "codeBlocks": 1,
+      "headings": 12,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "why-velocity/index.md",
+      "bytes": 5213,
+      "codeBlocks": 0,
+      "headings": 9,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    }
+  ],
+  "problems": [],
+  "warnings": [
+    "dev/plugin-messaging/index.md: 1 un-rewritten paper links",
+    "faq/index.md: 1 un-rewritten paper links",
+    "player-information-forwarding/index.md: 1 un-rewritten paper links"
+  ],
+  "missingSource": [],
+  "archiveIssues": []
+}

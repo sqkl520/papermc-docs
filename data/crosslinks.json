@@ -1,0 +1,146 @@
+{
+  "sections": [
+    {
+      "section": "misc",
+      "count": 10,
+      "pages": 8
+    },
+    {
+      "section": "adventure",
+      "count": 15,
+      "pages": 7
+    },
+    {
+      "section": "folia",
+      "count": 2,
+      "pages": 1
+    },
+    {
+      "section": "paper",
+      "count": 3,
+      "pages": 3
+    }
+  ],
+  "details": [
+    {
+      "from": "paper:aikars-flags/index.md",
+      "target": "https://docs.papermc.io/misc/tools/start-script-gen"
+    },
+    {
+      "from": "paper:basic-troubleshooting/index.md",
+      "target": "https://docs.papermc.io/misc/tools/start-script-gen"
+    },
+    {
+      "from": "paper:basic-troubleshooting/index.md",
+      "target": "https://docs.papermc.io/misc/java-install"
+    },
+    {
+      "from": "paper:dev/chat-events/index.md",
+      "target": "https://docs.papermc.io/adventure/text/"
+    },
+    {
+      "from": "paper:dev/component-api/introduction/index.md",
+      "target": "https://docs.papermc.io/adventure"
+    },
+    {
+      "from": "paper:dev/component-api/introduction/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:dev/component-api/introduction/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/api/#getting-started"
+    },
+    {
+      "from": "paper:dev/folia-support/index.md",
+      "target": "https://docs.papermc.io/folia/reference/overview"
+    },
+    {
+      "from": "paper:dev/folia-support/index.md",
+      "target": "https://docs.papermc.io/folia/reference/overview#global-region"
+    },
+    {
+      "from": "paper:dev/how-do-plugins-work/index.md",
+      "target": "https://docs.papermc.io/adventure/"
+    },
+    {
+      "from": "paper:faq/index.md",
+      "target": "https://docs.papermc.io/misc/java-install"
+    },
+    {
+      "from": "paper:getting-started/index.md",
+      "target": "https://docs.papermc.io/misc/java-install"
+    },
+    {
+      "from": "paper:getting-started/index.md",
+      "target": "https://docs.papermc.io/misc/tools/start-script-gen"
+    },
+    {
+      "from": "paper:next-steps/index.md",
+      "target": "https://docs.papermc.io/misc/tools/start-script-gen"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:reference/global-configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/"
+    },
+    {
+      "from": "paper:updating/index.md",
+      "target": "https://docs.papermc.io/misc/downloads-service"
+    },
+    {
+      "from": "velocity:built-in-commands/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/format/"
+    },
+    {
+      "from": "velocity:configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/format/"
+    },
+    {
+      "from": "velocity:configuration/index.md",
+      "target": "https://docs.papermc.io/adventure/minimessage/format/"
+    },
+    {
+      "from": "velocity:dev/creating-your-first-plugin/index.md",
+      "target": "https://docs.papermc.io/misc/java-install"
+    },
+    {
+      "from": "velocity:dev/plugin-messaging/index.md",
+      "target": "https://docs.papermc.io/paper/dev/plugin-messaging#plugin-message-types"
+    },
+    {
+      "from": "velocity:dev/porting-plugins-from-velocity-1/index.md",
+      "target": "https://docs.papermc.io/adventure/"
+    },
+    {
+      "from": "velocity:faq/index.md",
+      "target": "https://docs.papermc.io/paper/reference/system-properties#paperdisablechannellimit"
+    },
+    {
+      "from": "velocity:getting-started/index.md",
+      "target": "https://docs.papermc.io/misc/java-install"
+    },
+    {
+      "from": "velocity:player-information-forwarding/index.md",
+      "target": "https://docs.papermc.io/paper/reference/server-properties#online_mode"
+    }
+  ]
+}

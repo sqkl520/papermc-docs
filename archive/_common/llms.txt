@@ -1,0 +1,219 @@
+# Documentation
+
+> Markdown index for LLMs and agentic documentation tools.
+
+## adventure
+
+- [Adventure](/adventure/index.md): An overview of the Adventure library.
+- [Audiences](/adventure/audiences/index.md): A guide to Adventure Audiences.
+- [Books](/adventure/book/index.md): A guide to Adventure Books.
+- [Boss bars](/adventure/bossbar/index.md): A guide to Adventure BossBars.
+- [Community libraries](/adventure/community-libraries/index.md): Libraries utilizing the Adventure API.
+- [FAQ](/adventure/faq/index.md): Frequently asked questions.
+- [Getting started](/adventure/getting-started/index.md): A guide to getting started with Adventure.
+- [Localization](/adventure/localization/index.md): Utilizing localization in Adventure.
+- [Migration](/adventure/migration/index.md): Moving to the latest Adventure version.
+- [Migrating from Adventure 4.x to 5.x](/adventure/migration/adventure-4.x/index.md): Move from Adventure 4.x to 5.x.
+- [Migrating from the BungeeCord Chat API](/adventure/migration/bungeecord-chat-api/index.md): Move from the BungeeCord Chat API to the Adventure API.
+- [Migrating from text 3.x](/adventure/migration/text-3.x/index.md): Moving from text 3.x to Adventure.
+- [MiniMessage](/adventure/minimessage/index.md): Documentation regarding MiniMessage.
+- [MiniMessage API](/adventure/minimessage/api/index.md): A guide on using MiniMessage in your code.
+- [Dynamic replacements](/adventure/minimessage/dynamic-replacements/index.md): A guide on tag resolvers.
+- [Format](/adventure/minimessage/format/index.md): The MiniMessage format documentation.
+- [MiniMessage translator](/adventure/minimessage/translator/index.md): A guide on the MiniMessage translator.
+- [Platforms](/adventure/platform/index.md): Documentation regarding various implementations of the Adventure API.
+- [Bukkit](/adventure/platform/bukkit/index.md): The Bukkit Adventure implementation.
+- [BungeeCord](/adventure/platform/bungeecord/index.md): The BungeeCord Adventure implementation.
+- [Fabric](/adventure/platform/fabric/index.md): The Fabric Adventure implementation.
+- [Implementing platforms](/adventure/platform/implementing/index.md): Implementing Adventure for your own platform.
+- [Modded (Fabric and NeoForge shared API)](/adventure/platform/modded/index.md): Fabric and NeoForge shared Adventure implementation.
+- [Native support](/adventure/platform/native/index.md): All native supported software.
+- [NeoForge](/adventure/platform/neoforge/index.md): The NeoForge Adventure implementation.
+- [SpongeAPI](/adventure/platform/spongeapi/index.md): The SpongeAPI Adventure implementation.
+- [ViaVersion](/adventure/platform/viaversion/index.md): Using Adventure with ViaVersion.
+- [Resource packs](/adventure/resource-pack/index.md): A guide to using resource packs with Adventure.
+- [Text serializers](/adventure/serializer/index.md): Everything to know about text/component serializers.
+- [ANSI](/adventure/serializer/ansi/index.md): Serializing components to ANSI.
+- [Gson](/adventure/serializer/gson/index.md): Serializing components to JSON with Gson.
+- [JSON](/adventure/serializer/json/index.md): Serializing components to their JSON representation.
+- [Legacy](/adventure/serializer/legacy/index.md): (Deprecated) Serializing components to legacy format.
+- [Plain](/adventure/serializer/plain/index.md): Retrieving plain text content from components.
+- [Sound](/adventure/sound/index.md): A guide to playing sound with Adventure.
+- [Player list/Tab list](/adventure/tablist/index.md): Setting the player list with Adventure.
+- [Text (Chat Components)](/adventure/text/index.md): Everything you need to know about Components.
+- [Titles](/adventure/titles/index.md): Displaying titles to players.
+- [Version history](/adventure/version-history/index.md): Pages dedicated to displaying the latest changelogs!
+
+## folia
+
+- [Folia Documentation](/folia/index.md)
+- [Administration](/folia/admin/index.md)
+- [Reference](/folia/admin/reference/index.md)
+- [Frequently asked questions](/folia/faq/index.md): Questions frequently asked by our community, answered by us!
+- [Overview](/folia/reference/overview/index.md): An overview of how Folia works.
+- [Region logic](/folia/reference/region-logic/index.md): An overview to how Folia's regionizer works.
+
+## misc
+
+- [Miscellaneous](/misc/index.md)
+- [Art assets](/misc/assets/index.md): The official PaperMC and Velocity logomarks and the terms under which you may use them.
+- [Contact us](/misc/contact/index.md): There are many ways to contact us, see here for more information.
+- [Downloads Service](/misc/downloads-service/index.md): Paper provides a downloads service that you can use to access builds.
+- [Hangar auto-publishing](/misc/hangar-publishing/index.md): How to automatically publish your plugin to Hangar on commits.
+- [Installing or updating Java](/misc/java-install/index.md): How to install or update to Java 25 on Linux (apt/rpm), Windows, or Mac.
+- [Tools](/misc/tools/index.md)
+- [Diff viewer](/misc/tools/diff-viewer/index.md): Multi-file rich diff viewer for GitHub and diff/patch files.
+- [Item command converter](/misc/tools/item-command-converter/index.md): A tool to update commands from the old NBT-based item format to item components.
+- [MiniMessage web editor](/misc/tools/minimessage-web-editor/index.md): A web-based editor for creating and previewing MiniMessage-formatted text.
+- [Start script generator](/misc/tools/start-script-gen/index.md): A start script generator for PaperMC projects.
+
+## paper
+
+- [Paper Documentation](/paper/index.md)
+- [Adding plugins](/paper/adding-plugins/index.md): Plugins are the most powerful way to extend the functionality of Paper beyond the configuration files.
+- [Administration](/paper/admin/index.md)
+- [Getting started](/paper/admin/getting-started/index.md)
+- [How-to guides](/paper/admin/how-to/index.md)
+- [Miscellaneous](/paper/admin/misc/index.md)
+- [Reference](/paper/admin/reference/index.md)
+- [Aikar's flags](/paper/aikars-flags/index.md): Aikar's flags are a set of JVM flags designed to improve the performance of your Paper server.
+- [Configuring Anti-Xray](/paper/anti-xray/index.md): Paper ships an obfuscation-based Anti-Xray system by default. Learn how to configure it here.
+- [Basic troubleshooting](/paper/basic-troubleshooting/index.md): This guide will help you diagnose your server's problem before reporting it to PaperMC or the plugin's author.
+- [Contributing](/paper/contributing/index.md)
+- [Events](/paper/contributing/events/index.md): A guide on how to add new events to Paper.
+- [Development](/paper/dev/index.md)
+- [API](/paper/dev/api/index.md)
+- [Command API](/paper/dev/api/command-api/index.md)
+- [Arguments](/paper/dev/api/command-api/arguments/index.md)
+- [Basics](/paper/dev/api/command-api/basics/index.md)
+- [Miscellaneous](/paper/dev/api/command-api/misc/index.md)
+- [Component API](/paper/dev/api/component-api/index.md)
+- [Entity API](/paper/dev/api/entity-api/index.md)
+- [Event API](/paper/dev/api/event-api/index.md)
+- [Inventories](/paper/dev/api/inventories/index.md)
+- [Lifecycle API](/paper/dev/api/lifecycle/index.md)
+- [Chat events](/paper/dev/chat-events/index.md): An outline on AsyncChatEvent and how to handle it.
+- [Adventure](/paper/dev/command-api/arguments/adventure/index.md): Documentation for all arguments returning Adventure API objects.
+- [Entities and players](/paper/dev/command-api/arguments/entity-player/index.md): Player and Entity arguments documentation.
+- [Enums](/paper/dev/command-api/arguments/enums/index.md): Documentation for EntityAnchor, GameMode and similar enum value arguments.
+- [Location](/paper/dev/command-api/arguments/location/index.md): BlockPosition, FinePosition and World argument documentation.
+- [Minecraft-specific](/paper/dev/command-api/arguments/minecraft/index.md): Everything regarding the essential Brigadier arguments.
+- [Paper-specific](/paper/dev/command-api/arguments/paper/index.md): Documentation for arguments handling miscellaneous Paper API values.
+- [Predicates](/paper/dev/command-api/arguments/predicate/index.md): Documentation for arguments that allow value validation.
+- [Registry](/paper/dev/command-api/arguments/registry/index.md): Documentation for arguments retrieving registry values.
+- [Suggestions](/paper/dev/command-api/basics/argument-suggestions/index.md): Documentation about defining custom argument suggestions.
+- [Arguments and literals](/paper/dev/command-api/basics/arguments-and-literals/index.md): An extensive guide to command arguments and literals.
+- [Command trees](/paper/dev/command-api/basics/command-tree/index.md): An extensive guide to building up a command tree.
+- [Custom arguments](/paper/dev/command-api/basics/custom-arguments/index.md): Guide on custom arguments.
+- [Executors](/paper/dev/command-api/basics/executors/index.md): A guide to execution logic for Brigadier commands.
+- [Introduction](/paper/dev/command-api/basics/introduction/index.md): A guide to Paper's Brigadier command API.
+- [Registration](/paper/dev/command-api/basics/registration/index.md): A guide to registering Brigadier commands.
+- [Requirements](/paper/dev/command-api/basics/requirements/index.md): A guide to setting requirements for commands.
+- [Basic commands](/paper/dev/command-api/misc/basic-command/index.md): An overview of a Bukkit-style command declaration using Brigadier.
+- [Comparison](/paper/dev/command-api/misc/comparison-bukkit-brigadier/index.md): A comparison between Brigadier and Bukkit commands.
+- [Audiences](/paper/dev/component-api/audiences/index.md): How to use Adventure's Audiences.
+- [Internationalization](/paper/dev/component-api/i18n/index.md): How to use Adventure's internationalization.
+- [Introduction](/paper/dev/component-api/introduction/index.md): An introduction to how components work.
+- [Signed messages](/paper/dev/component-api/signed-messages/index.md): A guide to working with SignedMessage objects.
+- [Custom events](/paper/dev/custom-events/index.md): A guide to show you how to add custom events to your plugin.
+- [Custom InventoryHolders](/paper/dev/custom-inventory-holder/index.md): How to use a custom InventoryHolder to identify custom inventories.
+- [Data components](/paper/dev/data-component-api/index.md): A guide to the ItemStack data component API.
+- [Debugging your plugin](/paper/dev/debugging/index.md): Debugging is common when writing code. This guide outlines the common ways to debug your plugin.
+- [Dialog API](/paper/dev/dialogs/index.md): A guide to the dialog API introduced in 1.21.7.
+- [Display entities](/paper/dev/display-entities/index.md): The display entity API and how to use it.
+- [Entity Pathfinder API](/paper/dev/entity-pathfinder/index.md): A guide to the Entity Pathfinder API.
+- [Teleportation](/paper/dev/entity-teleport/index.md): The entity teleportation API and how to use it.
+- [Listeners](/paper/dev/event-listeners/index.md): Developer guide for how to listen to the broadcasted events.
+- [Supporting Paper and Folia](/paper/dev/folia-support/index.md): How to support both Folia and Paper within your plugin.
+- [Getting started](/paper/dev/getting-started/index.md)
+- [Paper plugins](/paper/dev/getting-started/paper-plugins/index.md): A development guide for how to write Paper-specific plugins.
+- [Handler lists](/paper/dev/handler-lists/index.md): An explanation to what an event's HandlerList is.
+- [How plugins work](/paper/dev/how-do-plugins-work/index.md): How plugins work in Paper.
+- [Minecraft internals](/paper/dev/internals/index.md): A brief overview of how to use internals in your plugin.
+- [Lifecycle API](/paper/dev/lifecycle/index.md): An introduction to Paper's Lifecycle API.
+- [Datapack discovery](/paper/dev/lifecycle/datapacks/index.md): A guide to including datapacks in your plugin and registering them with the lifecycle API.
+- [Menu Type API](/paper/dev/menu-type-api/index.md): A guide to the Menu Type API.
+- [Miscellaneous](/paper/dev/misc/index.md)
+- [Mob Goal API](/paper/dev/mob-goals/index.md): A guide to the Mob Goal API.
+- [Particles](/paper/dev/particles/index.md): A comprehensive guide to particle spawning.
+- [Persistent data container (PDC)](/paper/dev/pdc/index.md): A guide to the PDC API for storing data.
+- [Plugin configuration](/paper/dev/plugin-configurations/index.md): How to create configuration files for your plugins to customize behavior.
+- [Plugin messaging](/paper/dev/plugin-messaging/index.md): How to communicate with clients or proxies.
+- [plugin.yml](/paper/dev/plugin-yml/index.md): A guide to Bukkit's plugin.yml file.
+- [Project setup](/paper/dev/project-setup/index.md): Step-by-step instructions on how to set up a plugin development environment.
+- [Reading stacktraces](/paper/dev/reading-stacktraces/index.md): Stacktraces are produced by the JVM when an exception occurs. This guide will discuss the basics of how to read them.
+- [Recipes](/paper/dev/recipes/index.md): How to create and manage recipes.
+- [Registries](/paper/dev/registries/index.md): A guide to registries and their modification on Paper.
+- [Roadmap](/paper/dev/roadmap/index.md): Outlines the future intents and plans of the Paper project.
+- [Scheduling](/paper/dev/scheduler/index.md): A guide on how to use BukkitScheduler to run code at specific times.
+- [paperweight-userdev](/paper/dev/userdev/index.md): A guide on how to use the paperweight-userdev Gradle plugin to access internal code.
+- [Using databases](/paper/dev/using-databases/index.md): Databases are the recommended way to store a large amount of data. This guide outlines a few key details.
+- [Frequently asked questions](/paper/faq/index.md): Questions frequently asked by our community, answered by us!
+- [Getting started](/paper/getting-started/index.md): How to get started with downloading and setting up a Paper server.
+- [Migrating to or from Paper](/paper/migration/index.md): It's simple to migrate your server to or from Paper. This page will help you get started.
+- [Bug fixes](/paper/misc/paper-bug-fixes/index.md): An explanation of which Vanilla bugs we fix in Paper.
+- [Update checker](/paper/misc/update-checker/index.md): Documentation for Paper's built-in automatic update checker.
+- [Next steps](/paper/next-steps/index.md): How to proceed after starting your server.
+- [Profiling](/paper/profiling/index.md): How to profile your Paper server.
+- [commands.yml](/paper/reference/bukkit-commands-configuration/index.md): An explanation of Bukkit's commands.yml file.
+- [bukkit.yml](/paper/reference/bukkit-configuration/index.md): An explanation of Bukkit's configuration file.
+- [help.yml](/paper/reference/bukkit-help-configuration/index.md): An explanation of Bukkit's help.yml file.
+- [permissions.yml](/paper/reference/bukkit-permissions-configuration/index.md): An explanation of Bukkit's permissions.yml file.
+- [CLI Arguments](/paper/reference/cli-arguments/index.md): Reference for all CLI arguments Paper recognizes.
+- [Commands](/paper/reference/commands/index.md): Documentation about all commands added by Paper.
+- [Configuration](/paper/reference/configuration/index.md): An overview of Paper's configuration files.
+- [Global configuration](/paper/reference/global-configuration/index.md): An explanation of Paper's global configuration file.
+- [Paper plugins](/paper/reference/paper-plugins/index.md): A guide to the ins and outs of Paper plugins.
+- [Permissions](/paper/reference/permissions/index.md): All permissions available in the default Paper server.
+- [server.properties](/paper/reference/server-properties/index.md): An explanation of Minecraft's server.properties file.
+- [spigot.yml](/paper/reference/spigot-configuration/index.md): An explanation of Spigot's configuration file.
+- [System properties](/paper/reference/system-properties/index.md): Documentation for the system properties and environment variables Paper may check.
+- [Vanilla data files](/paper/reference/vanilla-data-files/index.md): An explanation of Minecraft's data files.
+- [World configuration](/paper/reference/world-configuration/index.md): An explanation of Paper's world configuration file.
+- [Updating](/paper/updating/index.md): Paper has new features and fixes coming every day, this guide explains the updating process.
+- [Vanilla-like experience](/paper/vanilla/index.md): This page lists all changes that result in a different experience than Vanilla.
+
+## velocity
+
+- [Velocity Documentation](/velocity/index.md)
+- [Administration](/velocity/admin/index.md)
+- [Getting started](/velocity/admin/getting-started/index.md)
+- [How-to guides](/velocity/admin/how-to/index.md)
+- [Reference](/velocity/admin/reference/index.md)
+- [Built-in commands](/velocity/built-in-commands/index.md): A list of the built-in commands with explanations.
+- [Comparing with other proxies](/velocity/comparisons-to-other-proxies/index.md): A comparison of Velocity to other proxies.
+- [Configuring Velocity](/velocity/configuration/index.md): Velocity is designed to be easy to configure and this guide will walk you through how to do so.
+- [Libraries used](/velocity/credits/index.md): The credits for all the different libraries used by Velocity.
+- [Development](/velocity/dev/index.md)
+- [API](/velocity/dev/api/index.md)
+- [Velocity plugin basics](/velocity/dev/api-basics/index.md): How to get started with the Velocity API.
+- [Command API](/velocity/dev/command-api/index.md): How to create commands within Velocity.
+- [Creating your first plugin](/velocity/dev/creating-your-first-plugin/index.md): How to create your first plugin with the Velocity API.
+- [Dependency management](/velocity/dev/dependency-management/index.md): How to handle dependencies within your Velocity plugin.
+- [Working with events](/velocity/dev/event-api/index.md): How to listen for events in Velocity.
+- [Getting started](/velocity/dev/getting-started/index.md)
+- [How-to guides](/velocity/dev/how-to/index.md)
+- [Common pitfalls](/velocity/dev/pitfalls/index.md): How to avoid common pitfalls within Velocity.
+- [Plugin messaging](/velocity/dev/plugin-messaging/index.md): How to handle and send plugin messages on Velocity.
+- [Porting your plugin from Velocity 1.x.x](/velocity/dev/porting-plugins-from-velocity-1/index.md): How to port your plugin from Velocity 1.x.x to modern API.
+- [Using the scheduler](/velocity/dev/scheduler-api/index.md): A guide to the Scheduler API within Velocity allowing tasks to be run.
+- [The Velocity plugin file](/velocity/dev/velocity-plugin-json/index.md): A full reference of the velocity-plugin.json file.
+- [Frequently asked questions](/velocity/faq/index.md): Frequently asked Velocity administration questions.
+- [Getting started](/velocity/getting-started/index.md): How to install and set up a minimal configuration of Velocity.
+- [Migration guide](/velocity/migration/index.md): How to migrate your proxy between different Velocity versions.
+- [Configuring player information forwarding](/velocity/player-information-forwarding/index.md): How to configure information forwarding on Velocity.
+- [System properties](/velocity/reference/system-properties/index.md): Documentation for the system properties and environment variables Velocity may check.
+- [Securing your servers](/velocity/security/index.md): An explanation of how to secure your servers.
+- [Server compatibility](/velocity/server-compatibility/index.md): A guide to the server compatibility for Velocity.
+- [Tuning Velocity](/velocity/tuning/index.md): How to tune Velocity to allow for even better performance.
+- [What does Velocity do for me?](/velocity/why-velocity/index.md): An explanation for why you should run Velocity.
+
+## waterfall
+
+- [Waterfall Documentation](/waterfall/index.md)
+- [Configuration](/waterfall/configuration/index.md): Configuration guide for Waterfall.
+- [Getting started](/waterfall/getting-started/index.md): How to get started with running Waterfall.
+
+## Complete docs
+
+- [Full documentation](/llms-full.txt)

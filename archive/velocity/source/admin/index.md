@@ -1,0 +1,18 @@
+# Administration
+
+import PageCards from "/src/components/PageCards.astro";
+
+Welcome to the Velocity administration guide! This guide includes information and tutorials
+regarding the administration of a Velocity proxy.
+
+#### Getting started
+
+<PageCards path="src/content/docs/velocity/admin/getting-started/index.mdx" />
+
+#### How-to guides
+
+<PageCards path="src/content/docs/velocity/admin/how-to/index.mdx" />
+
+#### Reference
+
+<PageCards path="src/content/docs/velocity/admin/reference/index.mdx" />

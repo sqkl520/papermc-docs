@@ -1,0 +1,23 @@
+# Paper Documentation
+
+import { CardGrid, LinkCard } from "@astrojs/starlight/components";
+
+Paper is a Minecraft: Java Edition game server, designed to greatly improve performance and offer more advanced features and API.
+
+<CardGrid>
+  <LinkCard
+    title="Administration"
+    description="Information and tutorials regarding the administration of a Paper server."
+    href="/paper/admin"
+  />
+  <LinkCard
+    title="Development"
+    description="Information and tutorials for developers on how to create and expand on Paper plugins."
+    href="/paper/dev"
+  />
+  <LinkCard
+    title="Contributing"
+    description="Information and tutorials for developers wishing to contribute to the Paper project."
+    href="/paper/contributing"
+  />
+</CardGrid>

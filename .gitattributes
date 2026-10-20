@@ -1,0 +1,98 @@
+# .gitattributes — 换行符、二进制判定与 GitHub 语言统计
+#
+# 目标
+#  1) 文本文件统一以 LF 入库，工作区按平台自动转换；PowerShell 脚本保留 CRLF；
+#  2) **明确把图片/字体/归档打成二进制** —— 否则 `* text=auto` 的启发式判定在
+#     极少数情况下会试图对 .webp/.woff2 做换行规范化，直接损坏文件；
+#  3) 让 GitHub 的语言统计 / diff 视图不要把归档镜像当成"我们写的代码"。
+
+# ---------------------------------------------------------------------------
+# 默认：自动判定文本，LF 入库
+# ---------------------------------------------------------------------------
+* text=auto eol=lf
+
+# ---------------------------------------------------------------------------
+# 明确的文本类型
+# ---------------------------------------------------------------------------
+*.md        text eol=lf
+*.markdown  text eol=lf
+*.txt       text eol=lf
+*.js        text eol=lf
+*.cjs       text eol=lf
+*.mjs       text eol=lf
+*.json      text eol=lf
+*.jsonl     text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.htm       text eol=lf
+*.xml       text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.toml      text eol=lf
+*.svg       text eol=lf
+*.editorconfig text eol=lf
+.gitignore     text eol=lf
+.gitattributes text eol=lf
+
+# Windows 脚本保持 CRLF（PowerShell 5.1 对 LF 脚本的处理有坑）
+*.ps1       text eol=crlf
+*.psm1      text eol=crlf
+*.psd1      text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# ---------------------------------------------------------------------------
+# 二进制：绝不做换行规范化，绝不做 diff
+# ---------------------------------------------------------------------------
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.webp      binary
+*.avif      binary
+*.bmp       binary
+*.ico       binary
+*.icns      binary
+*.tif       binary
+*.tiff      binary
+
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.otf       binary
+*.eot       binary
+
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+*.tgz       binary
+*.tar       binary
+*.7z        binary
+*.rar       binary
+*.jar       binary
+*.class     binary
+*.exe       binary
+*.dll       binary
+*.so        binary
+*.dylib     binary
+
+# ---------------------------------------------------------------------------
+# GitHub 视图调整
+# ---------------------------------------------------------------------------
+# 归档镜像是上游内容，不计入本仓库的语言统计
+archive/**            linguist-vendored=true
+
+# 工具生成的索引与站点产物不计入语言统计
+data/*.json           linguist-generated=true
+search-index.json     linguist-generated=true
+sitemap.xml           linguist-generated=true
+assets/search-index.js linguist-generated=true
+
+# 开发期报告不发布（同时被 .gitignore 忽略，这里只是双保险）
+reports/**            linguist-documentation=true
+
+# 治理文档归类为文档
+README.md             linguist-documentation=true
+CONTRIBUTING.md       linguist-documentation=true
+QUALITY.md            linguist-documentation=true
+THIRD-PARTY-NOTICES.md linguist-documentation=true

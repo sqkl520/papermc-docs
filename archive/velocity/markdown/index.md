@@ -1,0 +1,32 @@
+---
+title: "Velocity Documentation"
+source: "https://docs.papermc.io/velocity/"
+fetched_at: "2026-10-19T21:16:09.302Z"
+---
+
+# Velocity Documentation
+
+Velocity is the ridiculously scalable, flexible Minecraft proxy.
+
+## Getting started
+
+It is simple to get started with Velocity. Get started with our [Getting Started guide](getting-started/index.md).
+
+## I need help
+
+If you need some help with Velocity, please seek help in the following places:
+
+### 📖 These Docs
+
+We have put a lot of effort into documenting Velocity as much as possible with our new website and our coverage will continue to expand. We strongly encourage you to check the sidebar of the docs for relevant resources. Helping yourself using the resources in these docs saves all of us time.
+
+We recommend you visit the [frequently asked questions](faq/index.md) to begin your search. Most common issues with Velocity are answered there.
+
+Please do not be offended if we respond to your question linking back here. Asking us a question already answered in the documentation doesn’t help anyone.
+
+### 💬 Our Discord
+
+If you have searched the docs and didn’t find the answer to your question, then it is time to [join our Discord](https://discord.gg/papermc) to ask your question.
+
+- **[Administration](admin/index.md)** — Information and tutorials regarding the administration of a Velocity proxy.
+- **[Development](dev/index.md)** — Information and tutorials for developers on how to create and expand on Velocity plugins.

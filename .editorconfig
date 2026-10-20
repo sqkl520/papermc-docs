@@ -1,0 +1,48 @@
+# EditorConfig — https://editorconfig.org
+# 让不同编辑器写出的文件在换行符、缩进、编码上保持一致。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown 里行尾两个空格是有意义的硬换行，不能自动删
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{json,yml,yaml}]
+indent_size = 2
+
+[*.{js,cjs,mjs}]
+indent_size = 2
+
+[*.{html,css}]
+indent_size = 2
+
+# Windows 脚本与批处理保持 CRLF（与 .gitattributes 一致）
+[*.{ps1,psm1,psd1,bat,cmd}]
+end_of_line = crlf
+
+# ---------------------------------------------------------------------------
+# 归档镜像：逐字节保真优先
+# 上游文档正文、HTML 快照与元数据不做任何重排 / 补行 / 去尾空格，
+# 任何自动格式化都会让"源/渲染对账"和内容哈希失效。
+# ---------------------------------------------------------------------------
+[archive/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset
+
+# 生成的数据索引与站点产物同理：由脚本输出，不接受编辑器改写
+[data/**]
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+
+# 开发期报告不发布，格式随意
+[reports/**]
+trim_trailing_whitespace = unset

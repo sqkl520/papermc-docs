@@ -1,0 +1,17 @@
+# help.yml
+
+An explanation of Bukkit's help.yml file.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import HelpYML from "/src/config/paper/help.yml?raw";
+import { parse } from "yaml";
+
+:::note
+
+The below YAML shows you the structure for `help.yml`.
+
+Click on a leaf node to view the description for that setting.
+
+:::
+
+<ConfigNode data={parse(HelpYML)} />

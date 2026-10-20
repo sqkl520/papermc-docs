@@ -1,0 +1,7 @@
+# Miscellaneous
+
+import PageCards from "/src/components/PageCards.astro";
+
+Miscellaneous documentation pertaining to Paper.
+
+<PageCards />

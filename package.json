@@ -1,0 +1,32 @@
+{
+  "name": "papermc-docs-offline",
+  "version": "2.0.0",
+  "private": true,
+  "description": "docs.papermc.io 的 Paper + Velocity 离线镜像与静态文档站（URL 与上游逐段一致）",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "crawl:paper": "node tools/crawl.js --out archive/paper --prefix https://docs.papermc.io/paper/ --delay 700 --jitter 400 --concurrency 2 --html --assets --shared-corpus archive/_common",
+    "crawl:velocity": "node tools/crawl.js --out archive/velocity --prefix https://docs.papermc.io/velocity/ --delay 700 --jitter 400 --concurrency 2 --html --assets --shared-corpus archive/_common",
+    "rebuild:paper": "node tools/crawl.js --out archive/paper --prefix https://docs.papermc.io/paper/ --html --assets --from-html --shared-corpus archive/_common",
+    "rebuild:velocity": "node tools/crawl.js --out archive/velocity --prefix https://docs.papermc.io/velocity/ --html --assets --from-html --shared-corpus archive/_common",
+    "source-nav": "node tools/source-nav.js",
+    "build": "node tools/build-site.js",
+    "validate": "node tools/validate.js archive/paper && node tools/validate.js archive/velocity",
+    "check": "node tools/check-site.js",
+    "verify": "node tools/verify-site.js",
+    "url-parity": "node tools/url-parity.js",
+    "privacy": "node tools/privacy-scan.js",
+    "pages-smoke": "node tools/gh-pages-smoke.js",
+    "serve": "node tools/serve.js --port 8787",
+    "live": "node tools/live-smoke.js",
+    "checks": "npm run validate && npm run build && npm run check && npm run verify && npm run url-parity && npm run privacy && npm run pages-smoke"
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0",
+    "highlight.js": "^11.12.0",
+    "marked": "^18.1.1",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}

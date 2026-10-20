@@ -1,0 +1,7 @@
+# API
+
+import PageCards from "/src/components/PageCards.astro";
+
+Guides for working with Velocity's API.
+
+<PageCards />

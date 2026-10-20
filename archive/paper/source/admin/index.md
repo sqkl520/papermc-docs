@@ -1,0 +1,22 @@
+# Administration
+
+import PageCards from "/src/components/PageCards.astro";
+
+Welcome to the Paper administration guide! This guide includes information and tutorials
+regarding the administration of a Paper server.
+
+#### Getting started
+
+<PageCards path="src/content/docs/paper/admin/getting-started/index.mdx" />
+
+#### How-to guides
+
+<PageCards path="src/content/docs/paper/admin/how-to/index.mdx" />
+
+#### Reference
+
+<PageCards path="src/content/docs/paper/admin/reference/index.mdx" />
+
+#### Miscellaneous
+
+<PageCards path="src/content/docs/paper/admin/misc/index.mdx" />

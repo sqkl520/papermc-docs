@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sqkl520.github.io/papermc-docs/sitemap.xml

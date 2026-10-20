@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="auto">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>404 · 页面不存在 · PaperMC 文档库</title>
+<meta name="generator" content="papermc-docs offline library">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<style>
+  :root { color-scheme: light dark; --bg:#f7f7f8; --fg:#1f2328; --mut:#57606a; --line:#d8dee4; --acc:#1d4ed8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0d1117; --fg:#e6edf3; --mut:#9198a1; --line:#30363d; --acc:#7aa2ff; } }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--fg);
+         font:16px/1.7 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif; padding:2rem; }
+  main { max-width:44rem; }
+  .code { font-size:3.5rem; font-weight:700; color:var(--acc); margin:0; }
+  h1 { font-size:1.5rem; margin:.2rem 0 1rem; }
+  a { color:var(--acc); }
+  ul { padding-left:1.2rem; }
+  code { background:color-mix(in srgb, currentColor 12%, transparent); padding:.15em .4em; border-radius:.3em; }
+  .mut { color:var(--mut); }
+</style>
+</head>
+<body>
+<main>
+  <p class="code">404</p>
+  <h1>页面不存在</h1>
+  <p class="mut">请求的路径不在这份离线文档库里。可以回到下面任一入口：</p>
+  <ul>
+    <li><a href="./index.html" data-gh-pages-link="./index.html">文档库首页 —— <code>index.html</code></a>：两个分区入口、全站搜索与统计</li>
+    <li><a href="./all-pages.html" data-gh-pages-link="./all-pages.html">全部文章（135）—— <code>all-pages.html</code></a>：一份带过滤框的扁平清单</li>
+    <li><a href="./snapshots.html" data-gh-pages-link="./snapshots.html">原始快照索引 —— <code>snapshots.html</code></a>：渲染页 / HTML 快照 / 页面源 Markdown 对照</li>
+  </ul>
+  <p>正文页路径与上游 <a class="ext" href="https://docs.papermc.io/" target="_blank" rel="noopener">docs.papermc.io</a> 逐段一致，例如上游 <code>/paper/dev/command-api/basics/introduction/</code> 对应本站 <code>paper/dev/command-api/basics/introduction/index.html</code>。</p>
+  <p class="mut">内容版权归 PaperMC 及其贡献者所有（BSD-2-Clause）。</p>
+</main>
+<script>
+/* GitHub Pages project pages：站点挂在 /<repo>/ 子路径下。
+   深层无效路径被回退到 404.html 时，相对链接 ./index.html 会解析成 /<repo>/aaa/bbb/index.html —— 仍是 404。
+   这里按子路径把它们改写成 /<repo>/index.html 这样的绝对路径。 */
+(function () {
+  var p = location.pathname;
+  var seg = p.split("/").filter(Boolean);
+  var base = seg.length > 1 ? "/" + seg[0] + "/" : "/";
+  var links = document.querySelectorAll("[data-gh-pages-link]");
+  for (var i = 0; i < links.length; i++) {
+    var rel = links[i].getAttribute("data-gh-pages-link") || "";
+    links[i].setAttribute("href", base + rel.replace(/^\.\//, ""));
+  }
+})();
+</script>
+</body>
+</html>

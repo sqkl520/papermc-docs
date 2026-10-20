@@ -1,0 +1,223 @@
+{
+  "archive/paper": {
+    "pages": 103,
+    "totalBytes": 685073,
+    "counts": {
+      "fenced code block": 742,
+      "info string with lang": 348,
+      "inline code": 3390,
+      "link (relative md)": 323,
+      "link (external)": 609,
+      "blockquote": 523,
+      "h1": 108,
+      "h2": 272,
+      "h3": 296,
+      "h4+": 176,
+      "hr": 206,
+      "github alert": 169,
+      "link (absolute docs)": 21,
+      "info string with title=": 105,
+      "raw <details>": 23,
+      "raw <summary>": 23,
+      "image": 79,
+      "sup/sub tag": 1,
+      "deep indent list (>=3 levels)": 559,
+      "math inline $": 2,
+      "gfm table header": 285,
+      "math $$": 1
+    },
+    "examples": {
+      "fenced code block": {
+        "file": "adding-plugins/index.md",
+        "sample": "```"
+      },
+      "info string with lang": {
+        "file": "adding-plugins/index.md",
+        "sample": "```log"
+      },
+      "inline code": {
+        "file": "adding-plugins/index.md",
+        "sample": "`Paper plugin`"
+      },
+      "link (relative md)": {
+        "file": "adding-plugins/index.md",
+        "sample": "](../updating/index.md#step-2-update-plugins)"
+      },
+      "link (external)": {
+        "file": "adding-plugins/index.md",
+        "sample": "](https://hangar.papermc.io/)"
+      },
+      "blockquote": {
+        "file": "adding-plugins/index.md",
+        "sample": "> "
+      },
+      "h1": {
+        "file": "adding-plugins/index.md",
+        "sample": "# "
+      },
+      "h2": {
+        "file": "adding-plugins/index.md",
+        "sample": "## "
+      },
+      "h3": {
+        "file": "adding-plugins/index.md",
+        "sample": "### "
+      },
+      "h4+": {
+        "file": "adding-plugins/index.md",
+        "sample": "#### "
+      },
+      "hr": {
+        "file": "adding-plugins/index.md",
+        "sample": "---"
+      },
+      "github alert": {
+        "file": "aikars-flags/index.md",
+        "sample": "> [!CAUTION]"
+      },
+      "link (absolute docs)": {
+        "file": "aikars-flags/index.md",
+        "sample": "](https://docs.papermc.io/misc/tools/start-script-gen)"
+      },
+      "info string with title=": {
+        "file": "anti-xray/index.md",
+        "sample": "```yaml title=\""
+      },
+      "raw <details>": {
+        "file": "anti-xray/index.md",
+        "sample": "<details>"
+      },
+      "raw <summary>": {
+        "file": "anti-xray/index.md",
+        "sample": "<summary>"
+      },
+      "image": {
+        "file": "anti-xray/index.md",
+        "sample": "![Overworld Anti-Xray Comparison](../../assets/docs.papermc.io/_astro/anti-xray-overworld.CWzmAZnN_1BCGx4.webp"
+      },
+      "sup/sub tag": {
+        "file": "anti-xray/index.md",
+        "sample": "<sup>"
+      },
+      "deep indent list (>=3 levels)": {
+        "file": "anti-xray/index.md",
+        "sample": " - "
+      },
+      "math inline $": {
+        "file": "basic-troubleshooting/index.md",
+        "sample": "$main$"
+      },
+      "gfm table header": {
+        "file": "dev/command-api/arguments/minecraft/index.md",
+        "sample": "| Argument Reference | Resolved Type |"
+      },
+      "math $$": {
+        "file": "reference/bukkit-commands-configuration/index.md",
+        "sample": "$$<n>` is replaced by the n”th argument, 1-indexed, failing if the n”th argument is not present. - `$<n>-` is "
+      }
+    }
+  },
+  "archive/velocity": {
+    "pages": 32,
+    "totalBytes": 141136,
+    "counts": {
+      "link (relative md)": 62,
+      "h1": 34,
+      "hr": 64,
+      "h4+": 31,
+      "github alert": 26,
+      "inline code": 374,
+      "link (absolute docs)": 9,
+      "blockquote": 75,
+      "h2": 88,
+      "h3": 60,
+      "gfm table header": 114,
+      "image": 10,
+      "link (external)": 173,
+      "fenced code block": 120,
+      "info string with title=": 15,
+      "info string with lang": 52,
+      "html comment": 2,
+      "sup/sub tag": 1,
+      "deep indent list (>=3 levels)": 2
+    },
+    "examples": {
+      "link (relative md)": {
+        "file": "admin/getting-started/index.md",
+        "sample": "](../../getting-started/index.md)"
+      },
+      "h1": {
+        "file": "admin/getting-started/index.md",
+        "sample": "# "
+      },
+      "hr": {
+        "file": "admin/getting-started/index.md",
+        "sample": "---"
+      },
+      "h4+": {
+        "file": "admin/index.md",
+        "sample": "#### "
+      },
+      "github alert": {
+        "file": "built-in-commands/index.md",
+        "sample": "> [!CAUTION]"
+      },
+      "inline code": {
+        "file": "built-in-commands/index.md",
+        "sample": "`/velocity`"
+      },
+      "link (absolute docs)": {
+        "file": "built-in-commands/index.md",
+        "sample": "](https://docs.papermc.io/adventure/minimessage/format/)"
+      },
+      "blockquote": {
+        "file": "built-in-commands/index.md",
+        "sample": "> "
+      },
+      "h2": {
+        "file": "built-in-commands/index.md",
+        "sample": "## "
+      },
+      "h3": {
+        "file": "built-in-commands/index.md",
+        "sample": "### "
+      },
+      "gfm table header": {
+        "file": "comparisons-to-other-proxies/index.md",
+        "sample": "| Feature | BungeeCord | Waterfall | Velocity |"
+      },
+      "image": {
+        "file": "comparisons-to-other-proxies/index.md",
+        "sample": "![xkcd #1172](https://imgs.xkcd.com/comics/workflow.png)"
+      },
+      "link (external)": {
+        "file": "comparisons-to-other-proxies/index.md",
+        "sample": "](https://forums.papermc.io/threads/1088/)"
+      },
+      "fenced code block": {
+        "file": "dev/api-basics/index.md",
+        "sample": "```"
+      },
+      "info string with title=": {
+        "file": "dev/api-basics/index.md",
+        "sample": "```java title=\""
+      },
+      "info string with lang": {
+        "file": "dev/api-basics/index.md",
+        "sample": "```java"
+      },
+      "html comment": {
+        "file": "dev/creating-your-first-plugin/index.md",
+        "sample": "<!--"
+      },
+      "sup/sub tag": {
+        "file": "dev/pitfalls/index.md",
+        "sample": "<sup>"
+      },
+      "deep indent list (>=3 levels)": {
+        "file": "dev/velocity-plugin-json/index.md",
+        "sample": " - "
+      }
+    }
+  }
+}

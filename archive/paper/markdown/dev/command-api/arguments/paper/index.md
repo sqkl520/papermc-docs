@@ -1,0 +1,166 @@
+---
+title: "Paper-specific"
+source: "https://docs.papermc.io/paper/dev/command-api/arguments/paper/"
+description: "Documentation for arguments handling miscellaneous Paper API values."
+fetched_at: "2026-10-19T21:15:58.063Z"
+---
+
+# Paper-specific
+
+The arguments in this section return objects frequently used in Paper API.
+
+## Block state argument
+
+The block state argument can be used for getting a block type and explicit, associated data.
+
+### Example usage
+
+```java
+Commands.argument("state", ArgumentTypes.blockState())
+    .executes(context -> {
+        final BlockState state = context.getArgument("state", BlockState.class);
+        // will be an unplaced snapshot which needs to be copied in order to be used later
+
+
+        context.getSource().getSender().sendRichMessage("You specified a <block>!",
+            Placeholder.component("block", Component.translatable(state.getType()))
+        );
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.
+
+## Item argument
+
+The item argument is the way to retrieve an [item](https://jd.papermc.io/paper/org/bukkit/inventory/ItemStack.html) following the same argument format as the Vanilla `/give <player> <item> [<amount>]` command as its second argument. The user may also define components to further customize the `ItemStack`. If you only require an item type, you should instead check out the [registry arguments](../registry/index.md).
+
+### Example usage
+
+```java
+Commands.argument("item", ArgumentTypes.itemStack())
+    .executes(context -> {
+        final ItemStack item = context.getArgument("item", ItemStack.class);
+        final Player player = context.getSource().getPlayerOrThrow();
+
+
+        player.getInventory().addItem(item);
+        context.getSource().getSender().sendRichMessage("<green>Successfully gave <player> a <item>",
+            Placeholder.component("player", player.displayName()),
+            Placeholder.component("item", Component.translatable(item).hoverEvent(item))
+        );
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.
+
+## NamespacedKey argument
+
+This argument allows the user to provide any artificial (namespaced) key. The return value of this argument is a [`NamespacedKey`](https://jd.papermc.io/paper/org/bukkit/NamespacedKey.html), which makes it useful when dealing with Bukkit API.
+
+### Example usage
+
+```java
+Commands.argument("key", ArgumentTypes.namespacedKey())
+    .executes(context -> {
+        final NamespacedKey key = context.getArgument("key", NamespacedKey.class);
+
+
+        context.getSource().getSender().sendRichMessage("You put in <aqua><key></aqua>!",
+            Placeholder.unparsed("key", key.toString())
+        );
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.
+
+## Time argument
+
+The time argument allows the user to define a time frame, similar to the Vanilla `/time set <time>` time argument. The user has 4 possible ways of inputting time:
+
+-   Just as a number: This resolves to as usual ticks (`/timearg 1` —> 1 tick)
+-   With a `t` suffix: This also resolves to ticks (`/timearg 1t` —> 1 tick)
+-   With a `s` suffix: This resolves to seconds, meaning multiplying the first number by 20. (`/timearg 1s` —> 20 ticks)
+-   With a `d` suffix. This resolves as in-game days, meaning multiplying the first number by 24000. (`/timearg 1d` —> 24000 ticks)
+
+If you choose to use this argument, it is advised to explain to the users what these suffixes mean, as real time (`s` suffix) is mixed with in-game time (`t` and `d` suffix).
+
+The `ArgumentTypes.time()` method has one additional overload: `ArgumentTypes.time(int minTime)`. This allows to set the minimum required amount of ticks this argument has to resolve to. By default this value is set to 0.
+
+### Example usage
+
+```java
+Commands.argument("time", ArgumentTypes.time())
+    .executes(context -> {
+        final int timeInTicks = IntegerArgumentType.getInteger(context, "time");
+        final Player player = context.getSource().getPlayerOrThrow();
+
+
+        player.getWorld().setFullTime(player.getWorld().getFullTime() + timeInTicks);
+        player.sendPlainMessage("Moved time forward by " + timeInTicks + " ticks!");
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.
+
+## UUID argument
+
+The UUID argument allows the user to input a valid UUID. You can retrieve that value as a `UUID` object, which is used in various places, like `Bukkit.getOfflinePlayer(UUID)`. This argument is not very user-friendly, which is why it is suggested to only use this as a moderation or debug argument (and at least providing suggestions completion). For user input regarding offline player retrieval, the [player profiles argument](../entity-player/index.md#player-profiles-argument) is preferred, as it allows by-name lookup.
+
+### Example usage - Lookup command
+
+```java
+Commands.argument("uuid", ArgumentTypes.uuid())
+    .executes(context -> {
+        final UUID uuid = context.getArgument("uuid", UUID.class);
+        final OfflinePlayer result = Bukkit.getOfflinePlayer(uuid);
+
+
+        context.getSource().getSender().sendRichMessage("Has <aqua><uuid></aqua> played before: <result:'<green>true</green>':'<red>false</red>'>",
+            Placeholder.unparsed("uuid", uuid.toString()),
+            Formatter.booleanChoice("result", result.hasPlayedBefore())
+        );
+
+
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.
+
+## Objective criteria argument
+
+You can retrieve the argument value as a `Criteria`, which can be used with `Scoreboard` objects.
+
+### Example usage
+
+```java
+Commands.argument("criteria", ArgumentTypes.objectiveCriteria())
+    .executes(context -> {
+        final Criteria criteria = context.getArgument("criteria", Criteria.class);
+
+
+        context.getSource().getSender().sendRichMessage("Default render type for <criteria>: <render_type>",
+            Placeholder.unparsed("criteria", criteria.getName()),
+            Placeholder.unparsed("render_type", criteria.getDefaultRenderType().name())
+        );
+        return Command.SINGLE_SUCCESS;
+    })
+```
+
+### In-game preview
+
+ Your device does not support video playback.

@@ -1,0 +1,7 @@
+# How-to guides
+
+import PageCards from "/src/components/PageCards.astro";
+
+How-to guides for developing your Velocity plugin.
+
+<PageCards />

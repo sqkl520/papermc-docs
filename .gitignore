@@ -1,0 +1,119 @@
+# ============================================================================
+#  papermc-docs — GitHub Pages 发布用 .gitignore
+#
+#  设计目标
+#    1) 仓库只装「离线站点 + 归档镜像 + 工具链」，不含依赖、日志、开发期报告、
+#       临时产物；开发期报告（reports/）只服务开发过程，不对外发布；
+#    2) archive/** 与站点产物目录（assets/**、paper/**、velocity/**）的内容
+#       必须是跟踪对象：站点页面用相对路径直接引用 archive/<section>/assets/…
+#       里的图片，整仓部署才不会断图；
+#    3) .nojekyll 必须进仓库，否则 GitHub Pages 的 Jekyll 构建会吞掉
+#       archive/_common、archive/*/_corpus、assets/docs.papermc.io/_astro
+#       这类以下划线开头的目录。
+#
+#  规则顺序的两个坑（都已规避）
+#    · 否定规则必须排在所有忽略规则之后，否则不生效；
+#    · 但否定规则「后写」也意味着它会盖掉前面的忽略规则 —— 所以归档区用
+#      「按扩展名」保留（!archive/**/*.md …），而不是写 !archive/**。
+#      若写成 !archive/**，archive/paper/crawl.log 会被重新拉回仓库。
+#      文件末尾的「收尾重申」再用 *.log / .tmp-* / *.tmp 兜一次底。
+#
+#  自检（git 2.54，在仓库根执行）
+#    git check-ignore -v node_modules/undici/package.json    # 应命中
+#    git check-ignore -v reports/plan.md                     # 应命中
+#    git check-ignore -v archive/paper/crawl.log             # 应命中（日志不发布）
+#    git check-ignore -v archive/paper/markdown/index.md     # 应无输出（不忽略）
+#    git check-ignore -v data/site-manifest.json             # 应无输出（不忽略）
+#    git check-ignore -v tools/privacy-scan.js               # 应无输出（不忽略）
+#    git check-ignore -v .nojekyll                           # 应无输出（不忽略）
+#    git check-ignore -v index.html                          # 应无输出（不忽略）
+#
+#  隐私自检
+#    node tools/privacy-scan.js        # 必须 0 处「必须修复」，退出码 0
+#      该扫描器用同一套 .gitignore 语义枚举文件，可直接看到「会被跟踪的文件集」
+# ============================================================================
+
+# ---------- 依赖 / 包管理器缓存（Pages 构建与部署都不需要）----------
+node_modules/
+.pnpm-store/
+.npm/
+yarn.lock.bak
+
+# ---------- 临时产物 ----------
+.tmp-*
+*.tmp
+
+# ---------- 日志 ----------
+*.log
+crawl-*.log
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- 开发期报告（不发布）----------
+reports/
+
+# ---------- 操作系统杂项 ----------
+.DS_Store
+._*
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---------- 编辑器 / IDE ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ---------- 过渡期 ----------
+#  library/ 是旧站点产物，正被迁移到根目录的 paper/ + velocity/ + assets/。
+#  迁移完成、确认无残留引用后再取消注释。
+# library/
+
+# ============================================================================
+#  显式保留区（否定规则必须排在所有忽略规则之后）
+#  这里是「双保险」：即使日后有人加了全局的 *.md / *.json / *.webp 忽略，
+#  站点内容、归档镜像与工具链也不会被漏掉。
+#  archive/** 按扩展名逐个保留 —— 不做 !archive/** 整目录保留（见文件头说明）。
+#  data/ tools/ assets/ paper/ velocity/ 上方没有任何规则会整目录排除，
+#  下列否定只是防未来误加全局规则的保险。
+# ============================================================================
+!archive/**/*.md
+!archive/**/*.html
+!archive/**/*.json
+!archive/**/*.txt
+!archive/**/*.yml
+!archive/**/*.yaml
+!archive/**/*.css
+!archive/**/*.js
+!archive/**/*.svg
+!archive/**/*.png
+!archive/**/*.jpg
+!archive/**/*.jpeg
+!archive/**/*.gif
+!archive/**/*.webp
+!archive/**/*.ico
+!archive/**/*.woff
+!archive/**/*.woff2
+!data/**
+!tools/**
+!assets/**
+!paper/**
+!velocity/**
+!.nojekyll
+!.gitignore
+!.gitattributes
+!.editorconfig
+!index.html
+!404.html
+!package.json
+
+# ============================================================================
+#  收尾重申（必须放在否定规则之后）
+#  否定规则只用来保护站点内容，不能把开发期垃圾重新拉回仓库。
+# ============================================================================
+.tmp-*
+*.tmp
+*.log

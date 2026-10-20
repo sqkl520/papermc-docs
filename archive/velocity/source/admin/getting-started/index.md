@@ -1,0 +1,7 @@
+# Getting started
+
+import PageCards from "/src/components/PageCards.astro";
+
+Guides for getting started with running a Velocity proxy.
+
+<PageCards />

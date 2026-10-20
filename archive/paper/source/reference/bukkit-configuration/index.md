@@ -1,0 +1,17 @@
+# bukkit.yml
+
+An explanation of Bukkit's configuration file.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import BukkitYML from "/src/config/paper/bukkit.yml?raw";
+import { parse } from "yaml";
+
+:::note
+
+The below YAML shows you the structure and default values for `bukkit.yml`.
+
+Click on a leaf node to view the description for that setting.
+
+:::
+
+<ConfigNode data={parse(BukkitYML)} />

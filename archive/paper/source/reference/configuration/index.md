@@ -1,0 +1,134 @@
+# Configuration
+
+An overview of Paper's configuration files.
+
+import { FileTree } from "@astrojs/starlight/components";
+
+:::note
+
+Many of our files have been comprehensively documented. If this is the case, they will offer a link to their page.
+If this is not the case, they offer a brief explanation to what they are.
+
+:::
+
+<FileTree>
+  - logs/ all logs for the server
+    - latest.log the most recent log
+    - \<yyyy-MM-dd\>-\<run-id\>.log.gz old logs compressed with gzip
+  - config/
+    - [paper-global.yml](../global-configuration/index.md)
+    - [paper-world-defaults.yml](../world-configuration/index.md)
+  - plugins/ you can place your plugin JARs here
+    - .paper-remapped/ used to store remapped plugin JARs, learn more [here](https://forums.papermc.io/threads/important-dev-psa-future-removal-of-cb-package-relocation.1106/)
+    - bStats/
+      - config.yml stores configuration for bStats plugin metrics
+    - spark/ plugin folder for the bundled spark profiler
+      - [config.json](https://spark.lucko.me/docs/Configuration) the main spark config file
+  - world/dimensions/\<namespace\>/\<key\>/
+    - [paper-world.yml](#per-world-values) stores [configuration values](../world-configuration/index.md) that apply only to the world with the key `namespace:key`
+  - [banned-ips.json](../vanilla-data-files/index.md#banned-ipsjson) stores IP addresses banned from the server
+  - [banned-players.json](../vanilla-data-files/index.md#banned-playersjson) stores players banned from the server
+  - [bukkit.yml](../bukkit-configuration/index.md)
+  - [commands.yml](../bukkit-commands-configuration/index.md)
+  - [eula.txt](../vanilla-data-files/index.md#eulatxt) stores the EULA consent status
+  - [help.yml](../bukkit-help-configuration/index.md) stores configuration for the `/help` command
+  - [ops.json](../vanilla-data-files/index.md#opsjson) stores information about players with operator status
+  - [permissions.yml](../bukkit-permissions-configuration/index.md) stores additional permission definitions
+  - [server.properties](../server-properties/index.md)
+  - [spigot.yml](../spigot-configuration/index.md)
+  - usercache.json caches players' Mojang API data, e.g. their head textures
+  - [whitelist.json](../vanilla-data-files/index.md#whitelistjson) stores information about whitelisted players
+</FileTree>
+
+## Per-world configuration
+
+One of the most powerful yet least understood features of the Paper configuration is setting
+configuration options per world. While you cannot override every config option per world,
+everything stored within `paper-world-defaults.yml` can be.
+
+### Default values
+
+Paper sets no per-world overrides out of the box, storing all default values in
+`config/paper-world-defaults.yml`. Everything in this file can be overridden per world but isn't by
+default. Changing something in `paper-world-defaults.yml` will change the value for all worlds where
+you have not manually overridden it.
+
+### Per-world values
+
+To set a value for a specific world, edit `paper-world.yml` within the world folder. For example, if
+you wanted to enable `lootables.auto-replenish` for a world with the key `custom:resource`, you would edit
+`paper-world.yml` within the `world/dimensions/custom/resource` folder like so:
+
+```yaml title=world/dimensions/custom/resource/paper-world.yml {3-4}
+_version: 28
+
+lootables:
+  auto-replenish: true
+```
+
+Nothing but `_version` is set in `paper-world.yml` configuration files by default. In order to
+override the default for an option, you must manually add it by copying from
+`paper-world-defaults.yml`.
+
+### Inheritance
+
+All configuration not explicitly defined for a world is inherited from `paper-world-defaults.yml`.
+This means that there is no need to repeat yourself between the `paper-world-defaults.yml` and each
+individual `paper-world.yml`. You **do not need to and should not** copy the entire
+`paper-world-default.yml` file into each `paper-world.yml` file you want to modify. Only copy the
+exact value you want to change.
+
+For a more complex real-world example: setting both different `spawn-limits` and `auto-replenish`
+in two worlds.
+
+```yaml title="paper-world-defaults.yml"
+lootables:
+  auto-replenish: true
+entities:
+  spawning:
+    spawn-limits:
+      ambient: 70
+      axolotls: 10
+      creature: 15
+      monster: 5
+      underground_water_creature: 5
+      water_ambient: 5
+      water_creature: 20
+```
+
+```yaml title="world/dimensions/minecraft/the_nether/paper-world.yml"
+entities:
+  spawning:
+    spawn-limits:
+      monster: 90
+```
+
+```yaml title="world/dimensions/custom/resource/paper-world.yml"
+lootables:
+  auto-replenish: false
+entities:
+  spawning:
+    spawn-limits:
+      axolotls: 8
+      creature: 15
+      monster: 2
+```
+
+This example demonstrates the concept of inheritance. For each world in `world/dimensions`, this is the effective
+configuration which will be applied:
+
+| Configuration Key                                           | minecraft/overworld | minecraft/the_nether | minecraft/the_end | custom/resource |
+|-------------------------------------------------------------|---------------------|----------------------|-------------------|-----------------|
+| `lootables.auto-replenish`                                  | `true`              | `true`               | `true`            | `false`         |
+| `entities.spawning.spawn-limits.ambient`                    | `15`                | `15`                 | `15`              | `15`            |
+| `entities.spawning.spawn-limits.axolotls`                   | `5`                 | `5`                  | `5`               | `8`             |
+| `entities.spawning.spawn-limits.creature`                   | `10`                | `10`                 | `10`              | `15`            |
+| `entities.spawning.spawn-limits.monster`                    | `70`                | `90`                 | `70`              | `2`             |
+| `entities.spawning.spawn-limits.underground_water_creature` | `5`                 | `5`                  | `5`               | `5`             |
+| `entities.spawning.spawn-limits.water_ambient`              | `20`                | `20`                 | `20`              | `20`            |
+| `entities.spawning.spawn-limits.water_creature`             | `5`                 | `5`                  | `5`               | `5`             |
+
+Notice that `world/dimensions/minecraft/the_end/paper-world.yml` was never modified. Because of this, it inherits all the
+configuration options from `config/paper-world-defaults.yml`. Additionally, `auto-replenish` was
+only disabled in `world/dimensions/custom/resource/paper-world.yml` because in `config/paper-world-defaults.yml`,
+`auto-replenish` is set to `true`.

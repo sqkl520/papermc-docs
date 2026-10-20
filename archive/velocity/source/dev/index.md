@@ -1,0 +1,18 @@
+# Development
+
+import PageCards from "/src/components/PageCards.astro";
+
+Welcome to the Velocity development guide! This guide includes information and tutorials for
+developers to create and expand on Velocity plugins.
+
+#### Getting started
+
+<PageCards path="src/content/docs/velocity/dev/getting-started/index.mdx" />
+
+#### How-to guides
+
+<PageCards path="src/content/docs/velocity/dev/how-to/index.mdx" />
+
+#### API
+
+<PageCards path="src/content/docs/velocity/dev/api/index.mdx" />

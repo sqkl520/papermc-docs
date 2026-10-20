@@ -1,0 +1,1120 @@
+{
+  "generated_at": "2026-10-20T15:45:26.827Z",
+  "method": "extracted from Starlight sidebar (ul.top-level) of the archived HTML snapshots",
+  "extracted_from": [
+    "archive/paper/html/index.html",
+    "archive/paper/html/admin/getting-started/index.html",
+    "archive/paper/html/dev/getting-started/index.html",
+    "archive/paper/html/dev/command-api/basics/introduction/index.html",
+    "archive/paper/html/reference/configuration/index.html",
+    "archive/paper/html/misc/update-checker/index.html",
+    "archive/paper/html/contributing/events/index.html",
+    "archive/velocity/html/index.html",
+    "archive/velocity/html/admin/getting-started/index.html",
+    "archive/velocity/html/dev/getting-started/index.html",
+    "archive/velocity/html/dev/api/index.html",
+    "archive/velocity/html/reference/system-properties/index.html",
+    "archive/velocity/html/getting-started/index.html"
+  ],
+  "consistent_across_pages": true,
+  "sections": [
+    {
+      "id": "paper",
+      "title": "Paper",
+      "sourceHref": "/paper/",
+      "pageCount": 103,
+      "groups": [
+        {
+          "kind": "group",
+          "label": "Administration",
+          "children": [
+            {
+              "kind": "group",
+              "label": "Getting started",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Getting started",
+                  "href": "/paper/getting-started/",
+                  "rel": "getting-started/index",
+                  "title": "Getting started"
+                },
+                {
+                  "kind": "page",
+                  "label": "Adding plugins",
+                  "href": "/paper/adding-plugins/",
+                  "rel": "adding-plugins/index",
+                  "title": "Adding plugins"
+                },
+                {
+                  "kind": "page",
+                  "label": "Migrating to or from Paper",
+                  "href": "/paper/migration/",
+                  "rel": "migration/index",
+                  "title": "Migrating to or from Paper"
+                },
+                {
+                  "kind": "page",
+                  "label": "Next steps",
+                  "href": "/paper/next-steps/",
+                  "rel": "next-steps/index",
+                  "title": "Next steps"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "How-to guides",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Aikar's flags",
+                  "href": "/paper/aikars-flags/",
+                  "rel": "aikars-flags/index",
+                  "title": "Aikar's flags"
+                },
+                {
+                  "kind": "page",
+                  "label": "Configuring Anti-Xray",
+                  "href": "/paper/anti-xray/",
+                  "rel": "anti-xray/index",
+                  "title": "Configuring Anti-Xray"
+                },
+                {
+                  "kind": "page",
+                  "label": "Basic troubleshooting",
+                  "href": "/paper/basic-troubleshooting/",
+                  "rel": "basic-troubleshooting/index",
+                  "title": "Basic troubleshooting"
+                },
+                {
+                  "kind": "page",
+                  "label": "Profiling",
+                  "href": "/paper/profiling/",
+                  "rel": "profiling/index",
+                  "title": "Profiling"
+                },
+                {
+                  "kind": "page",
+                  "label": "Updating",
+                  "href": "/paper/updating/",
+                  "rel": "updating/index",
+                  "title": "Updating"
+                },
+                {
+                  "kind": "page",
+                  "label": "Vanilla-like experience",
+                  "href": "/paper/vanilla/",
+                  "rel": "vanilla/index",
+                  "title": "Vanilla-like experience"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "Reference",
+              "children": [
+                {
+                  "kind": "group",
+                  "label": "Configuration",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Configuration",
+                      "href": "/paper/reference/configuration/",
+                      "rel": "reference/configuration/index",
+                      "title": "Configuration"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Global configuration",
+                      "href": "/paper/reference/global-configuration/",
+                      "rel": "reference/global-configuration/index",
+                      "title": "Global configuration"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "World configuration",
+                      "href": "/paper/reference/world-configuration/",
+                      "rel": "reference/world-configuration/index",
+                      "title": "World configuration"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "bukkit.yml",
+                      "href": "/paper/reference/bukkit-configuration/",
+                      "rel": "reference/bukkit-configuration/index",
+                      "title": "bukkit.yml"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "spigot.yml",
+                      "href": "/paper/reference/spigot-configuration/",
+                      "rel": "reference/spigot-configuration/index",
+                      "title": "spigot.yml"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "commands.yml",
+                      "href": "/paper/reference/bukkit-commands-configuration/",
+                      "rel": "reference/bukkit-commands-configuration/index",
+                      "title": "commands.yml"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "permissions.yml",
+                      "href": "/paper/reference/bukkit-permissions-configuration/",
+                      "rel": "reference/bukkit-permissions-configuration/index",
+                      "title": "permissions.yml"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "help.yml",
+                      "href": "/paper/reference/bukkit-help-configuration/",
+                      "rel": "reference/bukkit-help-configuration/index",
+                      "title": "help.yml"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "server.properties",
+                      "href": "/paper/reference/server-properties/",
+                      "rel": "reference/server-properties/index",
+                      "title": "server.properties"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Vanilla data files",
+                      "href": "/paper/reference/vanilla-data-files/",
+                      "rel": "reference/vanilla-data-files/index",
+                      "title": "Vanilla data files"
+                    }
+                  ]
+                },
+                {
+                  "kind": "page",
+                  "label": "Paper plugins",
+                  "href": "/paper/reference/paper-plugins/",
+                  "rel": "reference/paper-plugins/index",
+                  "title": "Paper plugins"
+                },
+                {
+                  "kind": "page",
+                  "label": "Commands",
+                  "href": "/paper/reference/commands/",
+                  "rel": "reference/commands/index",
+                  "title": "Commands"
+                },
+                {
+                  "kind": "page",
+                  "label": "System properties",
+                  "href": "/paper/reference/system-properties/",
+                  "rel": "reference/system-properties/index",
+                  "title": "System properties"
+                },
+                {
+                  "kind": "page",
+                  "label": "CLI Arguments",
+                  "href": "/paper/reference/cli-arguments/",
+                  "rel": "reference/cli-arguments/index",
+                  "title": "CLI Arguments"
+                },
+                {
+                  "kind": "page",
+                  "label": "Permissions",
+                  "href": "/paper/reference/permissions/",
+                  "rel": "reference/permissions/index",
+                  "title": "Permissions"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "Miscellaneous",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Update checker",
+                  "href": "/paper/misc/update-checker/",
+                  "rel": "misc/update-checker/index",
+                  "title": "Update checker"
+                },
+                {
+                  "kind": "page",
+                  "label": "Bug fixes",
+                  "href": "/paper/misc/paper-bug-fixes/",
+                  "rel": "misc/paper-bug-fixes/index",
+                  "title": "Bug fixes"
+                },
+                {
+                  "kind": "page",
+                  "label": "Frequently asked questions",
+                  "href": "/paper/faq/",
+                  "rel": "faq/index",
+                  "title": "Frequently asked questions"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "label": "Development",
+          "children": [
+            {
+              "kind": "group",
+              "label": "Getting started",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Project setup",
+                  "href": "/paper/dev/project-setup/",
+                  "rel": "dev/project-setup/index",
+                  "title": "Project setup"
+                },
+                {
+                  "kind": "page",
+                  "label": "How plugins work",
+                  "href": "/paper/dev/how-do-plugins-work/",
+                  "rel": "dev/how-do-plugins-work/index",
+                  "title": "How plugins work"
+                },
+                {
+                  "kind": "page",
+                  "label": "Paper plugins Experimental",
+                  "href": "/paper/dev/getting-started/paper-plugins/",
+                  "rel": "dev/getting-started/paper-plugins/index",
+                  "title": "Paper plugins"
+                },
+                {
+                  "kind": "page",
+                  "label": "plugin.yml",
+                  "href": "/paper/dev/plugin-yml/",
+                  "rel": "dev/plugin-yml/index",
+                  "title": "plugin.yml"
+                },
+                {
+                  "kind": "page",
+                  "label": "paperweight-userdev",
+                  "href": "/paper/dev/userdev/",
+                  "rel": "dev/userdev/index",
+                  "title": "paperweight-userdev"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "API",
+              "children": [
+                {
+                  "kind": "group",
+                  "label": "Command API",
+                  "children": [
+                    {
+                      "kind": "group",
+                      "label": "Basics",
+                      "children": [
+                        {
+                          "kind": "page",
+                          "label": "Introduction",
+                          "href": "/paper/dev/command-api/basics/introduction/",
+                          "rel": "dev/command-api/basics/introduction/index",
+                          "title": "Introduction"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Command trees",
+                          "href": "/paper/dev/command-api/basics/command-tree/",
+                          "rel": "dev/command-api/basics/command-tree/index",
+                          "title": "Command trees"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Arguments and literals",
+                          "href": "/paper/dev/command-api/basics/arguments-and-literals/",
+                          "rel": "dev/command-api/basics/arguments-and-literals/index",
+                          "title": "Arguments and literals"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Executors",
+                          "href": "/paper/dev/command-api/basics/executors/",
+                          "rel": "dev/command-api/basics/executors/index",
+                          "title": "Executors"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Registration",
+                          "href": "/paper/dev/command-api/basics/registration/",
+                          "rel": "dev/command-api/basics/registration/index",
+                          "title": "Registration"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Requirements",
+                          "href": "/paper/dev/command-api/basics/requirements/",
+                          "rel": "dev/command-api/basics/requirements/index",
+                          "title": "Requirements"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Suggestions",
+                          "href": "/paper/dev/command-api/basics/argument-suggestions/",
+                          "rel": "dev/command-api/basics/argument-suggestions/index",
+                          "title": "Suggestions"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Custom arguments",
+                          "href": "/paper/dev/command-api/basics/custom-arguments/",
+                          "rel": "dev/command-api/basics/custom-arguments/index",
+                          "title": "Custom arguments"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "group",
+                      "label": "Arguments",
+                      "children": [
+                        {
+                          "kind": "page",
+                          "label": "Minecraft-specific",
+                          "href": "/paper/dev/command-api/arguments/minecraft/",
+                          "rel": "dev/command-api/arguments/minecraft/index",
+                          "title": "Minecraft-specific"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Location",
+                          "href": "/paper/dev/command-api/arguments/location/",
+                          "rel": "dev/command-api/arguments/location/index",
+                          "title": "Location"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Entities and players",
+                          "href": "/paper/dev/command-api/arguments/entity-player/",
+                          "rel": "dev/command-api/arguments/entity-player/index",
+                          "title": "Entities and players"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Registry",
+                          "href": "/paper/dev/command-api/arguments/registry/",
+                          "rel": "dev/command-api/arguments/registry/index",
+                          "title": "Registry"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Paper-specific",
+                          "href": "/paper/dev/command-api/arguments/paper/",
+                          "rel": "dev/command-api/arguments/paper/index",
+                          "title": "Paper-specific"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Enums",
+                          "href": "/paper/dev/command-api/arguments/enums/",
+                          "rel": "dev/command-api/arguments/enums/index",
+                          "title": "Enums"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Predicates",
+                          "href": "/paper/dev/command-api/arguments/predicate/",
+                          "rel": "dev/command-api/arguments/predicate/index",
+                          "title": "Predicates"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Adventure",
+                          "href": "/paper/dev/command-api/arguments/adventure/",
+                          "rel": "dev/command-api/arguments/adventure/index",
+                          "title": "Adventure"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "group",
+                      "label": "Miscellaneous",
+                      "children": [
+                        {
+                          "kind": "page",
+                          "label": "Basic commands",
+                          "href": "/paper/dev/command-api/misc/basic-command/",
+                          "rel": "dev/command-api/misc/basic-command/index",
+                          "title": "Basic commands"
+                        },
+                        {
+                          "kind": "page",
+                          "label": "Comparison",
+                          "href": "/paper/dev/command-api/misc/comparison-bukkit-brigadier/",
+                          "rel": "dev/command-api/misc/comparison-bukkit-brigadier/index",
+                          "title": "Comparison"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "label": "Component API",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Introduction",
+                      "href": "/paper/dev/component-api/introduction/",
+                      "rel": "dev/component-api/introduction/index",
+                      "title": "Introduction"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Internationalization",
+                      "href": "/paper/dev/component-api/i18n/",
+                      "rel": "dev/component-api/i18n/index",
+                      "title": "Internationalization"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Audiences",
+                      "href": "/paper/dev/component-api/audiences/",
+                      "rel": "dev/component-api/audiences/index",
+                      "title": "Audiences"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Signed messages",
+                      "href": "/paper/dev/component-api/signed-messages/",
+                      "rel": "dev/component-api/signed-messages/index",
+                      "title": "Signed messages"
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "label": "Event API",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Listeners",
+                      "href": "/paper/dev/event-listeners/",
+                      "rel": "dev/event-listeners/index",
+                      "title": "Listeners"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Custom events",
+                      "href": "/paper/dev/custom-events/",
+                      "rel": "dev/custom-events/index",
+                      "title": "Custom events"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Handler lists",
+                      "href": "/paper/dev/handler-lists/",
+                      "rel": "dev/handler-lists/index",
+                      "title": "Handler lists"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Chat events",
+                      "href": "/paper/dev/chat-events/",
+                      "rel": "dev/chat-events/index",
+                      "title": "Chat events"
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "label": "Entity API",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Teleportation",
+                      "href": "/paper/dev/entity-teleport/",
+                      "rel": "dev/entity-teleport/index",
+                      "title": "Teleportation"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Display entities",
+                      "href": "/paper/dev/display-entities/",
+                      "rel": "dev/display-entities/index",
+                      "title": "Display entities"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Mob Goal API",
+                      "href": "/paper/dev/mob-goals/",
+                      "rel": "dev/mob-goals/index",
+                      "title": "Mob Goal API"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Entity Pathfinder API",
+                      "href": "/paper/dev/entity-pathfinder/",
+                      "rel": "dev/entity-pathfinder/index",
+                      "title": "Entity Pathfinder API"
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "label": "Inventories",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Menu Type API",
+                      "href": "/paper/dev/menu-type-api/",
+                      "rel": "dev/menu-type-api/index",
+                      "title": "Menu Type API"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Custom InventoryHolders",
+                      "href": "/paper/dev/custom-inventory-holder/",
+                      "rel": "dev/custom-inventory-holder/index",
+                      "title": "Custom InventoryHolders"
+                    }
+                  ]
+                },
+                {
+                  "kind": "group",
+                  "label": "Lifecycle API",
+                  "children": [
+                    {
+                      "kind": "page",
+                      "label": "Introduction",
+                      "href": "/paper/dev/lifecycle/",
+                      "rel": "dev/lifecycle/index",
+                      "title": "Lifecycle API"
+                    },
+                    {
+                      "kind": "page",
+                      "label": "Datapack discovery Experimental",
+                      "href": "/paper/dev/lifecycle/datapacks/",
+                      "rel": "dev/lifecycle/datapacks/index",
+                      "title": "Datapack discovery"
+                    }
+                  ]
+                },
+                {
+                  "kind": "page",
+                  "label": "Data components",
+                  "href": "/paper/dev/data-component-api/",
+                  "rel": "dev/data-component-api/index",
+                  "title": "Data components"
+                },
+                {
+                  "kind": "page",
+                  "label": "Persistent data container (PDC)",
+                  "href": "/paper/dev/pdc/",
+                  "rel": "dev/pdc/index",
+                  "title": "Persistent data container (PDC)"
+                },
+                {
+                  "kind": "page",
+                  "label": "Scheduling",
+                  "href": "/paper/dev/scheduler/",
+                  "rel": "dev/scheduler/index",
+                  "title": "Scheduling"
+                },
+                {
+                  "kind": "page",
+                  "label": "Plugin messaging",
+                  "href": "/paper/dev/plugin-messaging/",
+                  "rel": "dev/plugin-messaging/index",
+                  "title": "Plugin messaging"
+                },
+                {
+                  "kind": "page",
+                  "label": "Plugin configuration",
+                  "href": "/paper/dev/plugin-configurations/",
+                  "rel": "dev/plugin-configurations/index",
+                  "title": "Plugin configuration"
+                },
+                {
+                  "kind": "page",
+                  "label": "Registries Experimental",
+                  "href": "/paper/dev/registries/",
+                  "rel": "dev/registries/index",
+                  "title": "Registries"
+                },
+                {
+                  "kind": "page",
+                  "label": "Dialog API",
+                  "href": "/paper/dev/dialogs/",
+                  "rel": "dev/dialogs/index",
+                  "title": "Dialog API"
+                },
+                {
+                  "kind": "page",
+                  "label": "Recipes",
+                  "href": "/paper/dev/recipes/",
+                  "rel": "dev/recipes/index",
+                  "title": "Recipes"
+                },
+                {
+                  "kind": "page",
+                  "label": "Particles",
+                  "href": "/paper/dev/particles/",
+                  "rel": "dev/particles/index",
+                  "title": "Particles"
+                },
+                {
+                  "kind": "page",
+                  "label": "Supporting Paper and Folia",
+                  "href": "/paper/dev/folia-support/",
+                  "rel": "dev/folia-support/index",
+                  "title": "Supporting Paper and Folia"
+                },
+                {
+                  "kind": "page",
+                  "label": "Roadmap",
+                  "href": "/paper/dev/roadmap/",
+                  "rel": "dev/roadmap/index",
+                  "title": "Roadmap"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "Miscellaneous",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Using databases",
+                  "href": "/paper/dev/using-databases/",
+                  "rel": "dev/using-databases/index",
+                  "title": "Using databases"
+                },
+                {
+                  "kind": "page",
+                  "label": "Debugging your plugin",
+                  "href": "/paper/dev/debugging/",
+                  "rel": "dev/debugging/index",
+                  "title": "Debugging your plugin"
+                },
+                {
+                  "kind": "page",
+                  "label": "Minecraft internals",
+                  "href": "/paper/dev/internals/",
+                  "rel": "dev/internals/index",
+                  "title": "Minecraft internals"
+                },
+                {
+                  "kind": "page",
+                  "label": "Reading stacktraces",
+                  "href": "/paper/dev/reading-stacktraces/",
+                  "rel": "dev/reading-stacktraces/index",
+                  "title": "Reading stacktraces"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "label": "Contributing",
+          "children": [
+            {
+              "kind": "page",
+              "label": "Events",
+              "href": "/paper/contributing/events/",
+              "rel": "contributing/events/index",
+              "title": "Events"
+            }
+          ]
+        }
+      ],
+      "pagesNotInSourceNav": [
+        {
+          "rel": "admin/getting-started/index",
+          "title": "Getting started",
+          "reason": "作为侧栏分组「Administration > Getting started」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/how-to/index",
+          "title": "How-to guides",
+          "reason": "作为侧栏分组「Administration > How-to guides」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/index",
+          "title": "Administration",
+          "reason": "作为侧栏分组「Administration」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/misc/index",
+          "title": "Miscellaneous",
+          "reason": "作为侧栏分组「Administration > Miscellaneous」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/reference/index",
+          "title": "Reference",
+          "reason": "作为侧栏分组「Administration > Reference」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "contributing/index",
+          "title": "Contributing",
+          "reason": "作为侧栏分组「Contributing」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/command-api/arguments/index",
+          "title": "Arguments",
+          "reason": "作为侧栏分组「Development > API > Command API > Arguments」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/command-api/basics/index",
+          "title": "Basics",
+          "reason": "作为侧栏分组「Development > API > Command API > Basics」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/command-api/index",
+          "title": "Command API",
+          "reason": "作为侧栏分组「Development > API > Command API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/command-api/misc/index",
+          "title": "Miscellaneous",
+          "reason": "作为侧栏分组「Development > API > Command API > Miscellaneous」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/component-api/index",
+          "title": "Component API",
+          "reason": "作为侧栏分组「Development > API > Component API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/entity-api/index",
+          "title": "Entity API",
+          "reason": "作为侧栏分组「Development > API > Entity API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/event-api/index",
+          "title": "Event API",
+          "reason": "作为侧栏分组「Development > API > Event API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/index",
+          "title": "API",
+          "reason": "作为侧栏分组「Development > API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/inventories/index",
+          "title": "Inventories",
+          "reason": "作为侧栏分组「Development > API > Inventories」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/lifecycle/index",
+          "title": "Lifecycle API",
+          "reason": "作为侧栏分组「Development > API > Lifecycle API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/getting-started/index",
+          "title": "Getting started",
+          "reason": "作为侧栏分组「Development > Getting started」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/index",
+          "title": "Development",
+          "reason": "作为侧栏分组「Development」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/misc/index",
+          "title": "Miscellaneous",
+          "reason": "作为侧栏分组「Development > Miscellaneous」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "index",
+          "title": "Paper Documentation",
+          "reason": "站点根 index 页（/paper/）；上游 Starlight 未在 ul.top-level 侧栏中单独列出"
+        }
+      ]
+    },
+    {
+      "id": "velocity",
+      "title": "Velocity",
+      "sourceHref": "/velocity/",
+      "pageCount": 32,
+      "groups": [
+        {
+          "kind": "group",
+          "label": "Administration",
+          "children": [
+            {
+              "kind": "group",
+              "label": "Getting started",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Getting started",
+                  "href": "/velocity/getting-started/",
+                  "rel": "getting-started/index",
+                  "title": "Getting started"
+                },
+                {
+                  "kind": "page",
+                  "label": "What does Velocity do for me?",
+                  "href": "/velocity/why-velocity/",
+                  "rel": "why-velocity/index",
+                  "title": "What does Velocity do for me?"
+                },
+                {
+                  "kind": "page",
+                  "label": "Configuring player information forwarding",
+                  "href": "/velocity/player-information-forwarding/",
+                  "rel": "player-information-forwarding/index",
+                  "title": "Configuring player information forwarding"
+                },
+                {
+                  "kind": "page",
+                  "label": "Frequently asked questions",
+                  "href": "/velocity/faq/",
+                  "rel": "faq/index",
+                  "title": "Frequently asked questions"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "How-to guides",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Tuning Velocity",
+                  "href": "/velocity/tuning/",
+                  "rel": "tuning/index",
+                  "title": "Tuning Velocity"
+                },
+                {
+                  "kind": "page",
+                  "label": "Securing your servers",
+                  "href": "/velocity/security/",
+                  "rel": "security/index",
+                  "title": "Securing your servers"
+                },
+                {
+                  "kind": "page",
+                  "label": "Migration guide",
+                  "href": "/velocity/migration/",
+                  "rel": "migration/index",
+                  "title": "Migration guide"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "Reference",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Configuring Velocity",
+                  "href": "/velocity/configuration/",
+                  "rel": "configuration/index",
+                  "title": "Configuring Velocity"
+                },
+                {
+                  "kind": "page",
+                  "label": "System properties",
+                  "href": "/velocity/reference/system-properties/",
+                  "rel": "reference/system-properties/index",
+                  "title": "System properties"
+                },
+                {
+                  "kind": "page",
+                  "label": "Built-in commands",
+                  "href": "/velocity/built-in-commands/",
+                  "rel": "built-in-commands/index",
+                  "title": "Built-in commands"
+                },
+                {
+                  "kind": "page",
+                  "label": "Server compatibility",
+                  "href": "/velocity/server-compatibility/",
+                  "rel": "server-compatibility/index",
+                  "title": "Server compatibility"
+                },
+                {
+                  "kind": "page",
+                  "label": "Comparing with other proxies",
+                  "href": "/velocity/comparisons-to-other-proxies/",
+                  "rel": "comparisons-to-other-proxies/index",
+                  "title": "Comparing with other proxies"
+                },
+                {
+                  "kind": "page",
+                  "label": "Libraries used",
+                  "href": "/velocity/credits/",
+                  "rel": "credits/index",
+                  "title": "Libraries used"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "group",
+          "label": "Development",
+          "children": [
+            {
+              "kind": "group",
+              "label": "Getting started",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Creating your first plugin",
+                  "href": "/velocity/dev/creating-your-first-plugin/",
+                  "rel": "dev/creating-your-first-plugin/index",
+                  "title": "Creating your first plugin"
+                },
+                {
+                  "kind": "page",
+                  "label": "The Velocity plugin file",
+                  "href": "/velocity/dev/velocity-plugin-json/",
+                  "rel": "dev/velocity-plugin-json/index",
+                  "title": "The Velocity plugin file"
+                },
+                {
+                  "kind": "page",
+                  "label": "Velocity plugin basics",
+                  "href": "/velocity/dev/api-basics/",
+                  "rel": "dev/api-basics/index",
+                  "title": "Velocity plugin basics"
+                },
+                {
+                  "kind": "page",
+                  "label": "Common pitfalls",
+                  "href": "/velocity/dev/pitfalls/",
+                  "rel": "dev/pitfalls/index",
+                  "title": "Common pitfalls"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "How-to guides",
+              "children": [
+                {
+                  "kind": "page",
+                  "label": "Dependency management",
+                  "href": "/velocity/dev/dependency-management/",
+                  "rel": "dev/dependency-management/index",
+                  "title": "Dependency management"
+                },
+                {
+                  "kind": "page",
+                  "label": "Porting your plugin from Velocity 1.x.x",
+                  "href": "/velocity/dev/porting-plugins-from-velocity-1/",
+                  "rel": "dev/porting-plugins-from-velocity-1/index",
+                  "title": "Porting your plugin from Velocity 1.x.x"
+                }
+              ]
+            },
+            {
+              "kind": "group",
+              "label": "API",
+              "children": [
+                {
+                  "kind": "group",
+                  "label": "Component API",
+                  "children": []
+                },
+                {
+                  "kind": "page",
+                  "label": "Working with events",
+                  "href": "/velocity/dev/event-api/",
+                  "rel": "dev/event-api/index",
+                  "title": "Working with events"
+                },
+                {
+                  "kind": "page",
+                  "label": "Using the scheduler",
+                  "href": "/velocity/dev/scheduler-api/",
+                  "rel": "dev/scheduler-api/index",
+                  "title": "Using the scheduler"
+                },
+                {
+                  "kind": "page",
+                  "label": "Command API",
+                  "href": "/velocity/dev/command-api/",
+                  "rel": "dev/command-api/index",
+                  "title": "Command API"
+                },
+                {
+                  "kind": "page",
+                  "label": "Plugin messaging",
+                  "href": "/velocity/dev/plugin-messaging/",
+                  "rel": "dev/plugin-messaging/index",
+                  "title": "Plugin messaging"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "pagesNotInSourceNav": [
+        {
+          "rel": "admin/getting-started/index",
+          "title": "Getting started",
+          "reason": "作为侧栏分组「Administration > Getting started」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/how-to/index",
+          "title": "How-to guides",
+          "reason": "作为侧栏分组「Administration > How-to guides」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/index",
+          "title": "Administration",
+          "reason": "作为侧栏分组「Administration」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "admin/reference/index",
+          "title": "Reference",
+          "reason": "作为侧栏分组「Administration > Reference」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/api/index",
+          "title": "API",
+          "reason": "作为侧栏分组「Development > API」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/getting-started/index",
+          "title": "Getting started",
+          "reason": "作为侧栏分组「Development > Getting started」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/how-to/index",
+          "title": "How-to guides",
+          "reason": "作为侧栏分组「Development > How-to guides」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "dev/index",
+          "title": "Development",
+          "reason": "作为侧栏分组「Development」的索引页；上游仅渲染组标题（details > summary），不输出 <a> 链接"
+        },
+        {
+          "rel": "index",
+          "title": "Velocity Documentation",
+          "reason": "站点根 index 页（/velocity/）；上游 Starlight 未在 ul.top-level 侧栏中单独列出"
+        }
+      ]
+    }
+  ],
+  "stats": {
+    "paper": {
+      "pagesInManifest": 103,
+      "pagesInNav": 83,
+      "pagesNotInNav": 20,
+      "groups": 20,
+      "maxDepth": 5,
+      "duplicateHrefs": 0
+    },
+    "velocity": {
+      "pagesInManifest": 32,
+      "pagesInNav": 23,
+      "pagesNotInNav": 9,
+      "groups": 9,
+      "maxDepth": 3,
+      "duplicateHrefs": 0
+    }
+  }
+}

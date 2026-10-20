@@ -1,0 +1,7 @@
+# Reference
+
+import PageCards from "/src/components/PageCards.astro";
+
+Reference of Paper's configuration options, system properties and other features.
+
+<PageCards />

@@ -1,0 +1,8 @@
+# Getting started
+
+import PageCards from "/src/components/PageCards.astro";
+
+Welcome to the Paper development guide! This guide includes information and tutorials on
+how to start developing plugins for Paper.
+
+<PageCards />

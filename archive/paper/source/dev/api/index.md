@@ -1,0 +1,8 @@
+# API
+
+import PageCards from "/src/components/PageCards.astro";
+
+Welcome to the Paper API guide!
+This guide includes information for developers about how to use specific parts of the Paper API.
+
+<PageCards />

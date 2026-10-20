@@ -1,0 +1,18 @@
+# World configuration
+
+An explanation of Paper's world configuration file.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import PaperWorldDefaultsYML from "/src/config/paper/paper-world-defaults.yml?raw";
+import { parse } from "yaml";
+
+:::note
+
+The below YAML shows you the structure and default values for the world configuration (`config/paper-world-defaults.yml` and
+`world/dimensions/<namespace>/<key>/paper-world.yml`).
+
+Click on a leaf node to view the description for that setting.
+
+:::
+
+<ConfigNode data={parse(PaperWorldDefaultsYML)} />

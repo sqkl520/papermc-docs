@@ -1,0 +1,25 @@
+# permissions.yml
+
+An explanation of Bukkit's permissions.yml file.
+
+import ConfigNode from "/src/components/ConfigNode.astro";
+import PermissionsYML from "/src/config/paper/permissions.yml?raw";
+import { parse } from "yaml";
+
+:::note
+
+The below YAML shows you the structure for `permissions.yml`.
+
+Click on a leaf node to view the description for that setting.
+
+:::
+
+:::caution
+
+This is NOT a replacement for a permissions plugin.
+
+This file is used to define metadata about permissions themselves, including a description and a default value.
+
+:::
+
+<ConfigNode data={parse(PermissionsYML)} />

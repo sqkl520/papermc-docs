@@ -1,0 +1,935 @@
+{
+  "rows": [
+    {
+      "rel": "adding-plugins/index.md",
+      "bytes": 6753,
+      "codeBlocks": 4,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/getting-started/index.md",
+      "bytes": 748,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/how-to/index.md",
+      "bytes": 1072,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/index.md",
+      "bytes": 2765,
+      "codeBlocks": 0,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/misc/index.md",
+      "bytes": 547,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "admin/reference/index.md",
+      "bytes": 947,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "aikars-flags/index.md",
+      "bytes": 10493,
+      "codeBlocks": 3,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "anti-xray/index.md",
+      "bytes": 15506,
+      "codeBlocks": 9,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 14,
+      "issues": []
+    },
+    {
+      "rel": "basic-troubleshooting/index.md",
+      "bytes": 21411,
+      "codeBlocks": 4,
+      "headings": 23,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "contributing/events/index.md",
+      "bytes": 2319,
+      "codeBlocks": 0,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "contributing/index.md",
+      "bytes": 366,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/command-api/arguments/index.md",
+      "bytes": 1232,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/command-api/basics/index.md",
+      "bytes": 1151,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/command-api/index.md",
+      "bytes": 2515,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/command-api/misc/index.md",
+      "bytes": 437,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/component-api/index.md",
+      "bytes": 589,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/entity-api/index.md",
+      "bytes": 538,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/event-api/index.md",
+      "bytes": 580,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/index.md",
+      "bytes": 1849,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/inventories/index.md",
+      "bytes": 375,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/api/lifecycle/index.md",
+      "bytes": 399,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/chat-events/index.md",
+      "bytes": 6825,
+      "codeBlocks": 4,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/adventure/index.md",
+      "bytes": 6801,
+      "codeBlocks": 5,
+      "headings": 16,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/entity-player/index.md",
+      "bytes": 7276,
+      "codeBlocks": 5,
+      "headings": 16,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/enums/index.md",
+      "bytes": 5172,
+      "codeBlocks": 6,
+      "headings": 19,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/location/index.md",
+      "bytes": 3908,
+      "codeBlocks": 3,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/minecraft/index.md",
+      "bytes": 6811,
+      "codeBlocks": 0,
+      "headings": 2,
+      "tableRows": 39,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/paper/index.md",
+      "bytes": 6371,
+      "codeBlocks": 6,
+      "headings": 19,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/predicate/index.md",
+      "bytes": 3057,
+      "codeBlocks": 3,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/arguments/registry/index.md",
+      "bytes": 8077,
+      "codeBlocks": 4,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/argument-suggestions/index.md",
+      "bytes": 9101,
+      "codeBlocks": 6,
+      "headings": 8,
+      "tableRows": 12,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/arguments-and-literals/index.md",
+      "bytes": 9650,
+      "codeBlocks": 3,
+      "headings": 10,
+      "tableRows": 15,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/command-tree/index.md",
+      "bytes": 9558,
+      "codeBlocks": 16,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/custom-arguments/index.md",
+      "bytes": 11620,
+      "codeBlocks": 9,
+      "headings": 9,
+      "tableRows": 7,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/executors/index.md",
+      "bytes": 8943,
+      "codeBlocks": 4,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/introduction/index.md",
+      "bytes": 2220,
+      "codeBlocks": 0,
+      "headings": 3,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/registration/index.md",
+      "bytes": 6698,
+      "codeBlocks": 7,
+      "headings": 8,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/basics/requirements/index.md",
+      "bytes": 5562,
+      "codeBlocks": 6,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/misc/basic-command/index.md",
+      "bytes": 10534,
+      "codeBlocks": 13,
+      "headings": 11,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/command-api/misc/comparison-bukkit-brigadier/index.md",
+      "bytes": 4693,
+      "codeBlocks": 4,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/component-api/audiences/index.md",
+      "bytes": 3001,
+      "codeBlocks": 2,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/component-api/i18n/index.md",
+      "bytes": 3109,
+      "codeBlocks": 3,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/component-api/introduction/index.md",
+      "bytes": 8967,
+      "codeBlocks": 4,
+      "headings": 11,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/component-api/signed-messages/index.md",
+      "bytes": 6226,
+      "codeBlocks": 1,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/custom-events/index.md",
+      "bytes": 4973,
+      "codeBlocks": 6,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/custom-inventory-holder/index.md",
+      "bytes": 5597,
+      "codeBlocks": 5,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/data-component-api/index.md",
+      "bytes": 9335,
+      "codeBlocks": 10,
+      "headings": 26,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/debugging/index.md",
+      "bytes": 5702,
+      "codeBlocks": 5,
+      "headings": 9,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/dialogs/index.md",
+      "bytes": 25423,
+      "codeBlocks": 13,
+      "headings": 25,
+      "tableRows": 14,
+      "details": 4,
+      "issues": []
+    },
+    {
+      "rel": "dev/display-entities/index.md",
+      "bytes": 10041,
+      "codeBlocks": 9,
+      "headings": 13,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/entity-pathfinder/index.md",
+      "bytes": 3513,
+      "codeBlocks": 2,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/entity-teleport/index.md",
+      "bytes": 3106,
+      "codeBlocks": 4,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/event-listeners/index.md",
+      "bytes": 5184,
+      "codeBlocks": 6,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/folia-support/index.md",
+      "bytes": 3418,
+      "codeBlocks": 6,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/getting-started/index.md",
+      "bytes": 838,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/getting-started/paper-plugins/index.md",
+      "bytes": 10237,
+      "codeBlocks": 8,
+      "headings": 16,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/handler-lists/index.md",
+      "bytes": 2209,
+      "codeBlocks": 2,
+      "headings": 3,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/how-do-plugins-work/index.md",
+      "bytes": 7954,
+      "codeBlocks": 0,
+      "headings": 11,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/index.md",
+      "bytes": 3080,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/internals/index.md",
+      "bytes": 5365,
+      "codeBlocks": 1,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/lifecycle/datapacks/index.md",
+      "bytes": 7552,
+      "codeBlocks": 8,
+      "headings": 8,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/lifecycle/index.md",
+      "bytes": 6722,
+      "codeBlocks": 6,
+      "headings": 8,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/menu-type-api/index.md",
+      "bytes": 6680,
+      "codeBlocks": 2,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/misc/index.md",
+      "bytes": 873,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/mob-goals/index.md",
+      "bytes": 6366,
+      "codeBlocks": 3,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/particles/index.md",
+      "bytes": 28633,
+      "codeBlocks": 46,
+      "headings": 84,
+      "tableRows": 0,
+      "details": 3,
+      "issues": []
+    },
+    {
+      "rel": "dev/pdc/index.md",
+      "bytes": 13207,
+      "codeBlocks": 9,
+      "headings": 8,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/plugin-configurations/index.md",
+      "bytes": 6791,
+      "codeBlocks": 6,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/plugin-messaging/index.md",
+      "bytes": 10972,
+      "codeBlocks": 5,
+      "headings": 8,
+      "tableRows": 20,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/plugin-yml/index.md",
+      "bytes": 8241,
+      "codeBlocks": 5,
+      "headings": 24,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/project-setup/index.md",
+      "bytes": 9859,
+      "codeBlocks": 5,
+      "headings": 14,
+      "tableRows": 16,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/reading-stacktraces/index.md",
+      "bytes": 4419,
+      "codeBlocks": 2,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/recipes/index.md",
+      "bytes": 3411,
+      "codeBlocks": 4,
+      "headings": 3,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/registries/index.md",
+      "bytes": 8704,
+      "codeBlocks": 4,
+      "headings": 7,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/roadmap/index.md",
+      "bytes": 4481,
+      "codeBlocks": 2,
+      "headings": 11,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/scheduler/index.md",
+      "bytes": 8486,
+      "codeBlocks": 8,
+      "headings": 13,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/userdev/index.md",
+      "bytes": 7993,
+      "codeBlocks": 5,
+      "headings": 9,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "dev/using-databases/index.md",
+      "bytes": 9253,
+      "codeBlocks": 8,
+      "headings": 16,
+      "tableRows": 0,
+      "details": 2,
+      "issues": []
+    },
+    {
+      "rel": "faq/index.md",
+      "bytes": 819,
+      "codeBlocks": 0,
+      "headings": 2,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "getting-started/index.md",
+      "bytes": 2453,
+      "codeBlocks": 1,
+      "headings": 9,
+      "tableRows": 8,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "index.md",
+      "bytes": 647,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "migration/index.md",
+      "bytes": 5536,
+      "codeBlocks": 0,
+      "headings": 11,
+      "tableRows": 4,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "misc/paper-bug-fixes/index.md",
+      "bytes": 3557,
+      "codeBlocks": 4,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "misc/update-checker/index.md",
+      "bytes": 1477,
+      "codeBlocks": 2,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "next-steps/index.md",
+      "bytes": 3249,
+      "codeBlocks": 0,
+      "headings": 10,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "profiling/index.md",
+      "bytes": 2305,
+      "codeBlocks": 1,
+      "headings": 3,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/bukkit-commands-configuration/index.md",
+      "bytes": 1974,
+      "codeBlocks": 3,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/bukkit-configuration/index.md",
+      "bytes": 6960,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/bukkit-help-configuration/index.md",
+      "bytes": 3284,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/bukkit-permissions-configuration/index.md",
+      "bytes": 1518,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/cli-arguments/index.md",
+      "bytes": 4367,
+      "codeBlocks": 1,
+      "headings": 32,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/commands/index.md",
+      "bytes": 10756,
+      "codeBlocks": 2,
+      "headings": 27,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/configuration/index.md",
+      "bytes": 5212,
+      "codeBlocks": 5,
+      "headings": 5,
+      "tableRows": 10,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/global-configuration/index.md",
+      "bytes": 19753,
+      "codeBlocks": 2,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/paper-plugins/index.md",
+      "bytes": 1980,
+      "codeBlocks": 0,
+      "headings": 5,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/permissions/index.md",
+      "bytes": 13136,
+      "codeBlocks": 0,
+      "headings": 7,
+      "tableRows": 140,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/server-properties/index.md",
+      "bytes": 12226,
+      "codeBlocks": 0,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/spigot-configuration/index.md",
+      "bytes": 23688,
+      "codeBlocks": 3,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/system-properties/index.md",
+      "bytes": 12638,
+      "codeBlocks": 1,
+      "headings": 49,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/vanilla-data-files/index.md",
+      "bytes": 4608,
+      "codeBlocks": 1,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "reference/world-configuration/index.md",
+      "bytes": 40794,
+      "codeBlocks": 5,
+      "headings": 1,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "updating/index.md",
+      "bytes": 4021,
+      "codeBlocks": 0,
+      "headings": 4,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    },
+    {
+      "rel": "vanilla/index.md",
+      "bytes": 12725,
+      "codeBlocks": 1,
+      "headings": 6,
+      "tableRows": 0,
+      "details": 0,
+      "issues": []
+    }
+  ],
+  "problems": [],
+  "warnings": [],
+  "missingSource": [],
+  "archiveIssues": []
+}

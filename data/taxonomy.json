@@ -1,0 +1,2162 @@
+{
+  "generated_at": "2026-10-19T19:05:26.213Z",
+  "sections": [
+    {
+      "id": "paper",
+      "title": "Paper",
+      "subtitle": "Minecraft 服务端本体",
+      "archive": "archives/paper",
+      "pageCount": 103
+    },
+    {
+      "id": "velocity",
+      "title": "Velocity",
+      "subtitle": "Minecraft 代理端",
+      "archive": "archives/velocity",
+      "pageCount": 32
+    }
+  ],
+  "categories": [
+    {
+      "id": "paper-start",
+      "title": "入门与安装",
+      "section": "paper",
+      "order": 10,
+      "description": "面向服主：从下载启动到更新、迁移与选型，含常见问题，读完即可把服务端跑起来"
+    },
+    {
+      "id": "paper-ops",
+      "title": "运维、性能与排错",
+      "section": "paper",
+      "order": 20,
+      "description": "服主运维总览索引与日常运维：启动失败排查、自动更新检查、原版缺陷说明、插件加载机制、JVM 参数、性能分析与 Anti-Xray"
+    },
+    {
+      "id": "paper-config",
+      "title": "配置文件参考",
+      "section": "paper",
+      "order": 30,
+      "description": "落盘的 yml / properties 配置文件与数据文件的逐项参考手册，含原版行为差异对照，调整服务端行为前先查这里"
+    },
+    {
+      "id": "paper-ref",
+      "title": "参考手册与速查",
+      "section": "paper",
+      "order": 40,
+      "description": "参考区总索引，以及命令、权限节点、CLI 参数与系统属性速查表"
+    },
+    {
+      "id": "paper-dev-basics",
+      "title": "插件开发基础",
+      "section": "paper",
+      "order": 50,
+      "description": "开发总览与入门索引，以及插件工程搭建、插件运行机制、清单文件、配置与任务调度等开发起点"
+    },
+    {
+      "id": "paper-dev-command",
+      "title": "命令 API 开发",
+      "section": "paper",
+      "order": 60,
+      "description": "基于 Brigadier 的命令树、字面量与参数类型、权限条件与补全建议"
+    },
+    {
+      "id": "paper-dev-component",
+      "title": "文本与消息组件",
+      "section": "paper",
+      "order": 70,
+      "description": "Adventure 文本组件、MiniMessage、受众分发、国际化与聊天渲染器"
+    },
+    {
+      "id": "paper-dev-content",
+      "title": "事件与游戏内容 API",
+      "section": "paper",
+      "order": 80,
+      "description": "事件与生命周期、实体与 AI、物品与容器、注册表、配方、粒子等游戏内容 API，含插件消息与跨端通信，以及 API 总览入口"
+    },
+    {
+      "id": "paper-dev-tools",
+      "title": "开发工具与项目协作",
+      "section": "paper",
+      "order": 90,
+      "description": "调试、堆栈阅读、数据库、服务端内部代码访问（含 paperweight-userdev 工具链）、项目路线图与弃用策略，以及向 Paper 提交贡献"
+    },
+    {
+      "id": "velocity-start",
+      "title": "入门与选型",
+      "section": "velocity",
+      "order": 10,
+      "description": "面向服主：安装启动、为什么选 Velocity、与其他代理对比、版本迁移与常见问题"
+    },
+    {
+      "id": "velocity-admin",
+      "title": "代理运维与性能调优",
+      "section": "velocity",
+      "order": 20,
+      "description": "代理端日常管理索引与性能调优：部署平台、内存分配与启动参数；常见问题与排错见 velocity-start 的 FAQ"
+    },
+    {
+      "id": "velocity-net",
+      "title": "玩家信息转发与后端互通",
+      "section": "velocity",
+      "order": 30,
+      "description": "代理端能力核心：modern forwarding、后端服务端兼容矩阵与后端安全加固"
+    },
+    {
+      "id": "velocity-config",
+      "title": "配置与命令参考",
+      "section": "velocity",
+      "order": 40,
+      "description": "velocity.toml、系统属性、内置命令与依赖库清单等参考手册"
+    },
+    {
+      "id": "velocity-dev-basics",
+      "title": "插件开发基础",
+      "section": "velocity",
+      "order": 50,
+      "description": "代理端插件的工程搭建、插件类编写、velocity-plugin.json 清单与依赖管理"
+    },
+    {
+      "id": "velocity-dev-api",
+      "title": "API、事件与进阶开发",
+      "section": "velocity",
+      "order": 60,
+      "description": "命令 API、事件系统、调度器、插件消息以及从 Velocity 1.x 迁移插件"
+    }
+  ],
+  "pages": [
+    {
+      "id": "paper:adding-plugins/index",
+      "section": "paper",
+      "rel": "adding-plugins/index",
+      "url": "https://docs.papermc.io/paper/adding-plugins/",
+      "title": "Adding plugins",
+      "description": "Plugins are the most powerful way to extend the functionality of Paper beyond the configuration files.",
+      "category": "paper-start",
+      "order": 40,
+      "tags": [
+        "插件体系",
+        "安装启动",
+        "排错"
+      ],
+      "summary": "如何寻找并安装插件，以及插件不生效时的排查步骤，包括日志检查与 plugin.yml 报错处理"
+    },
+    {
+      "id": "paper:admin/getting-started/index",
+      "section": "paper",
+      "rel": "admin/getting-started/index",
+      "url": "https://docs.papermc.io/paper/admin/getting-started/",
+      "title": "Getting started（管理入门）",
+      "description": "",
+      "category": "paper-start",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "安装启动"
+      ],
+      "summary": "Paper 管理文档的入门索引页，按入门、操作指南、参考与杂项四类列出服主该读的页面"
+    },
+    {
+      "id": "paper:admin/how-to/index",
+      "section": "paper",
+      "rel": "admin/how-to/index",
+      "url": "https://docs.papermc.io/paper/admin/how-to/",
+      "title": "How-to guides",
+      "description": "",
+      "category": "paper-ops",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "服主运维"
+      ],
+      "summary": "操作指南索引，汇总性能调优、Anti-Xray、故障排查、性能分析、更新与原版体验等六篇实战主题"
+    },
+    {
+      "id": "paper:admin/index",
+      "section": "paper",
+      "rel": "admin/index",
+      "url": "https://docs.papermc.io/paper/admin/",
+      "title": "Administration",
+      "description": "",
+      "category": "paper-ops",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "服主运维"
+      ],
+      "summary": "Paper 管理文档总览页，把全部面向服主的指南与参考页面按主题分门别类列出"
+    },
+    {
+      "id": "paper:admin/misc/index",
+      "section": "paper",
+      "rel": "admin/misc/index",
+      "url": "https://docs.papermc.io/paper/admin/misc/",
+      "title": "Miscellaneous（管理杂项）",
+      "description": "",
+      "category": "paper-ops",
+      "order": 30,
+      "tags": [
+        "分组索引",
+        "服主运维"
+      ],
+      "summary": "管理文档的杂项索引，指向更新检查、原版缺陷修复说明与常见问题页面"
+    },
+    {
+      "id": "paper:admin/reference/index",
+      "section": "paper",
+      "rel": "admin/reference/index",
+      "url": "https://docs.papermc.io/paper/admin/reference/",
+      "title": "Reference",
+      "description": "",
+      "category": "paper-ref",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "参考手册"
+      ],
+      "summary": "Paper 参考手册索引页，集中列出配置概览、插件体系、命令、系统属性与权限等条目"
+    },
+    {
+      "id": "paper:aikars-flags/index",
+      "section": "paper",
+      "rel": "aikars-flags/index",
+      "url": "https://docs.papermc.io/paper/aikars-flags/",
+      "title": "Aikar's flags",
+      "description": "Aikar's flags are a set of JVM flags designed to improve the performance of your Paper server.",
+      "category": "paper-ops",
+      "order": 80,
+      "tags": [
+        "性能调优",
+        "启动参数"
+      ],
+      "summary": "推荐的 JVM 启动参数集合，含内存建议、GC 日志开关以及每个参数背后的技术原理"
+    },
+    {
+      "id": "paper:anti-xray/index",
+      "section": "paper",
+      "rel": "anti-xray/index",
+      "url": "https://docs.papermc.io/paper/anti-xray/",
+      "title": "Configuring Anti-Xray",
+      "description": "Paper ships an obfuscation-based Anti-Xray system by default. Learn how to configure it here.",
+      "category": "paper-ops",
+      "order": 100,
+      "tags": [
+        "世界配置",
+        "备份与安全",
+        "配置"
+      ],
+      "summary": "讲解 Paper 内置的混淆式防透视系统，对比三种引擎模式的强度、性能开销与推荐配置"
+    },
+    {
+      "id": "paper:basic-troubleshooting/index",
+      "section": "paper",
+      "rel": "basic-troubleshooting/index",
+      "url": "https://docs.papermc.io/paper/basic-troubleshooting/",
+      "title": "Basic troubleshooting",
+      "description": "This guide will help you diagnose your server's problem before reporting it to PaperMC or the plugin's author.",
+      "category": "paper-ops",
+      "order": 40,
+      "tags": [
+        "排错",
+        "插件体系"
+      ],
+      "summary": "服务端出问题时的系统排查流程：二分法定位插件、检查依赖、端口占用与启动失败等原因"
+    },
+    {
+      "id": "paper:contributing/events/index",
+      "section": "paper",
+      "rel": "contributing/events/index",
+      "url": "https://docs.papermc.io/paper/contributing/events/",
+      "title": "Events",
+      "description": "A guide on how to add new events to Paper.",
+      "category": "paper-dev-tools",
+      "order": 90,
+      "tags": [
+        "调试与工具",
+        "事件 API"
+      ],
+      "summary": "向 Paper 提交新事件时的编写规范，涵盖构造函数、可变性与处理器列表的要求"
+    },
+    {
+      "id": "paper:contributing/index",
+      "section": "paper",
+      "rel": "contributing/index",
+      "url": "https://docs.papermc.io/paper/contributing/",
+      "title": "Contributing",
+      "description": "",
+      "category": "paper-dev-tools",
+      "order": 80,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "参与 Paper 项目贡献的说明，指引开发者了解提交流程与可以参与的工作方向"
+    },
+    {
+      "id": "paper:dev/api/command-api/arguments/index",
+      "section": "paper",
+      "rel": "dev/api/command-api/arguments/index",
+      "url": "https://docs.papermc.io/paper/dev/api/command-api/arguments/",
+      "title": "Arguments",
+      "description": "",
+      "category": "paper-dev-command",
+      "order": 110,
+      "tags": [
+        "分组索引",
+        "命令"
+      ],
+      "summary": "命令参数类型文档索引页，按 Minecraft 原生、Paper 扩展与工具类参数分组列出"
+    },
+    {
+      "id": "paper:dev/api/command-api/basics/index",
+      "section": "paper",
+      "rel": "dev/api/command-api/basics/index",
+      "url": "https://docs.papermc.io/paper/dev/api/command-api/basics/",
+      "title": "Basics",
+      "description": "",
+      "category": "paper-dev-command",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "命令"
+      ],
+      "summary": "命令 API 基础部分索引页，列出深入讲解参数、命令树、注册与执行器的指南"
+    },
+    {
+      "id": "paper:dev/api/command-api/index",
+      "section": "paper",
+      "rel": "dev/api/command-api/index",
+      "url": "https://docs.papermc.io/paper/dev/api/command-api/",
+      "title": "Command API",
+      "description": "",
+      "category": "paper-dev-command",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "命令"
+      ],
+      "summary": "命令 API 文档的分组索引页，指向基础用法、参数类型与杂项三部分内容"
+    },
+    {
+      "id": "paper:dev/api/command-api/misc/index",
+      "section": "paper",
+      "rel": "dev/api/command-api/misc/index",
+      "url": "https://docs.papermc.io/paper/dev/api/command-api/misc/",
+      "title": "Miscellaneous（命令杂项）",
+      "description": "",
+      "category": "paper-dev-command",
+      "order": 200,
+      "tags": [
+        "分组索引",
+        "命令"
+      ],
+      "summary": "命令 API 杂项索引页，收录基础命令写法与 Brigadier、Bukkit 命令对比等内容"
+    },
+    {
+      "id": "paper:dev/api/component-api/index",
+      "section": "paper",
+      "rel": "dev/api/component-api/index",
+      "url": "https://docs.papermc.io/paper/dev/api/component-api/",
+      "title": "Component API",
+      "description": "",
+      "category": "paper-dev-component",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "文本组件"
+      ],
+      "summary": "Component API 文档的分组索引，指向文本组件、受众、国际化与签名消息等页面"
+    },
+    {
+      "id": "paper:dev/api/entity-api/index",
+      "section": "paper",
+      "rel": "dev/api/entity-api/index",
+      "url": "https://docs.papermc.io/paper/dev/api/entity-api/",
+      "title": "Entity API",
+      "description": "",
+      "category": "paper-dev-content",
+      "order": 60,
+      "tags": [
+        "分组索引",
+        "实体 API"
+      ],
+      "summary": "实体 API 文档分组入口，汇总实体寻路、传送、显示实体与生物目标等页面"
+    },
+    {
+      "id": "paper:dev/api/event-api/index",
+      "section": "paper",
+      "rel": "dev/api/event-api/index",
+      "url": "https://docs.papermc.io/paper/dev/api/event-api/",
+      "title": "Event API",
+      "description": "",
+      "category": "paper-dev-content",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "事件 API"
+      ],
+      "summary": "事件 API 文档分组入口，列出监听事件、自定义事件与处理器列表等相关指南"
+    },
+    {
+      "id": "paper:dev/api/index",
+      "section": "paper",
+      "rel": "dev/api/index",
+      "url": "https://docs.papermc.io/paper/dev/api/",
+      "title": "API",
+      "description": "",
+      "category": "paper-dev-content",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "Paper API 总览枢纽，以扁平链接清单列出命令、组件、事件、实体、容器、内容与生命周期等开发指南"
+    },
+    {
+      "id": "paper:dev/api/inventories/index",
+      "section": "paper",
+      "rel": "dev/api/inventories/index",
+      "url": "https://docs.papermc.io/paper/dev/api/inventories/",
+      "title": "Inventories",
+      "description": "",
+      "category": "paper-dev-content",
+      "order": 110,
+      "tags": [
+        "分组索引",
+        "容器 API"
+      ],
+      "summary": "容器相关 API 的文档分组入口，指向自定义容器持有者与菜单类型等内容"
+    },
+    {
+      "id": "paper:dev/api/lifecycle/index",
+      "section": "paper",
+      "rel": "dev/api/lifecycle/index",
+      "url": "https://docs.papermc.io/paper/dev/api/lifecycle/",
+      "title": "Lifecycle API（总览）",
+      "description": "",
+      "category": "paper-dev-content",
+      "order": 180,
+      "tags": [
+        "分组索引",
+        "生命周期 API"
+      ],
+      "summary": "生命周期 API 的文档分组入口，指向生命周期事件与数据包发现等相关页面"
+    },
+    {
+      "id": "paper:dev/chat-events/index",
+      "section": "paper",
+      "rel": "dev/chat-events/index",
+      "url": "https://docs.papermc.io/paper/dev/chat-events/",
+      "title": "Chat events",
+      "description": "An outline on AsyncChatEvent and how to handle it.",
+      "category": "paper-dev-component",
+      "order": 60,
+      "tags": [
+        "消息与通信",
+        "文本组件"
+      ],
+      "summary": "讲解 AsyncChatEvent 的用法与聊天渲染器机制，实现自定义格式的聊天消息显示"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/adventure/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/adventure/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/adventure/",
+      "title": "Adventure",
+      "description": "Documentation for all arguments returning Adventure API objects.",
+      "category": "paper-dev-command",
+      "order": 190,
+      "tags": [
+        "命令",
+        "文本组件"
+      ],
+      "summary": "返回 Adventure 对象的命令参数，包括组件、按键、命名颜色与样式参数的使用示例"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/entity-player/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/entity-player/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/entity-player/",
+      "title": "Entities and players",
+      "description": "Player and Entity arguments documentation.",
+      "category": "paper-dev-command",
+      "order": 130,
+      "tags": [
+        "命令",
+        "实体 API"
+      ],
+      "summary": "实体与玩家类命令参数文档，给出单个目标与多目标的用法示例与游戏内效果预览"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/enums/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/enums/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/enums/",
+      "title": "Enums",
+      "description": "Documentation for EntityAnchor, GameMode and similar enum value arguments.",
+      "category": "paper-dev-command",
+      "order": 150,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "枚举类命令参数文档，涵盖实体锚点、游戏模式、高度图与计分板显示位等固定取值"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/location/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/location/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/location/",
+      "title": "Location",
+      "description": "BlockPosition, FinePosition and World argument documentation.",
+      "category": "paper-dev-command",
+      "order": 140,
+      "tags": [
+        "命令",
+        "世界配置"
+      ],
+      "summary": "位置类命令参数文档，说明方块坐标、精确坐标与世界参数的使用方式与示例"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/minecraft/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/minecraft/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/minecraft/",
+      "title": "Minecraft-specific",
+      "description": "Everything regarding the essential Brigadier arguments.",
+      "category": "paper-dev-command",
+      "order": 120,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "介绍 Brigadier 内置的核心参数类型，快速总览 Minecraft 原生支持的各种取值"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/paper/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/paper/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/paper/",
+      "title": "Paper-specific",
+      "description": "Documentation for arguments handling miscellaneous Paper API values.",
+      "category": "paper-dev-command",
+      "order": 170,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "Paper 特有的命令参数类型，涵盖方块状态、物品、命名空间键与时间等取值"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/predicate/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/predicate/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/predicate/",
+      "title": "Predicates",
+      "description": "Documentation for arguments that allow value validation.",
+      "category": "paper-dev-command",
+      "order": 160,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "用于取值校验的命令参数，包括整数与浮点范围以及物品谓词参数的用法示例"
+    },
+    {
+      "id": "paper:dev/command-api/arguments/registry/index",
+      "section": "paper",
+      "rel": "dev/command-api/arguments/registry/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/arguments/registry/",
+      "title": "Registry",
+      "description": "Documentation for arguments retrieving registry values.",
+      "category": "paper-dev-command",
+      "order": 180,
+      "tags": [
+        "命令",
+        "物品与数据"
+      ],
+      "summary": "从注册表取值的命令参数，比较资源参数与资源键参数并说明各自的适用场景"
+    },
+    {
+      "id": "paper:dev/command-api/basics/argument-suggestions/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/argument-suggestions/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/argument-suggestions/",
+      "title": "Suggestions",
+      "description": "Documentation about defining custom argument suggestions.",
+      "category": "paper-dev-command",
+      "order": 90,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "自定义命令参数的补全建议，介绍 SuggestionProvider 与 SuggestionsBuilder 的用法"
+    },
+    {
+      "id": "paper:dev/command-api/basics/arguments-and-literals/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/arguments-and-literals/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/arguments-and-literals/",
+      "title": "Arguments and literals",
+      "description": "An extensive guide to command arguments and literals.",
+      "category": "paper-dev-command",
+      "order": 50,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "详解命令树中的字面量与参数节点，以及布尔、数字、字符串等参数类型的解析规则"
+    },
+    {
+      "id": "paper:dev/command-api/basics/command-tree/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/command-tree/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/command-tree/",
+      "title": "Command trees",
+      "description": "An extensive guide to building up a command tree.",
+      "category": "paper-dev-command",
+      "order": 40,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "讲解如何用链式调用构建命令树，把子命令、参数与执行逻辑组织成清晰的结构"
+    },
+    {
+      "id": "paper:dev/command-api/basics/custom-arguments/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/custom-arguments/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/custom-arguments/",
+      "title": "Custom arguments",
+      "description": "Guide on custom arguments.",
+      "category": "paper-dev-command",
+      "order": 100,
+      "tags": [
+        "命令",
+        "插件体系"
+      ],
+      "summary": "实现自定义参数类型，介绍 CustomArgumentType 接口、泛型转换与建议阶段的错误处理"
+    },
+    {
+      "id": "paper:dev/command-api/basics/executors/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/executors/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/executors/",
+      "title": "Executors",
+      "description": "A guide to execution logic for Brigadier commands.",
+      "category": "paper-dev-command",
+      "order": 70,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "说明 executes 方法的执行逻辑，并以飞行速度命令为例演示参数读取与逻辑分层"
+    },
+    {
+      "id": "paper:dev/command-api/basics/introduction/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/introduction/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/introduction/",
+      "title": "Introduction（命令 API）",
+      "description": "A guide to Paper's Brigadier command API.",
+      "category": "paper-dev-command",
+      "order": 30,
+      "tags": [
+        "命令",
+        "Brigadier",
+        "插件开发"
+      ],
+      "summary": "介绍 Paper 基于 Brigadier 的命令 API，说明它与旧版 Bukkit 命令注册方式的关系"
+    },
+    {
+      "id": "paper:dev/command-api/basics/registration/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/registration/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/registration/",
+      "title": "Registration",
+      "description": "A guide to registering Brigadier commands.",
+      "category": "paper-dev-command",
+      "order": 60,
+      "tags": [
+        "命令",
+        "生命周期 API"
+      ],
+      "summary": "如何在插件引导类或主类中注册 Brigadier 命令，并借助生命周期事件管理器注册命令"
+    },
+    {
+      "id": "paper:dev/command-api/basics/requirements/index",
+      "section": "paper",
+      "rel": "dev/command-api/basics/requirements/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/basics/requirements/",
+      "title": "Requirements",
+      "description": "A guide to setting requirements for commands.",
+      "category": "paper-dev-command",
+      "order": 80,
+      "tags": [
+        "权限",
+        "命令"
+      ],
+      "summary": "为命令设置执行条件与权限，包括进阶判定、自动重载与限制特定来源使用命令"
+    },
+    {
+      "id": "paper:dev/command-api/misc/basic-command/index",
+      "section": "paper",
+      "rel": "dev/command-api/misc/basic-command/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/misc/basic-command/",
+      "title": "Basic commands",
+      "description": "An overview of a Bukkit-style command declaration using Brigadier.",
+      "category": "paper-dev-command",
+      "order": 210,
+      "tags": [
+        "命令",
+        "兼容性"
+      ],
+      "summary": "用 Brigadier 声明 Bukkit 风格命令的写法，介绍可选方法、注册方式与广播命令示例"
+    },
+    {
+      "id": "paper:dev/command-api/misc/comparison-bukkit-brigadier/index",
+      "section": "paper",
+      "rel": "dev/command-api/misc/comparison-bukkit-brigadier/index",
+      "url": "https://docs.papermc.io/paper/dev/command-api/misc/comparison-bukkit-brigadier/",
+      "title": "Comparison",
+      "description": "A comparison between Brigadier and Bukkit commands.",
+      "category": "paper-dev-command",
+      "order": 220,
+      "tags": [
+        "命令",
+        "Brigadier",
+        "插件体系"
+      ],
+      "summary": "对比 Brigadier 与旧版 Bukkit 命令的注册方式与结构差异，帮助老插件平滑迁移"
+    },
+    {
+      "id": "paper:dev/component-api/audiences/index",
+      "section": "paper",
+      "rel": "dev/component-api/audiences/index",
+      "url": "https://docs.papermc.io/paper/dev/component-api/audiences/",
+      "title": "Audiences",
+      "description": "How to use Adventure's Audiences.",
+      "category": "paper-dev-component",
+      "order": 30,
+      "tags": [
+        "消息与通信",
+        "文本组件"
+      ],
+      "summary": "Adventure 的 Audience 抽象入门：谁算受众、广播组如何分发消息、可以投递哪些操作"
+    },
+    {
+      "id": "paper:dev/component-api/i18n/index",
+      "section": "paper",
+      "rel": "dev/component-api/i18n/index",
+      "url": "https://docs.papermc.io/paper/dev/component-api/i18n/",
+      "title": "Internationalization",
+      "description": "How to use Adventure's internationalization.",
+      "category": "paper-dev-component",
+      "order": 40,
+      "tags": [
+        "文本组件",
+        "消息与通信"
+      ],
+      "summary": "用 Adventure 的国际化能力为插件文本提供多语言翻译，并说明生效范围与示例"
+    },
+    {
+      "id": "paper:dev/component-api/introduction/index",
+      "section": "paper",
+      "rel": "dev/component-api/introduction/index",
+      "url": "https://docs.papermc.io/paper/dev/component-api/introduction/",
+      "title": "Introduction（组件 API）",
+      "description": "An introduction to how components work.",
+      "category": "paper-dev-component",
+      "order": 20,
+      "tags": [
+        "文本组件",
+        "消息与通信"
+      ],
+      "summary": "介绍 Paper 的文本组件体系，说明组件的创建方式、MiniMessage 与各序列化器的用途"
+    },
+    {
+      "id": "paper:dev/component-api/signed-messages/index",
+      "section": "paper",
+      "rel": "dev/component-api/signed-messages/index",
+      "url": "https://docs.papermc.io/paper/dev/component-api/signed-messages/",
+      "title": "Signed messages",
+      "description": "A guide to working with SignedMessage objects.",
+      "category": "paper-dev-component",
+      "order": 50,
+      "tags": [
+        "消息与通信",
+        "备份与安全"
+      ],
+      "summary": "处理签名消息对象，说明如何在代码中获取与使用它以支持可撤回的玩家发言"
+    },
+    {
+      "id": "paper:dev/custom-events/index",
+      "section": "paper",
+      "rel": "dev/custom-events/index",
+      "url": "https://docs.papermc.io/paper/dev/custom-events/",
+      "title": "Custom events",
+      "description": "A guide to show you how to add custom events to your plugin.",
+      "category": "paper-dev-content",
+      "order": 40,
+      "tags": [
+        "事件 API",
+        "插件体系"
+      ],
+      "summary": "为插件创建自定义事件，说明事件类的定义方式、触发流程与可取消事件的实现"
+    },
+    {
+      "id": "paper:dev/custom-inventory-holder/index",
+      "section": "paper",
+      "rel": "dev/custom-inventory-holder/index",
+      "url": "https://docs.papermc.io/paper/dev/custom-inventory-holder/",
+      "title": "Custom InventoryHolders",
+      "description": "How to use a custom InventoryHolder to identify custom inventories.",
+      "category": "paper-dev-content",
+      "order": 120,
+      "tags": [
+        "容器 API",
+        "插件开发"
+      ],
+      "summary": "使用自定义 InventoryHolder 标识自建界面，并在事件中区分界面与存取附带数据"
+    },
+    {
+      "id": "paper:dev/data-component-api/index",
+      "section": "paper",
+      "rel": "dev/data-component-api/index",
+      "url": "https://docs.papermc.io/paper/dev/data-component-api/",
+      "title": "Data components",
+      "description": "A guide to the ItemStack data component API.",
+      "category": "paper-dev-content",
+      "order": 140,
+      "tags": [
+        "物品与数据",
+        "插件开发"
+      ],
+      "summary": "物品数据组件 API 指南，讲解组件原型与补丁模型以及与 ItemMeta 的关键差异"
+    },
+    {
+      "id": "paper:dev/debugging/index",
+      "section": "paper",
+      "rel": "dev/debugging/index",
+      "url": "https://docs.papermc.io/paper/dev/debugging/",
+      "title": "Debugging your plugin",
+      "description": "Debugging is common when writing code. This guide outlines the common ways to debug your plugin.",
+      "category": "paper-dev-tools",
+      "order": 20,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "调试插件的常见手段，包括控制台输出、远程调试器配置与避免看门狗超时中断"
+    },
+    {
+      "id": "paper:dev/dialogs/index",
+      "section": "paper",
+      "rel": "dev/dialogs/index",
+      "url": "https://docs.papermc.io/paper/dev/dialogs/",
+      "title": "Dialog API",
+      "description": "A guide to the dialog API introduced in 1.21.7.",
+      "category": "paper-dev-content",
+      "order": 210,
+      "tags": [
+        "容器 API",
+        "界面交互"
+      ],
+      "summary": "对话框 API 指南，说明如何向玩家展示对话框、构建动态对话框并注册到注册表"
+    },
+    {
+      "id": "paper:dev/display-entities/index",
+      "section": "paper",
+      "rel": "dev/display-entities/index",
+      "url": "https://docs.papermc.io/paper/dev/display-entities/",
+      "title": "Display entities",
+      "description": "The display entity API and how to use it.",
+      "category": "paper-dev-content",
+      "order": 90,
+      "tags": [
+        "实体 API",
+        "界面交互"
+      ],
+      "summary": "显示实体 API 的用法，涵盖文本、方块与物品显示实体以及变换与插值动画"
+    },
+    {
+      "id": "paper:dev/entity-pathfinder/index",
+      "section": "paper",
+      "rel": "dev/entity-pathfinder/index",
+      "url": "https://docs.papermc.io/paper/dev/entity-pathfinder/",
+      "title": "Entity Pathfinder API",
+      "description": "A guide to the Entity Pathfinder API.",
+      "category": "paper-dev-content",
+      "order": 80,
+      "tags": [
+        "实体 API",
+        "插件开发"
+      ],
+      "summary": "实体寻路 API 指南，说明如何获取寻路组件、设置寻路规则以及中途停止寻路"
+    },
+    {
+      "id": "paper:dev/entity-teleport/index",
+      "section": "paper",
+      "rel": "dev/entity-teleport/index",
+      "url": "https://docs.papermc.io/paper/dev/entity-teleport/",
+      "title": "Teleportation",
+      "description": "The entity teleportation API and how to use it.",
+      "category": "paper-dev-content",
+      "order": 70,
+      "tags": [
+        "实体 API",
+        "插件开发"
+      ],
+      "summary": "实体传送 API 的用法，介绍朝向控制、相对传送与保留骑乘者等传送标志位含义"
+    },
+    {
+      "id": "paper:dev/event-listeners/index",
+      "section": "paper",
+      "rel": "dev/event-listeners/index",
+      "url": "https://docs.papermc.io/paper/dev/event-listeners/",
+      "title": "Listeners",
+      "description": "Developer guide for how to listen to the broadcasted events.",
+      "category": "paper-dev-content",
+      "order": 30,
+      "tags": [
+        "事件 API",
+        "插件开发"
+      ],
+      "summary": "编写事件监听器的基础指南，含 @EventHandler 用法、注册、优先级与事件取消处理"
+    },
+    {
+      "id": "paper:dev/folia-support/index",
+      "section": "paper",
+      "rel": "dev/folia-support/index",
+      "url": "https://docs.papermc.io/paper/dev/folia-support/",
+      "title": "Supporting Paper and Folia",
+      "description": "How to support both Folia and Paper within your plugin.",
+      "category": "paper-dev-basics",
+      "order": 90,
+      "tags": [
+        "调度与并发",
+        "兼容性"
+      ],
+      "summary": "如何让插件同时兼容 Paper 与 Folia，包括标记支持、运行时检测与四种调度器的用法"
+    },
+    {
+      "id": "paper:dev/getting-started/index",
+      "section": "paper",
+      "rel": "dev/getting-started/index",
+      "url": "https://docs.papermc.io/paper/dev/getting-started/",
+      "title": "Getting started（开发入门）",
+      "description": "",
+      "category": "paper-dev-basics",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "插件开发入门章节的索引页，指引从工程搭建到 Paper 插件体系的起步内容"
+    },
+    {
+      "id": "paper:dev/getting-started/paper-plugins/index",
+      "section": "paper",
+      "rel": "dev/getting-started/paper-plugins/index",
+      "url": "https://docs.papermc.io/paper/dev/getting-started/paper-plugins/",
+      "title": "Paper plugins（开发指南）",
+      "description": "A development guide for how to write Paper-specific plugins.",
+      "category": "paper-dev-basics",
+      "order": 50,
+      "tags": [
+        "插件体系",
+        "插件开发"
+      ],
+      "summary": "编写 Paper 专属插件的开发指南，介绍引导类与加载器以及相对 Bukkit 插件的关键差异"
+    },
+    {
+      "id": "paper:dev/handler-lists/index",
+      "section": "paper",
+      "rel": "dev/handler-lists/index",
+      "url": "https://docs.papermc.io/paper/dev/handler-lists/",
+      "title": "Handler lists",
+      "description": "An explanation to what an event's HandlerList is.",
+      "category": "paper-dev-content",
+      "order": 50,
+      "tags": [
+        "事件 API",
+        "插件开发"
+      ],
+      "summary": "解释事件的 HandlerList 是什么，如何获取它以及如何动态注销已注册的监听器"
+    },
+    {
+      "id": "paper:dev/how-do-plugins-work/index",
+      "section": "paper",
+      "rel": "dev/how-do-plugins-work/index",
+      "url": "https://docs.papermc.io/paper/dev/how-do-plugins-work/",
+      "title": "How plugins work",
+      "description": "How plugins work in Paper.",
+      "category": "paper-dev-basics",
+      "order": 30,
+      "tags": [
+        "插件体系",
+        "生命周期 API"
+      ],
+      "summary": "说明 Paper 插件的运行机制与生命周期：初始化、启用与禁用流程以及各功能调用时机"
+    },
+    {
+      "id": "paper:dev/index",
+      "section": "paper",
+      "rel": "dev/index",
+      "url": "https://docs.papermc.io/paper/dev/",
+      "title": "Development",
+      "description": "",
+      "category": "paper-dev-basics",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "Paper 插件开发文档总览，按入门、API 与杂项给出学习路径和推荐阅读顺序"
+    },
+    {
+      "id": "paper:dev/internals/index",
+      "section": "paper",
+      "rel": "dev/internals/index",
+      "url": "https://docs.papermc.io/paper/dev/internals/",
+      "title": "Minecraft internals",
+      "description": "A brief overview of how to use internals in your plugin.",
+      "category": "paper-dev-tools",
+      "order": 50,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "如何在插件中访问 Minecraft 内部代码 NMS，介绍反射、映射与服务端版本获取方式"
+    },
+    {
+      "id": "paper:dev/lifecycle/datapacks/index",
+      "section": "paper",
+      "rel": "dev/lifecycle/datapacks/index",
+      "url": "https://docs.papermc.io/paper/dev/lifecycle/datapacks/",
+      "title": "Datapack discovery",
+      "description": "A guide to including datapacks in your plugin and registering them with the lifecycle API.",
+      "category": "paper-dev-content",
+      "order": 200,
+      "tags": [
+        "生命周期 API",
+        "插件开发"
+      ],
+      "summary": "在插件中内置数据包并通过生命周期 API 注册，包括发现事件处理与加载结果校验"
+    },
+    {
+      "id": "paper:dev/lifecycle/index",
+      "section": "paper",
+      "rel": "dev/lifecycle/index",
+      "url": "https://docs.papermc.io/paper/dev/lifecycle/",
+      "title": "Lifecycle API",
+      "description": "An introduction to Paper's Lifecycle API.",
+      "category": "paper-dev-content",
+      "order": 190,
+      "tags": [
+        "生命周期 API",
+        "插件开发"
+      ],
+      "summary": "生命周期 API 入门，说明生命周期事件管理器、事件种类、优先级与注册方式"
+    },
+    {
+      "id": "paper:dev/menu-type-api/index",
+      "section": "paper",
+      "rel": "dev/menu-type-api/index",
+      "url": "https://docs.papermc.io/paper/dev/menu-type-api/",
+      "title": "Menu Type API",
+      "description": "A guide to the Menu Type API.",
+      "category": "paper-dev-content",
+      "order": 130,
+      "tags": [
+        "容器 API",
+        "界面交互"
+      ],
+      "summary": "菜单类型 API 指南，说明如何用菜单类型构建容器视图并打开带菜单的方块界面"
+    },
+    {
+      "id": "paper:dev/misc/index",
+      "section": "paper",
+      "rel": "dev/misc/index",
+      "url": "https://docs.papermc.io/paper/dev/misc/",
+      "title": "Miscellaneous（开发杂项）",
+      "description": "",
+      "category": "paper-dev-tools",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "调试与工具"
+      ],
+      "summary": "开发文档的杂项索引，汇总数据库、调试、服务端内部代码与堆栈阅读等实用主题"
+    },
+    {
+      "id": "paper:dev/mob-goals/index",
+      "section": "paper",
+      "rel": "dev/mob-goals/index",
+      "url": "https://docs.papermc.io/paper/dev/mob-goals/",
+      "title": "Mob Goal API",
+      "description": "A guide to the Mob Goal API.",
+      "category": "paper-dev-content",
+      "order": 100,
+      "tags": [
+        "实体 API",
+        "插件开发"
+      ],
+      "summary": "生物目标 API 指南，说明如何给实体添加目标、编写自定义目标以及移除已有目标"
+    },
+    {
+      "id": "paper:dev/particles/index",
+      "section": "paper",
+      "rel": "dev/particles/index",
+      "url": "https://docs.papermc.io/paper/dev/particles/",
+      "title": "Particles",
+      "description": "A comprehensive guide to particle spawning.",
+      "category": "paper-dev-content",
+      "order": 220,
+      "tags": [
+        "界面交互",
+        "世界配置"
+      ],
+      "summary": "粒子生成综合指南，详解数量参数行为、定向粒子以及随机与指定方向的实现方式"
+    },
+    {
+      "id": "paper:dev/pdc/index",
+      "section": "paper",
+      "rel": "dev/pdc/index",
+      "url": "https://docs.papermc.io/paper/dev/pdc/",
+      "title": "Persistent data container (PDC)",
+      "description": "A guide to the PDC API for storing data.",
+      "category": "paper-dev-content",
+      "order": 150,
+      "tags": [
+        "物品与数据",
+        "插件开发"
+      ],
+      "summary": "持久化数据容器 PDC 的用法，说明如何把数据存到物品、实体或区块等对象上"
+    },
+    {
+      "id": "paper:dev/plugin-configurations/index",
+      "section": "paper",
+      "rel": "dev/plugin-configurations/index",
+      "url": "https://docs.papermc.io/paper/dev/plugin-configurations/",
+      "title": "Plugin configuration",
+      "description": "How to create configuration files for your plugins to customize behavior.",
+      "category": "paper-dev-basics",
+      "order": 70,
+      "tags": [
+        "配置",
+        "插件开发"
+      ],
+      "summary": "为插件编写 config.yml 的方法，包括读写配置数据与创建自定义配置文件结构"
+    },
+    {
+      "id": "paper:dev/plugin-messaging/index",
+      "section": "paper",
+      "rel": "dev/plugin-messaging/index",
+      "url": "https://docs.papermc.io/paper/dev/plugin-messaging/",
+      "title": "Plugin messaging",
+      "description": "How to communicate with clients or proxies.",
+      "category": "paper-dev-content",
+      "order": 230,
+      "tags": [
+        "消息与通信",
+        "插件开发"
+      ],
+      "summary": "插件消息通道的使用方法，用于与客户端或代理端通信，含 BungeeCord 兼容通道说明"
+    },
+    {
+      "id": "paper:dev/plugin-yml/index",
+      "section": "paper",
+      "rel": "dev/plugin-yml/index",
+      "url": "https://docs.papermc.io/paper/dev/plugin-yml/",
+      "title": "plugin.yml",
+      "description": "A guide to Bukkit's plugin.yml file.",
+      "category": "paper-dev-basics",
+      "order": 60,
+      "tags": [
+        "plugin.yml",
+        "插件体系",
+        "参考手册"
+      ],
+      "summary": "Bukkit 插件清单 plugin.yml 各字段详解，包括主类、依赖、加载顺序与命令权限声明"
+    },
+    {
+      "id": "paper:dev/project-setup/index",
+      "section": "paper",
+      "rel": "dev/project-setup/index",
+      "url": "https://docs.papermc.io/paper/dev/project-setup/",
+      "title": "Project setup",
+      "description": "Step-by-step instructions on how to set up a plugin development environment.",
+      "category": "paper-dev-basics",
+      "order": 40,
+      "tags": [
+        "工程搭建",
+        "插件开发"
+      ],
+      "summary": "手把手搭建插件开发环境：新建 Gradle/Maven 工程、添加 Paper 依赖、配置源码目录与主类"
+    },
+    {
+      "id": "paper:dev/reading-stacktraces/index",
+      "section": "paper",
+      "rel": "dev/reading-stacktraces/index",
+      "url": "https://docs.papermc.io/paper/dev/reading-stacktraces/",
+      "title": "Reading stacktraces",
+      "description": "Stacktraces are produced by the JVM when an exception occurs. This guide will discuss the basics of how to read them.",
+      "category": "paper-dev-tools",
+      "order": 30,
+      "tags": [
+        "调试与工具",
+        "排错"
+      ],
+      "summary": "讲解如何阅读 JVM 抛出的堆栈信息，理解异常结构并据此定位插件报错的源头"
+    },
+    {
+      "id": "paper:dev/recipes/index",
+      "section": "paper",
+      "rel": "dev/recipes/index",
+      "url": "https://docs.papermc.io/paper/dev/recipes/",
+      "title": "Recipes",
+      "description": "How to create and manage recipes.",
+      "category": "paper-dev-content",
+      "order": 170,
+      "tags": [
+        "物品与数据",
+        "插件开发"
+      ],
+      "summary": "创建与管理合成配方的指南，涵盖有序配方与无序配方的定义方式与常用方法"
+    },
+    {
+      "id": "paper:dev/registries/index",
+      "section": "paper",
+      "rel": "dev/registries/index",
+      "url": "https://docs.papermc.io/paper/dev/registries/",
+      "title": "Registries",
+      "description": "A guide to registries and their modification on Paper.",
+      "category": "paper-dev-content",
+      "order": 160,
+      "tags": [
+        "物品与数据",
+        "插件开发"
+      ],
+      "summary": "注册表 API 指南，说明如何读取注册表取值并新增或修改注册表条目来扩展内容"
+    },
+    {
+      "id": "paper:dev/roadmap/index",
+      "section": "paper",
+      "rel": "dev/roadmap/index",
+      "url": "https://docs.papermc.io/paper/dev/roadmap/",
+      "title": "Roadmap",
+      "description": "Outlines the future intents and plans of the Paper project.",
+      "category": "paper-dev-tools",
+      "order": 70,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "Paper 项目的未来规划与弃用策略说明，帮助开发者提前规避即将移除的 API"
+    },
+    {
+      "id": "paper:dev/scheduler/index",
+      "section": "paper",
+      "rel": "dev/scheduler/index",
+      "url": "https://docs.papermc.io/paper/dev/scheduler/",
+      "title": "Scheduling",
+      "description": "A guide on how to use BukkitScheduler to run code at specific times.",
+      "category": "paper-dev-basics",
+      "order": 80,
+      "tags": [
+        "调度与并发",
+        "性能调优"
+      ],
+      "summary": "使用 BukkitScheduler 安排延时与循环任务，并区分同步任务与异步任务的适用场景"
+    },
+    {
+      "id": "paper:dev/userdev/index",
+      "section": "paper",
+      "rel": "dev/userdev/index",
+      "url": "https://docs.papermc.io/paper/dev/userdev/",
+      "title": "paperweight-userdev",
+      "description": "A guide on how to use the paperweight-userdev Gradle plugin to access internal code.",
+      "category": "paper-dev-tools",
+      "order": 60,
+      "tags": [
+        "调试与工具",
+        "工程搭建"
+      ],
+      "summary": "使用 paperweight-userdev Gradle 插件搭建可访问服务端内部代码的开发环境与重混淆流程"
+    },
+    {
+      "id": "paper:dev/using-databases/index",
+      "section": "paper",
+      "rel": "dev/using-databases/index",
+      "url": "https://docs.papermc.io/paper/dev/using-databases/",
+      "title": "Using databases",
+      "description": "Databases are the recommended way to store a large amount of data. This guide outlines a few key details.",
+      "category": "paper-dev-tools",
+      "order": 40,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "插件中使用数据库的建议，对比 SQL 与 NoSQL、文件型与独立数据库并强调防注入"
+    },
+    {
+      "id": "paper:faq/index",
+      "section": "paper",
+      "rel": "faq/index",
+      "url": "https://docs.papermc.io/paper/faq/",
+      "title": "Frequently asked questions",
+      "description": "Questions frequently asked by our community, answered by us!",
+      "category": "paper-start",
+      "order": 80,
+      "tags": [
+        "排错",
+        "安装启动"
+      ],
+      "summary": "社区高频问题汇总，当前主要说明启动时提示不支持的 Java 版本应当如何处理"
+    },
+    {
+      "id": "paper:getting-started/index",
+      "section": "paper",
+      "rel": "getting-started/index",
+      "url": "https://docs.papermc.io/paper/getting-started/",
+      "title": "Getting started",
+      "description": "How to get started with downloading and setting up a Paper server.",
+      "category": "paper-start",
+      "order": 30,
+      "tags": [
+        "安装启动",
+        "服主运维"
+      ],
+      "summary": "从下载 Paper 到首次启动服务端的完整流程，含 Java 版本要求、启动脚本与后续更新建议"
+    },
+    {
+      "id": "paper:index",
+      "section": "paper",
+      "rel": "index",
+      "url": "https://docs.papermc.io/paper/",
+      "title": "Paper Documentation",
+      "description": "",
+      "category": "paper-start",
+      "order": 10,
+      "tags": [
+        "分区导航",
+        "服主运维"
+      ],
+      "summary": "Paper 文档离线镜像的首页，给出管理、开发与贡献三条主线入口以及各类指南的阅读起点"
+    },
+    {
+      "id": "paper:migration/index",
+      "section": "paper",
+      "rel": "migration/index",
+      "url": "https://docs.papermc.io/paper/migration/",
+      "title": "Migrating to or from Paper",
+      "description": "It's simple to migrate your server to or from Paper. This page will help you get started.",
+      "category": "paper-start",
+      "order": 70,
+      "tags": [
+        "迁移",
+        "兼容性"
+      ],
+      "summary": "原版、Fabric/Forge、Spigot/CraftBukkit 与 Paper 之间双向迁移的步骤与数据兼容注意点"
+    },
+    {
+      "id": "paper:misc/paper-bug-fixes/index",
+      "section": "paper",
+      "rel": "misc/paper-bug-fixes/index",
+      "url": "https://docs.papermc.io/paper/misc/paper-bug-fixes/",
+      "title": "Bug fixes",
+      "description": "An explanation of which Vanilla bugs we fix in Paper.",
+      "category": "paper-ops",
+      "order": 60,
+      "tags": [
+        "兼容性",
+        "排错"
+      ],
+      "summary": "列出 Paper 修复的原版缺陷，并区分哪些是刻意保留的原版行为、哪些属于复制类漏洞"
+    },
+    {
+      "id": "paper:misc/update-checker/index",
+      "section": "paper",
+      "rel": "misc/update-checker/index",
+      "url": "https://docs.papermc.io/paper/misc/update-checker/",
+      "title": "Update checker",
+      "description": "Documentation for Paper's built-in automatic update checker.",
+      "category": "paper-ops",
+      "order": 50,
+      "tags": [
+        "安装启动",
+        "配置"
+      ],
+      "summary": "说明 Paper 内置的自动更新检查机制、上报内容以及如何通过配置关闭它"
+    },
+    {
+      "id": "paper:next-steps/index",
+      "section": "paper",
+      "rel": "next-steps/index",
+      "url": "https://docs.papermc.io/paper/next-steps/",
+      "title": "Next steps",
+      "description": "How to proceed after starting your server.",
+      "category": "paper-start",
+      "order": 50,
+      "tags": [
+        "服主运维",
+        "备份与安全"
+      ],
+      "summary": "服务端跑起来之后的下一步：配置、插件、白名单与权限、备份、优化以及对外开服注意事项"
+    },
+    {
+      "id": "paper:profiling/index",
+      "section": "paper",
+      "rel": "profiling/index",
+      "url": "https://docs.papermc.io/paper/profiling/",
+      "title": "Profiling",
+      "description": "How to profile your Paper server.",
+      "category": "paper-ops",
+      "order": 90,
+      "tags": [
+        "性能调优",
+        "服主运维"
+      ],
+      "summary": "介绍用 spark 与 Timings 定位服务端卡顿来源的方法，是性能调优前的必备诊断步骤"
+    },
+    {
+      "id": "paper:reference/bukkit-commands-configuration/index",
+      "section": "paper",
+      "rel": "reference/bukkit-commands-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/bukkit-commands-configuration/",
+      "title": "commands.yml",
+      "description": "An explanation of Bukkit's commands.yml file.",
+      "category": "paper-config",
+      "order": 70,
+      "tags": [
+        "参考手册",
+        "配置",
+        "权限"
+      ],
+      "summary": "说明 commands.yml 如何自定义命令别名与权限覆盖，用于屏蔽或转发原版指令"
+    },
+    {
+      "id": "paper:reference/bukkit-configuration/index",
+      "section": "paper",
+      "rel": "reference/bukkit-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/bukkit-configuration/",
+      "title": "bukkit.yml",
+      "description": "An explanation of Bukkit's configuration file.",
+      "category": "paper-config",
+      "order": 50,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "逐项说明 Bukkit 的 bukkit.yml 配置，涵盖区块加载、刷怪上限与连接节流等设置"
+    },
+    {
+      "id": "paper:reference/bukkit-help-configuration/index",
+      "section": "paper",
+      "rel": "reference/bukkit-help-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/bukkit-help-configuration/",
+      "title": "help.yml",
+      "description": "An explanation of Bukkit's help.yml file.",
+      "category": "paper-config",
+      "order": 90,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "说明 help.yml 如何改写 /help 的输出内容、排列顺序与按权限过滤的帮助条目"
+    },
+    {
+      "id": "paper:reference/bukkit-permissions-configuration/index",
+      "section": "paper",
+      "rel": "reference/bukkit-permissions-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/bukkit-permissions-configuration/",
+      "title": "permissions.yml",
+      "description": "An explanation of Bukkit's permissions.yml file.",
+      "category": "paper-config",
+      "order": 80,
+      "tags": [
+        "参考手册",
+        "权限"
+      ],
+      "summary": "说明 permissions.yml 如何为默认权限与子权限做集中声明，简化插件的权限配置"
+    },
+    {
+      "id": "paper:reference/cli-arguments/index",
+      "section": "paper",
+      "rel": "reference/cli-arguments/index",
+      "url": "https://docs.papermc.io/paper/reference/cli-arguments/",
+      "title": "CLI Arguments",
+      "description": "Reference for all CLI arguments Paper recognizes.",
+      "category": "paper-ref",
+      "order": 20,
+      "tags": [
+        "启动参数",
+        "参考手册"
+      ],
+      "summary": "Paper 识别的全部命令行参数参考，用于在启动脚本中调整运行方式与调试行为"
+    },
+    {
+      "id": "paper:reference/commands/index",
+      "section": "paper",
+      "rel": "reference/commands/index",
+      "url": "https://docs.papermc.io/paper/reference/commands/",
+      "title": "Commands",
+      "description": "Documentation about all commands added by Paper.",
+      "category": "paper-ref",
+      "order": 40,
+      "tags": [
+        "命令",
+        "服主运维",
+        "参考手册"
+      ],
+      "summary": "Paper 与 Bukkit 提供的全部服务端命令说明，含性能分析命令与重新启动指令及别名"
+    },
+    {
+      "id": "paper:reference/configuration/index",
+      "section": "paper",
+      "rel": "reference/configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/configuration/",
+      "title": "Configuration",
+      "description": "An overview of Paper's configuration files.",
+      "category": "paper-config",
+      "order": 10,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "服务端目录与配置文件的总览，说明每个文件的作用，并解释按世界覆盖的默认值、逐世界值与继承模型"
+    },
+    {
+      "id": "paper:reference/global-configuration/index",
+      "section": "paper",
+      "rel": "reference/global-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/global-configuration/",
+      "title": "Global configuration",
+      "description": "An explanation of Paper's global configuration file.",
+      "category": "paper-config",
+      "order": 20,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "逐项说明 config/paper-global.yml 的全局配置选项，影响所有世界的整体服务端行为"
+    },
+    {
+      "id": "paper:reference/paper-plugins/index",
+      "section": "paper",
+      "rel": "reference/paper-plugins/index",
+      "url": "https://docs.papermc.io/paper/reference/paper-plugins/",
+      "title": "Paper plugins（加载机制）",
+      "description": "A guide to the ins and outs of Paper plugins.",
+      "category": "paper-ops",
+      "order": 70,
+      "tags": [
+        "插件体系",
+        "排错"
+      ],
+      "summary": "Paper 插件的加载机制说明：与 Bukkit 插件的区别、循环加载导致关服的原因与兼容开关"
+    },
+    {
+      "id": "paper:reference/permissions/index",
+      "section": "paper",
+      "rel": "reference/permissions/index",
+      "url": "https://docs.papermc.io/paper/reference/permissions/",
+      "title": "Permissions",
+      "description": "All permissions available in the default Paper server.",
+      "category": "paper-ref",
+      "order": 50,
+      "tags": [
+        "权限",
+        "参考手册",
+        "服主运维"
+      ],
+      "summary": "默认 Paper 服务端全部可用权限节点清单，按原版、Bukkit 与 Paper 命令权限分组"
+    },
+    {
+      "id": "paper:reference/server-properties/index",
+      "section": "paper",
+      "rel": "reference/server-properties/index",
+      "url": "https://docs.papermc.io/paper/reference/server-properties/",
+      "title": "server.properties",
+      "description": "An explanation of Minecraft's server.properties file.",
+      "category": "paper-config",
+      "order": 40,
+      "tags": [
+        "参考手册",
+        "配置",
+        "兼容性"
+      ],
+      "summary": "解释 Minecraft 原版 server.properties 各项属性的含义、取值范围与生效方式"
+    },
+    {
+      "id": "paper:reference/spigot-configuration/index",
+      "section": "paper",
+      "rel": "reference/spigot-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/spigot-configuration/",
+      "title": "spigot.yml",
+      "description": "An explanation of Spigot's configuration file.",
+      "category": "paper-config",
+      "order": 60,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "逐项说明 Spigot 的 spigot.yml 配置，包括实体合并、视野距离与各世界默认设置"
+    },
+    {
+      "id": "paper:reference/system-properties/index",
+      "section": "paper",
+      "rel": "reference/system-properties/index",
+      "url": "https://docs.papermc.io/paper/reference/system-properties/",
+      "title": "System properties",
+      "description": "Documentation for the system properties and environment variables Paper may check.",
+      "category": "paper-ref",
+      "order": 30,
+      "tags": [
+        "启动参数",
+        "参考手册"
+      ],
+      "summary": "汇总 Paper 会读取的 JVM 系统属性与环境变量，并给出每个开关的作用与配置方式"
+    },
+    {
+      "id": "paper:reference/vanilla-data-files/index",
+      "section": "paper",
+      "rel": "reference/vanilla-data-files/index",
+      "url": "https://docs.papermc.io/paper/reference/vanilla-data-files/",
+      "title": "Vanilla data files",
+      "description": "An explanation of Minecraft's data files.",
+      "category": "paper-config",
+      "order": 100,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "说明 eula.txt、白名单、封禁列表、ops.json 等原版数据文件的格式与用途"
+    },
+    {
+      "id": "paper:reference/world-configuration/index",
+      "section": "paper",
+      "rel": "reference/world-configuration/index",
+      "url": "https://docs.papermc.io/paper/reference/world-configuration/",
+      "title": "World configuration",
+      "description": "An explanation of Paper's world configuration file.",
+      "category": "paper-config",
+      "order": 30,
+      "tags": [
+        "参考手册",
+        "世界配置"
+      ],
+      "summary": "逐项说明 config/paper-world-defaults.yml 的世界级配置，并解释按世界覆盖与继承规则"
+    },
+    {
+      "id": "paper:updating/index",
+      "section": "paper",
+      "rel": "updating/index",
+      "url": "https://docs.papermc.io/paper/updating/",
+      "title": "Updating",
+      "description": "Paper has new features and fixes coming every day, this guide explains the updating process.",
+      "category": "paper-start",
+      "order": 60,
+      "tags": [
+        "安装启动",
+        "备份与安全"
+      ],
+      "summary": "讲解 Paper 的更新流程，强调先备份、再更新插件、最后替换服务端核心的三步顺序"
+    },
+    {
+      "id": "paper:vanilla/index",
+      "section": "paper",
+      "rel": "vanilla/index",
+      "url": "https://docs.papermc.io/paper/vanilla/",
+      "title": "Vanilla-like experience",
+      "description": "This page lists all changes that result in a different experience than Vanilla.",
+      "category": "paper-config",
+      "order": 110,
+      "tags": [
+        "兼容性",
+        "配置"
+      ],
+      "summary": "汇总 Paper 相对原版在行为上的差异，按 server.properties 与各配置文件逐项对照列出"
+    },
+    {
+      "id": "velocity:admin/getting-started/index",
+      "section": "velocity",
+      "rel": "admin/getting-started/index",
+      "url": "https://docs.papermc.io/velocity/admin/getting-started/",
+      "title": "Getting started（管理入门）",
+      "description": "",
+      "category": "velocity-start",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "安装启动"
+      ],
+      "summary": "代理端管理入门索引页，列出安装、选型说明、玩家信息转发与常见问题四类起步页面"
+    },
+    {
+      "id": "velocity:admin/how-to/index",
+      "section": "velocity",
+      "rel": "admin/how-to/index",
+      "url": "https://docs.papermc.io/velocity/admin/how-to/",
+      "title": "How-to guides（管理）",
+      "description": "",
+      "category": "velocity-admin",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "服主运维"
+      ],
+      "summary": "操作指南索引，汇总性能调优、后端安全加固与版本迁移三篇实战主题页面"
+    },
+    {
+      "id": "velocity:admin/index",
+      "section": "velocity",
+      "rel": "admin/index",
+      "url": "https://docs.papermc.io/velocity/admin/",
+      "title": "Administration",
+      "description": "",
+      "category": "velocity-admin",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "服主运维"
+      ],
+      "summary": "Velocity 管理文档总览页，按入门、操作指南与参考三部分列出服主需要的内容"
+    },
+    {
+      "id": "velocity:admin/reference/index",
+      "section": "velocity",
+      "rel": "admin/reference/index",
+      "url": "https://docs.papermc.io/velocity/admin/reference/",
+      "title": "Reference",
+      "description": "",
+      "category": "velocity-config",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "参考手册"
+      ],
+      "summary": "代理端参考手册索引页，列出配置、系统属性、内置命令、服务器兼容、代理对比与依赖库清单六类条目"
+    },
+    {
+      "id": "velocity:built-in-commands/index",
+      "section": "velocity",
+      "rel": "built-in-commands/index",
+      "url": "https://docs.papermc.io/velocity/built-in-commands/",
+      "title": "Built-in commands",
+      "description": "A list of the built-in commands with explanations.",
+      "category": "velocity-config",
+      "order": 40,
+      "tags": [
+        "命令",
+        "参考手册"
+      ],
+      "summary": "代理端内置命令清单及说明，含 /velocity 子命令、服务器切换与在线玩家列表等指令"
+    },
+    {
+      "id": "velocity:comparisons-to-other-proxies/index",
+      "section": "velocity",
+      "rel": "comparisons-to-other-proxies/index",
+      "url": "https://docs.papermc.io/velocity/comparisons-to-other-proxies/",
+      "title": "Comparing with other proxies",
+      "description": "A comparison of Velocity to other proxies.",
+      "category": "velocity-start",
+      "order": 50,
+      "tags": [
+        "服主运维",
+        "兼容性"
+      ],
+      "summary": "把 Velocity 与 BungeeCord、Waterfall 等代理方案逐项对比，解释设计取舍与迁移代价"
+    },
+    {
+      "id": "velocity:configuration/index",
+      "section": "velocity",
+      "rel": "configuration/index",
+      "url": "https://docs.papermc.io/velocity/configuration/",
+      "title": "Configuring Velocity",
+      "description": "Velocity is designed to be easy to configure and this guide will walk you through how to do so.",
+      "category": "velocity-config",
+      "order": 20,
+      "tags": [
+        "参考手册",
+        "配置"
+      ],
+      "summary": "velocity.toml 配置详解，逐节说明服务器列表、强制主机、高级与查询等配置项含义"
+    },
+    {
+      "id": "velocity:credits/index",
+      "section": "velocity",
+      "rel": "credits/index",
+      "url": "https://docs.papermc.io/velocity/credits/",
+      "title": "Libraries used",
+      "description": "The credits for all the different libraries used by Velocity.",
+      "category": "velocity-config",
+      "order": 50,
+      "tags": [
+        "参考手册",
+        "工程搭建"
+      ],
+      "summary": "列出 Velocity 使用的开源库、作者与许可证信息，便于合规审查与二次开发参考"
+    },
+    {
+      "id": "velocity:dev/api-basics/index",
+      "section": "velocity",
+      "rel": "dev/api-basics/index",
+      "url": "https://docs.papermc.io/velocity/dev/api-basics/",
+      "title": "Velocity plugin basics",
+      "description": "How to get started with the Velocity API.",
+      "category": "velocity-dev-basics",
+      "order": 50,
+      "tags": [
+        "插件体系",
+        "插件开发"
+      ],
+      "summary": "代理端插件基础：主插件类的编写、@Plugin 信息填写与插件数据目录的获取方式"
+    },
+    {
+      "id": "velocity:dev/api/index",
+      "section": "velocity",
+      "rel": "dev/api/index",
+      "url": "https://docs.papermc.io/velocity/dev/api/",
+      "title": "API",
+      "description": "",
+      "category": "velocity-dev-api",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "Velocity API 文档分组入口，汇总事件、调度器、命令与插件消息四类开发指南"
+    },
+    {
+      "id": "velocity:dev/command-api/index",
+      "section": "velocity",
+      "rel": "dev/command-api/index",
+      "url": "https://docs.papermc.io/velocity/dev/command-api/",
+      "title": "Command API",
+      "description": "How to create commands within Velocity.",
+      "category": "velocity-dev-api",
+      "order": 20,
+      "tags": [
+        "命令",
+        "Brigadier"
+      ],
+      "summary": "代理端命令 API 指南，对比 Brigadier 与 SimpleCommand 等三种命令的实现方式"
+    },
+    {
+      "id": "velocity:dev/creating-your-first-plugin/index",
+      "section": "velocity",
+      "rel": "dev/creating-your-first-plugin/index",
+      "url": "https://docs.papermc.io/velocity/dev/creating-your-first-plugin/",
+      "title": "Creating your first plugin",
+      "description": "How to create your first plugin with the Velocity API.",
+      "category": "velocity-dev-basics",
+      "order": 40,
+      "tags": [
+        "工程搭建",
+        "插件开发"
+      ],
+      "summary": "创建第一个代理端插件：环境搭建、IDE 工程设置、依赖声明与构建系统配置"
+    },
+    {
+      "id": "velocity:dev/dependency-management/index",
+      "section": "velocity",
+      "rel": "dev/dependency-management/index",
+      "url": "https://docs.papermc.io/velocity/dev/dependency-management/",
+      "title": "Dependency management",
+      "description": "How to handle dependencies within your Velocity plugin.",
+      "category": "velocity-dev-basics",
+      "order": 70,
+      "tags": [
+        "工程搭建",
+        "插件开发"
+      ],
+      "summary": "插件的依赖管理方式，区分插件间依赖、可选依赖与外部库的引入与打包策略"
+    },
+    {
+      "id": "velocity:dev/event-api/index",
+      "section": "velocity",
+      "rel": "dev/event-api/index",
+      "url": "https://docs.papermc.io/velocity/dev/event-api/",
+      "title": "Working with events",
+      "description": "How to listen for events in Velocity.",
+      "category": "velocity-dev-api",
+      "order": 30,
+      "tags": [
+        "事件 API",
+        "调度与并发"
+      ],
+      "summary": "代理端事件系统：编写监听方法、事件优先级、注册监听器、异步处理与自定义事件"
+    },
+    {
+      "id": "velocity:dev/getting-started/index",
+      "section": "velocity",
+      "rel": "dev/getting-started/index",
+      "url": "https://docs.papermc.io/velocity/dev/getting-started/",
+      "title": "Getting started（开发入门）",
+      "description": "",
+      "category": "velocity-dev-basics",
+      "order": 20,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "插件开发入门章节的索引页，指引从环境搭建到写出第一个代理端插件的起步内容"
+    },
+    {
+      "id": "velocity:dev/how-to/index",
+      "section": "velocity",
+      "rel": "dev/how-to/index",
+      "url": "https://docs.papermc.io/velocity/dev/how-to/",
+      "title": "How-to guides（开发）",
+      "description": "",
+      "category": "velocity-dev-basics",
+      "order": 30,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "开发侧操作指南索引页，指向依赖管理与从 Velocity 1.x 迁移插件这两篇实用主题页面"
+    },
+    {
+      "id": "velocity:dev/index",
+      "section": "velocity",
+      "rel": "dev/index",
+      "url": "https://docs.papermc.io/velocity/dev/",
+      "title": "Development",
+      "description": "",
+      "category": "velocity-dev-basics",
+      "order": 10,
+      "tags": [
+        "分组索引",
+        "插件开发"
+      ],
+      "summary": "Velocity 插件开发文档总览页，按入门、操作指南与 API 三部分给出学习路径"
+    },
+    {
+      "id": "velocity:dev/pitfalls/index",
+      "section": "velocity",
+      "rel": "dev/pitfalls/index",
+      "url": "https://docs.papermc.io/velocity/dev/pitfalls/",
+      "title": "Common pitfalls",
+      "description": "How to avoid common pitfalls within Velocity.",
+      "category": "velocity-dev-basics",
+      "order": 80,
+      "tags": [
+        "调试与工具",
+        "插件开发"
+      ],
+      "summary": "代理端开发中容易踩的坑，例如构造阶段访问 API、受众相关操作支持不完整等"
+    },
+    {
+      "id": "velocity:dev/plugin-messaging/index",
+      "section": "velocity",
+      "rel": "dev/plugin-messaging/index",
+      "url": "https://docs.papermc.io/velocity/dev/plugin-messaging/",
+      "title": "Plugin messaging",
+      "description": "How to handle and send plugin messages on Velocity.",
+      "category": "velocity-dev-api",
+      "order": 50,
+      "tags": [
+        "消息与通信",
+        "插件开发"
+      ],
+      "summary": "代理端插件消息处理，覆盖与玩家、后端服务器之间四个方向的消息收发与兼容通道"
+    },
+    {
+      "id": "velocity:dev/porting-plugins-from-velocity-1/index",
+      "section": "velocity",
+      "rel": "dev/porting-plugins-from-velocity-1/index",
+      "url": "https://docs.papermc.io/velocity/dev/porting-plugins-from-velocity-1/",
+      "title": "Porting your plugin from Velocity 1.x.x",
+      "description": "How to port your plugin from Velocity 1.x.x to modern API.",
+      "category": "velocity-dev-api",
+      "order": 60,
+      "tags": [
+        "迁移",
+        "插件开发"
+      ],
+      "summary": "把插件从 Velocity 1.x 迁移到现代 API：Java 版本要求、旧依赖移除与异步事件系统变更"
+    },
+    {
+      "id": "velocity:dev/scheduler-api/index",
+      "section": "velocity",
+      "rel": "dev/scheduler-api/index",
+      "url": "https://docs.papermc.io/velocity/dev/scheduler-api/",
+      "title": "Using the scheduler",
+      "description": "A guide to the Scheduler API within Velocity allowing tasks to be run.",
+      "category": "velocity-dev-api",
+      "order": 40,
+      "tags": [
+        "调度与并发",
+        "插件开发"
+      ],
+      "summary": "调度器 API 指南，说明如何安排延时任务、循环任务与立即执行任务并获取已有任务"
+    },
+    {
+      "id": "velocity:dev/velocity-plugin-json/index",
+      "section": "velocity",
+      "rel": "dev/velocity-plugin-json/index",
+      "url": "https://docs.papermc.io/velocity/dev/velocity-plugin-json/",
+      "title": "The Velocity plugin file",
+      "description": "A full reference of the velocity-plugin.json file.",
+      "category": "velocity-dev-basics",
+      "order": 60,
+      "tags": [
+        "插件体系",
+        "插件开发"
+      ],
+      "summary": "velocity-plugin.json 清单文件完整参考，逐字段说明插件名、版本、作者与依赖声明"
+    },
+    {
+      "id": "velocity:faq/index",
+      "section": "velocity",
+      "rel": "faq/index",
+      "url": "https://docs.papermc.io/velocity/faq/",
+      "title": "Frequently asked questions",
+      "description": "Frequently asked Velocity administration questions.",
+      "category": "velocity-start",
+      "order": 70,
+      "tags": [
+        "排错",
+        "安装启动"
+      ],
+      "summary": "代理端常见问题解答，涵盖 Java 版本要求、插件来源、转发报错与无法连接等排查"
+    },
+    {
+      "id": "velocity:getting-started/index",
+      "section": "velocity",
+      "rel": "getting-started/index",
+      "url": "https://docs.papermc.io/velocity/getting-started/",
+      "title": "Getting started",
+      "description": "How to install and set up a minimal configuration of Velocity.",
+      "category": "velocity-start",
+      "order": 30,
+      "tags": [
+        "安装启动",
+        "兼容性"
+      ],
+      "summary": "安装并完成最小化配置的完整流程：安装 Java、下载 Velocity、首次启动与配置后端服务器"
+    },
+    {
+      "id": "velocity:index",
+      "section": "velocity",
+      "rel": "index",
+      "url": "https://docs.papermc.io/velocity/",
+      "title": "Velocity Documentation",
+      "description": "",
+      "category": "velocity-start",
+      "order": 10,
+      "tags": [
+        "分区导航",
+        "服主运维"
+      ],
+      "summary": "Velocity 文档离线镜像的首页，给出入门、管理与开发文档的入口以及求助渠道"
+    },
+    {
+      "id": "velocity:migration/index",
+      "section": "velocity",
+      "rel": "migration/index",
+      "url": "https://docs.papermc.io/velocity/migration/",
+      "title": "Migration guide",
+      "description": "How to migrate your proxy between different Velocity versions.",
+      "category": "velocity-start",
+      "order": 60,
+      "tags": [
+        "迁移",
+        "安装启动"
+      ],
+      "summary": "Velocity 自身的版本迁移指南，当前覆盖从 1.0.x 升级到 1.1.0 时需要留意与调整的事项"
+    },
+    {
+      "id": "velocity:player-information-forwarding/index",
+      "section": "velocity",
+      "rel": "player-information-forwarding/index",
+      "url": "https://docs.papermc.io/velocity/player-information-forwarding/",
+      "title": "Configuring player information forwarding",
+      "description": "How to configure information forwarding on Velocity.",
+      "category": "velocity-net",
+      "order": 10,
+      "tags": [
+        "消息与通信",
+        "配置"
+      ],
+      "summary": "配置玩家信息转发，含面向 Paper、Fabric、Forge 的 modern forwarding 与传统兼容模式"
+    },
+    {
+      "id": "velocity:reference/system-properties/index",
+      "section": "velocity",
+      "rel": "reference/system-properties/index",
+      "url": "https://docs.papermc.io/velocity/reference/system-properties/",
+      "title": "System properties",
+      "description": "Documentation for the system properties and environment variables Velocity may check.",
+      "category": "velocity-config",
+      "order": 30,
+      "tags": [
+        "启动参数",
+        "参考手册"
+      ],
+      "summary": "Velocity 会读取的系统属性与环境变量清单，说明各自作用与设置方式"
+    },
+    {
+      "id": "velocity:security/index",
+      "section": "velocity",
+      "rel": "security/index",
+      "url": "https://docs.papermc.io/velocity/security/",
+      "title": "Securing your servers",
+      "description": "An explanation of how to secure your servers.",
+      "category": "velocity-net",
+      "order": 30,
+      "tags": [
+        "备份与安全",
+        "兼容性"
+      ],
+      "summary": "加固后端服务器：操作系统防火墙、启用 modern forwarding、仅监听本地与加密隧道"
+    },
+    {
+      "id": "velocity:server-compatibility/index",
+      "section": "velocity",
+      "rel": "server-compatibility/index",
+      "url": "https://docs.papermc.io/velocity/server-compatibility/",
+      "title": "Server compatibility",
+      "description": "A guide to the server compatibility for Velocity.",
+      "category": "velocity-net",
+      "order": 20,
+      "tags": [
+        "兼容性",
+        "消息与通信"
+      ],
+      "summary": "列出 Velocity 兼容的游戏版本与后端类型，涵盖原版、Spigot、Paper 与各类模组服"
+    },
+    {
+      "id": "velocity:tuning/index",
+      "section": "velocity",
+      "rel": "tuning/index",
+      "url": "https://docs.papermc.io/velocity/tuning/",
+      "title": "Tuning Velocity",
+      "description": "How to tune Velocity to allow for even better performance.",
+      "category": "velocity-admin",
+      "order": 30,
+      "tags": [
+        "性能调优",
+        "启动参数"
+      ],
+      "summary": "调优代理端性能：部署平台选择、内存与堆大小分配、启动参数以及垃圾回收器取舍"
+    },
+    {
+      "id": "velocity:why-velocity/index",
+      "section": "velocity",
+      "rel": "why-velocity/index",
+      "url": "https://docs.papermc.io/velocity/why-velocity/",
+      "title": "What does Velocity do for me?",
+      "description": "An explanation for why you should run Velocity.",
+      "category": "velocity-start",
+      "order": 40,
+      "tags": [
+        "服主运维",
+        "性能调优"
+      ],
+      "summary": "说明选用 Velocity 的理由，从玩家体验、性能设计与安全性和模组支持等角度展开"
+    }
+  ]
+}

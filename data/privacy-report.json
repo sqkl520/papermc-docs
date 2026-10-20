@@ -1,0 +1,526 @@
+{
+  "schema": 1,
+  "generated_at": "2026-10-20T15:31:50.047Z",
+  "scanner": "tools/privacy-scan.js",
+  "root": "<repo>",
+  "file_set": {
+    "mode": "gitignore-walker",
+    "include_ignored": false,
+    "files": 713,
+    "scanned_text_files": 640,
+    "skipped_binary": 72,
+    "skipped_too_large": 0,
+    "skipped_self_output": 1,
+    "self_output_note": "data/privacy-report.json 是本扫描器的输出，must_fix / files_with_hits / rules / history 均不含命中片段原文，故不纳入扫描",
+    "ignored_paths": 3
+  },
+  "summary": {
+    "must_fix": 0,
+    "public_url": 310,
+    "loopback_ok": 109,
+    "upstream": 86,
+    "suppressed_must_fix": 4,
+    "must_fix_files": 0,
+    "total_hits": 505
+  },
+  "buckets": {
+    "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
+    "public-url": "② 正当公网信息：仓库所有者自己的公开地址（github.io / github.com 上的仓库页）",
+    "loopback-ok": "② 正当信息：回环地址（本机回环主机名与 127.0.0.0/8 地址）——任何机器上语义相同，不含可识别本机的信息",
+    "upstream": "③ 上游内容：archive/** 的上游正文 / HTML / 快照 / markdown，禁止修改，仅统计（archive/<section> 下 4 类自生成元数据除外）"
+  },
+  "rules": [
+    {
+      "id": "win-abs-path",
+      "note": "Windows 绝对路径（转义写法：盘符 + 双反斜杠，JSON / 源码字符串里常见）",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "win-abs-path-raw",
+      "note": "Windows 绝对路径（明文写法：盘符 + 单反斜杠）",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "temp-path",
+      "note": "临时目录引用",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "user-name",
+      "note": "本机用户名",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "owner-handle",
+      "note": "账号 / 仓库所有者标识（出现在公网地址里属正当信息）",
+      "total": 310,
+      "must_fix": 0,
+      "public_url": 310,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "owner-email",
+      "note": "个人邮箱",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "localhost",
+      "note": "回环地址 / 本机服务地址",
+      "total": 195,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 109,
+      "upstream": 86
+    },
+    {
+      "id": "server-path",
+      "note": "本机目录片段",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "id": "project-abs",
+      "note": "本机项目绝对路径片段",
+      "total": 0,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 0
+    }
+  ],
+  "must_fix": [],
+  "files_with_hits": [
+    {
+      "file": "sitemap.xml",
+      "total": 138,
+      "must_fix": 0,
+      "public_url": 138,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "file": "tools/gh-pages-smoke.js",
+      "total": 27,
+      "must_fix": 0,
+      "public_url": 2,
+      "loopback_ok": 25,
+      "upstream": 0
+    },
+    {
+      "file": "assets/search-index.js",
+      "total": 14,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 14,
+      "upstream": 0
+    },
+    {
+      "file": "search-index.json",
+      "total": 14,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 14,
+      "upstream": 0
+    },
+    {
+      "file": "archive/_common/llms-full.txt",
+      "total": 12,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 12
+    },
+    {
+      "file": "archive/velocity/html/security/index.html",
+      "total": 12,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 12
+    },
+    {
+      "file": "tools/verify-site.js",
+      "total": 12,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 12,
+      "upstream": 0
+    },
+    {
+      "file": "archive/velocity/_corpus/velocity-corpus.md",
+      "total": 11,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 11
+    },
+    {
+      "file": "archive/velocity/velocity-docs-all.md",
+      "total": 11,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 11
+    },
+    {
+      "file": "velocity/security/index.html",
+      "total": 10,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 9,
+      "upstream": 0
+    },
+    {
+      "file": "README.md",
+      "total": 8,
+      "must_fix": 0,
+      "public_url": 7,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "archive/velocity/html/getting-started/index.html",
+      "total": 7,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 7
+    },
+    {
+      "file": "tools/verify-nav.js",
+      "total": 7,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 7,
+      "upstream": 0
+    },
+    {
+      "file": "archive/velocity/markdown/security/index.md",
+      "total": 5,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 5
+    },
+    {
+      "file": "archive/velocity/source/security/index.md",
+      "total": 5,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 5
+    },
+    {
+      "file": "velocity/getting-started/index.html",
+      "total": 5,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
+      "file": "archive/velocity/markdown/getting-started/index.md",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 4
+    },
+    {
+      "file": "archive/velocity/source/getting-started/index.md",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 4
+    },
+    {
+      "file": "tools/privacy-scan.js",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
+      "file": "tools/serve.js",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
+      "file": "tools/live-smoke.js",
+      "total": 3,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 2,
+      "upstream": 0
+    },
+    {
+      "file": "archive/paper/html/dev/using-databases/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 2
+    },
+    {
+      "file": "archive/paper/paper-docs-all.md",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 2
+    },
+    {
+      "file": "archive/velocity/html/faq/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 2
+    },
+    {
+      "file": "data/build-manifest.json",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 2,
+      "upstream": 0
+    },
+    {
+      "file": "paper/dev/using-databases/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "paper/reference/server-properties/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "tools/site/layout.js",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 2,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "file": "tools/url-parity.js",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 2,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "file": "velocity/configuration/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "velocity/faq/index.html",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "QUALITY.md",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 1,
+      "upstream": 0
+    },
+    {
+      "file": "all-pages.html",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 0,
+      "upstream": 0
+    },
+    {
+      "file": "archive/paper/html/reference/server-properties/index.html",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 1
+    },
+    {
+      "file": "archive/paper/markdown/dev/using-databases/index.md",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 1
+    },
+    {
+      "file": "archive/paper/markdown/reference/server-properties/index.md",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 1
+    },
+    {
+      "file": "archive/paper/source/dev/using-databases/index.md",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 1
+    },
+    {
+      "file": "archive/velocity/html/configuration/index.html",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 0,
+      "upstream": 1
+    },
+    {
+      "file": "archive/velocity/manifest.json",
+      "total": 1,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 1,
+      "upstream": 0
+    }
+  ],
+  "verdict": {
+    "clean": true,
+    "exit_code": 0,
+    "statement": "通过：仓库中不存在必须修复的本机痕迹。"
+  },
+  "history": [
+    {
+      "at": "2026-10-20T11:30:52.246Z",
+      "files": 706,
+      "must_fix": 7,
+      "public_url": 10,
+      "loopback_ok": 104,
+      "upstream": 139,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T11:32:50.775Z",
+      "files": 707,
+      "must_fix": 7,
+      "public_url": 10,
+      "loopback_ok": 108,
+      "upstream": 139,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T12:06:20.912Z",
+      "files": 864,
+      "must_fix": 0,
+      "public_url": 31,
+      "loopback_ok": 154,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T12:58:36.009Z",
+      "files": 712,
+      "must_fix": 1,
+      "public_url": 307,
+      "loopback_ok": 113,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-20T13:27:19.159Z",
+      "files": 715,
+      "must_fix": 0,
+      "public_url": 307,
+      "loopback_ok": 113,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T14:07:20.558Z",
+      "files": 714,
+      "must_fix": 0,
+      "public_url": 307,
+      "loopback_ok": 113,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T14:26:53.736Z",
+      "files": 715,
+      "must_fix": 0,
+      "public_url": 309,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T14:28:10.601Z",
+      "files": 715,
+      "must_fix": 0,
+      "public_url": 309,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-20T15:31:50.047Z",
+      "files": 713,
+      "must_fix": 0,
+      "public_url": 310,
+      "loopback_ok": 109,
+      "upstream": 86,
+      "clean": true
+    }
+  ]
+}
