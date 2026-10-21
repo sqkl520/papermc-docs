@@ -330,30 +330,50 @@
     return c;
   }
 
-  /* 红队 F6/M3 第二步：正文预筛位图（单字 + 相邻双字哈希）。
-     位图只用来跳过“肯定没有”的正文；出现假阳性时照旧走精确 indexOf，
+  /* 红队 F6/M3 第二步 + 本轮性能修复：每条目一张「全部可检索字符串」位图（单字 + 相邻双字哈希）。
+     位图覆盖 directScore/partScore 真正会 indexOf 的每个串（标题/摘要/小节/分类复合串/元字段复合串/
+     标签串/正文），并额外保留一份「正文子位图」，因此一份构建两用：
+       ① 按键路径的条目级预筛（跳过「任一路径都不可能命中」的条目）；
+       ② 正文 indexOf 前的跳过判定。
+     位图只用来跳过「肯定没有」的条目：出现假阳性时照旧走精确 indexOf，
      因此命中集合、分数与排序与改造前完全一致。 */
   var BITS = (typeof WeakMap === 'function') ? new WeakMap() : null;
   var BIT_WORDS = 1024;
   var BIT_MASK = (BIT_WORDS << 5) - 1;
   var BODY_IDX = new Map();
+  /* 只有全部条目的位图都建好后才启用预筛，否则退化为全量扫描（绝不漏条目） */
+  var BITS_READY = false;
   function hbits(s, i, n) {
     var h = 2166136261;
     for (var k = 0; k < n; k++) { h ^= s.charCodeAt(i + k); h = (h * 16777619) >>> 0; }
     return h & BIT_MASK;
   }
-  function bodyBits(e) {
-    var bits = BITS ? BITS.get(e) : null;
-    if (bits) return bits;
-    bits = new Uint32Array(BIT_WORDS);
-    var x = lc(e).x;
-    for (var i = 0; i < x.length; i++) {
-      var h1 = hbits(x, i, 1);
-      bits[h1 >>> 5] |= (1 << (h1 & 31));
-      if (i + 1 < x.length) { var h2 = hbits(x, i, 2); bits[h2 >>> 5] |= (1 << (h2 & 31)); }
+  function entryBits(e) {
+    var rec = BITS ? BITS.get(e) : null;
+    if (rec) return rec;
+    var c = lc(e);
+    var kw = e.kw || [];
+    /* head 里逐项都是 score() 会查的串（c=分类名+空格+分类描述，m=摘要/标签/分类/分类描述/拉丁词元），
+       拼成一个 hay 后：字段命中 ⇒ 该子串在 hay 里仍连续 ⇒ 其单字/双字位必然被置位。 */
+    var head = [c.t, c.u, c.h, c.c, c.m, kw.join(' ')].join('\u0001');
+    var hay = head + '\u0001' + c.x;
+    var bodyStart = head.length + 1;
+    var all = new Uint32Array(BIT_WORDS);
+    var body = new Uint32Array(BIT_WORDS);
+    for (var i = 0; i < hay.length; i++) {
+      var inBody = i >= bodyStart;
+      var h1 = hbits(hay, i, 1);
+      all[h1 >>> 5] |= (1 << (h1 & 31));
+      if (inBody) body[h1 >>> 5] |= (1 << (h1 & 31));
+      if (i + 1 < hay.length) {
+        var h2 = hbits(hay, i, 2);
+        all[h2 >>> 5] |= (1 << (h2 & 31));
+        if (inBody) body[h2 >>> 5] |= (1 << (h2 & 31));
+      }
     }
-    if (BITS) BITS.set(e, bits);
-    return bits;
+    rec = { a: all, b: body };
+    if (BITS) BITS.set(e, rec);
+    return rec;
   }
   function bitMayHave(bits, term) {
     var n = term.length;
@@ -369,7 +389,7 @@
     if (!m) { m = new Map(); BODY_IDX.set(term, m); }
     if (m.has(e)) return m.get(e);
     var x = lc(e).x;
-    var idx = (!x || !bitMayHave(bodyBits(e), term)) ? -1 : x.indexOf(term);
+    var idx = (!x || !bitMayHave(entryBits(e).b, term)) ? -1 : x.indexOf(term);
     m.set(e, idx);
     return idx;
   }
@@ -378,13 +398,47 @@
     return false;
   }
   function resetScanCache() { BODY_IDX = new Map(); }
-  /** 索引就绪后分片预热位图，避免首次按键承担 72MB 扫描（每片 <12ms） */
+  /** 短语的一个 part 是否可能命中：直接子串 或 其拉丁别名 */
+  function partMayMatch(bits, part) {
+    if (bitMayHave(bits, part)) return true;
+    var al = ALIASES[part];
+    if (al) for (var i = 0; i < al.length; i++) if (al[i] && bitMayHave(bits, al[i])) return true;
+    return false;
+  }
+  /** termScore() 的四条命中路径（直接子串 / 拉丁别名 / 受控短语分解 / 全部二字片段）里
+      是否至少有一条「可能」成交付；判据全部来自位图，因此只会多放行、绝不漏。 */
+  function termMayMatch(bits, q) {
+    if (bitMayHave(bits, q)) return true;
+    var al = ALIASES[q];
+    if (al) for (var i = 0; i < al.length; i++) if (al[i] && bitMayHave(bits, al[i])) return true;
+    var ph = PHRASE_BY_Q[q];
+    if (ph) {
+      var okPh = true;
+      for (var p = 0; p < ph.parts.length; p++) if (!partMayMatch(bits, ph.parts[p])) { okPh = false; break; }
+      if (okPh) return true;
+    }
+    if (q.length >= 3 && CJK.test(q)) {
+      var gs = bigrams(q);
+      for (var g = 0; g < gs.length; g++) if (!bitMayHave(bits, gs[g])) return false;
+      return true;
+    }
+    return false;
+  }
+  /** 条目级预筛：任一查询词都不可能命中 → 直接跳过 score() */
+  function entryMayMatch(e, terms) {
+    var bits = entryBits(e).a;
+    for (var i = 0; i < terms.length; i++) if (!termMayMatch(bits, terms[i])) return false;
+    return true;
+  }
+  /** 索引就绪后分片预热位图，避免首次按键承担 ~700KB 扫描（每片 <12ms）；
+      建完后 BITS_READY=true 才启用条目级预筛。 */
   function warmBodyBits() {
     var i = 0;
     (function step() {
       var t0 = Date.now();
-      while (i < INDEX.length && Date.now() - t0 < 12) { bodyBits(INDEX[i]); i++; }
+      while (i < INDEX.length && Date.now() - t0 < 12) { entryBits(INDEX[i]); i++; }
       if (i < INDEX.length) setTimeout(step, 0);
+      else BITS_READY = true;
     })();
   }
 
@@ -531,8 +585,10 @@
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
   function reEsc(s) { return String(s).replace(/[.*+?^$\{\}()|[\]\\]/g, '\\$&'); }
 
-  /** snippet always comes from the field that produced the hit, with the query highlighted */
-  function snippet(entry, terms, useBody) {
+  /** snippet always comes from the field that produced the hit, with the query highlighted.
+   *  本轮性能修复：高亮正则改为**每个查询编译一次**（原先每行每词都 new RegExp），
+   *  正则对象与语义（gi + reEsc + 替换串）与原先逐次构造完全一致。 */
+  function snippet(entry, terms, useBody, hl) {
     var l = lc(entry);
     var byBody = !!(useBody && entry.x);
     var text = byBody ? entry.x : (entry.u || entry.x || '');
@@ -549,7 +605,8 @@
     var s = (start > 0 ? '…' : '') + text.slice(start, start + 200);
     for (var j = 0; j < terms.length; j++) {
       if (!terms[j]) continue;
-      s = s.replace(new RegExp('(' + reEsc(terms[j]) + ')', 'gi'), '<mark class="sr-hit">$1</mark>');
+      var re = hl && hl[j] ? hl[j] : new RegExp('(' + reEsc(terms[j]) + ')', 'gi');
+      s = s.replace(re, '<mark class="sr-hit">$1</mark>');
     }
     return s;
   }
@@ -557,6 +614,7 @@
   var MAX_RESULTS = 40;
   /* 查询代次：切片的渲染任务用它判断「这一片是否已被新查询取代」（红队 M3 追加修复） */
   var searchGen = 0;
+  var searchRaf = window.requestAnimationFrame || function (f) { return setTimeout(f, 16); };
 
   function runSearch(q) {
     resetScanCache();
@@ -571,30 +629,42 @@
       ensureIndex(function () { runSearch(q); });
       return;
     }
-    list.innerHTML = '';
     if (!query) {
+      list.textContent = '';
       renderEmpty('输入关键词开始检索：中文支持子串与分词近似（如 <b>渲染</b>、<b>命令注册</b>、<b>插件加载</b>），英文支持前缀（如 <b>yaml</b>、<b>anti</b>）。');
       setCount('');
       return;
     }
     var terms = query.split(/\s+/).filter(Boolean);
     var hits = [];
+    /* 本轮性能修复：同步阶段只做纯计算 —— 先用全字段位图跳过「任一路径都不可能命中」的条目
+       （BITS_READY 前退化为全量扫描），再对剩下的条目照旧打分；命中集合/分数/排序不变。 */
+    var pre = BITS_READY;
     for (var i = 0; i < INDEX.length; i++) {
-      var r = score(INDEX[i], terms);
-      if (r && r.s > 0) hits.push({ e: INDEX[i], s: r.s, tier: r.tier, fields: r.fields, body: r.body });
+      var ent = INDEX[i];
+      if (pre && !entryMayMatch(ent, terms)) continue;
+      var r = score(ent, terms);
+      if (r && r.s > 0) hits.push({ e: ent, s: r.s, tier: r.tier, fields: r.fields, body: r.body });
     }
     hits.sort(compareHits);
     if (!hits.length) {
+      list.textContent = '';
       renderEmpty('没有匹配 <b>' + esc(q) + '</b> 的页面。试试更短的词、去掉标点，或改用英文关键词（如 <b>permission</b>、<b>tuning</b>）。');
       setCount('0 个结果');
       return;
     }
     var root = libraryRoot();
     var max = Math.min(hits.length, MAX_RESULTS);
-    /* 红队 M3 追加修复（2026-10-21 第二轮）：小写缓存/位图把「打分」降到 ~5–26ms，但 40 行结果
-       一次性插入仍会在 4x CPU 下产生 50–240ms 的长任务（CDP LayoutDuration 实测占主导，非 JS）。
-       这里把渲染切片：每片 ≤6 行且 ≤6ms 实时，片间让出主线程；最终 DOM（顺序/内容/条数/链接）
-       与一次性渲染逐项一致，命中集合与排序也不受影响。首行同步渲染，保证 Enter 立即导航可用。 */
+    var hl = new Array(terms.length);
+    for (var hz = 0; hz < terms.length; hz++) hl[hz] = terms[hz] ? new RegExp('(' + reEsc(terms[hz]) + ')', 'gi') : null;
+    /* 红队 M3（2026-10-21 第二轮）：把小写缓存/位图做进来后打分降到 ~5–26ms，但 40 行结果一次性插入
+       在 4x CPU 下仍是 50–240ms 长任务 → 改为分片渲染（每片 ≤3 行且 ≤4ms，片间让出主线程）。
+       本轮性能修复（2026-10-21 第三轮）：实测长任务里**没有 JS**，全部是 Layout/Paint/Layerize，
+       且 Paint 的裁剪矩形是整篇文档（Blink 失效追踪）→ 每加一行就重绘整篇文档。
+       因此把「清空 + 首行 + 计数」整体挪到下一帧：同步阶段不再有任何 DOM 写入，
+       按键路径上的长任务不再叠加"整篇文档重绘"；渲染侧再由 CSS 的 contain/content-visibility
+       （见 .search-dialog/.search-results/li）把单帧成本压到最小。
+       最终 DOM（顺序/内容/条数/链接/文案）与原先逐项一致，命中集合与排序不受影响。 */
     var gen = ++searchGen;
     var rendered = 0;
     var total = max;
@@ -613,21 +683,24 @@
       a.innerHTML = '<div class="sr-ttl">' + esc(e.t || '') + '</div>'
         + '<div class="sr-path">' + esc(e.sn || [e.s, e.c].filter(Boolean).join(' · ')) + '</div>'
         + (chips ? '<div class="sr-hits">' + chips + '</div>' : '')
-        + '<div class="sr-snip">' + (snippet(e, terms, hit.body) || esc(e.u || '')) + '</div>';
+        + '<div class="sr-snip">' + (snippet(e, terms, hit.body, hl) || esc(e.u || '')) + '</div>';
       li.appendChild(a);
       list.appendChild(li);
     }
-    if (total > 0) { renderOne(0); rendered = 1; }
-    paintCount();
-    if (rendered < total) {
-      (function step() {
-        if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
-        var t0 = Date.now();
-        var n = 0;
-        while (rendered < total && n < 3 && Date.now() - t0 < 4) { renderOne(rendered); rendered++; n++; }
-        if (rendered < total) setTimeout(step, 0);
-      })();
+    function step() {
+      if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
+      var t0 = Date.now();
+      var n = 0;
+      while (rendered < total && n < 3 && Date.now() - t0 < 4) { renderOne(rendered); rendered++; n++; }
+      if (rendered < total) setTimeout(step, 0);
     }
+    searchRaf(function () {
+      if (gen !== searchGen) return;
+      list.textContent = '';
+      if (total > 0) { renderOne(0); rendered = 1; }
+      paintCount();
+      if (rendered < total) step();
+    });
   }
 
   function setCount(text) {
@@ -806,6 +879,7 @@
     ALIASES = (data && data.aliases) || {};
     PHRASE_BY_Q = {};
     ((data && data.phrases) || []).forEach(function (p) { PHRASE_BY_Q[p.q] = p; });
+    BITS_READY = false;      /* 新索引 → 旧的位图缓存与预筛前提都失效 */
     try { warmBodyBits(); } catch (e) {}
   }
   function loadJsonFallback(done) {

@@ -391,13 +391,15 @@ table.allpages td.lnk{margin-top:.1rem}
 
 /* search dialog */
 .search-dialog{border:0;padding:0;border-radius:14px;width:min(760px,94vw);max-height:80vh;background:var(--bg);color:var(--fg);
-  box-shadow:var(--shadow);overflow:hidden}
+  box-shadow:var(--shadow);overflow:hidden;contain:paint}
 .search-dialog::backdrop{background:rgba(10,12,16,.45)}
 .search-box{display:flex;align-items:center;gap:.5rem;padding:.7rem .9rem;border-bottom:1px solid var(--border)}
 .search-box input{flex:1;border:0;outline:0;background:transparent;color:var(--fg);font-size:1rem;font-family:inherit}
 .search-hint{font-size:.75rem;color:var(--fg-muted)}
-.search-results{list-style:none;margin:0;padding:.3rem;max-height:62vh;overflow-y:auto}
-.search-results li{margin:0}
+/* 性能修复（本轮）：面板内失效不再外溢到整篇文档；视口外的结果行不参与排版/绘制。
+   DOM 内容、顺序、条数、链接与文案均不变，只改变渲染侧的成本。 */
+.search-results{list-style:none;margin:0;padding:.3rem;max-height:62vh;overflow-y:auto;contain:paint}
+.search-results li{margin:0;contain:paint;content-visibility:auto;contain-intrinsic-size:auto 96px}
 .search-results a{display:block;padding:.5rem .7rem;border-radius:10px;color:var(--fg)}
 .search-results a:hover,.search-results a.sel{background:var(--bg-soft);text-decoration:none}
 .sr-path{font-size:.74rem;color:var(--fg-muted)}

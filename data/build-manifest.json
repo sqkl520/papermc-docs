@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-21T15:29:57.042Z",
+  "generated_at": "2026-10-21T16:28:42.308Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -473,8 +473,8 @@
   "search": {
     "entries": 141,
     "bodyCapBytes": 524288,
-    "jsonBytes": 834784,
-    "jsBytes": 834892,
+    "jsonBytes": 823963,
+    "jsBytes": 824071,
     "attempts": [
       {
         "cap": 524288,
@@ -484,8 +484,6 @@
     "underCap": true,
     "truncatedPages": 0,
     "aliases": 32,
-    "precomputedPhrases": 690,
-    "pagesWithPhrases": 141,
     "jsonPath": "search-index.json",
     "jsPath": "assets/search-index.js"
   },
@@ -520,11 +518,11 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 43130
+        "bytes": 43446
       },
       "js": {
         "output": "assets/site.js",
-        "bytes": 42310
+        "bytes": 46585
       },
       "favicon": {
         "output": "assets/favicon.svg",
@@ -532,12 +530,12 @@
       },
       "searchJs": {
         "output": "assets/search-index.js",
-        "bytes": 834892
+        "bytes": 824071
       }
     },
     "searchIndexJson": {
       "output": "search-index.json",
-      "bytes": 834784
+      "bytes": 823963
     },
     "pageCount": 141,
     "categoryCount": 17,
@@ -12103,10 +12101,11 @@
       "warnings": 0
     }
   ],
-  "warningCount": 49,
+  "warningCount": 50,
   "warningsByKind": {
     "fragment-recovered": 47,
-    "fragment-unresolved": 2
+    "fragment-unresolved": 2,
+    "selftest-ranker-load": 1
   },
   "warnings": [
     {
@@ -12310,9 +12309,13 @@
       "from": "paper:dev/internals/index",
       "target": "paper:dev/userdev/index",
       "frag": "1205-and-beyond"
+    },
+    {
+      "kind": "selftest-ranker-load",
+      "message": "无法载入内置排序函数用于自测：window is not defined"
     }
   ],
   "timing_ms": {
-    "total": 7904
+    "total": 3740
   }
 }
