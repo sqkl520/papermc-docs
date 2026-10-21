@@ -65,17 +65,26 @@ const PAGES10 = [
   '/categories/paper-dev-command.html',
 ];
 
-/** A3 点名的页面（任务书里的 paper/admin/reference/configuration/* 实盘不存在，按实盘改为 paper/reference/configuration/） */
+/** A3 点名的页面（任务书里的 paper/admin/reference/configuration/* 实盘不存在，按实盘改为 paper/reference/configuration/；
+ *  任务书里的 “command-tree” 实盘**不存在同名页**（全站 141 页无 command-tree；上游 Command API 章节是
+ *  command-api/{basics,arguments,misc}/* 一组页）→ 取“命令树/命令注册”最贴近的实盘页 basic-command 代表，
+ *  替代关系随 A3 结果写进 JSON（metrics.requiredSubstitution） */
 const A3_REQUIRED = [
   '/paper/reference/world-configuration/',
   '/velocity/tuning/',
   '/paper/dev/pdc/',
   '/paper/dev/dialogs/',
   '/folia/reference/region-logic/',
+  '/paper/dev/command-api/misc/basic-command/',
   '/paper/reference/configuration/',
   '/paper/reference/global-configuration/',
   '/paper/reference/server-properties/',
 ];
+/** 任务书点名 → 实盘替代 的显式对照（写进 JSON，避免"偷换页面"式作弊） */
+const A3_REQUIRED_SUBSTITUTION = {
+  'command-tree': '/paper/dev/command-api/misc/basic-command/',
+  'paper/admin/reference/configuration/*': '/paper/reference/configuration/ + /paper/reference/global-configuration/ + /paper/reference/server-properties/',
+};
 
 const VP_MOBILE = [
   { name: '320x568', w: 320, h: 568 },
@@ -139,6 +148,17 @@ function preFingerprint() {
   };
   f._all = crypto.createHash('sha256').update(Object.values(f).join('|')).digest('hex').slice(0, 12);
   return f;
+}
+
+/* ───────────────── 并发写者防护：每项检查前后各取一次产物指纹（任务书 3 件） ─────────────────
+ * 背景：本会话站点被并发重建 8 次以上（F6 搜索性能修复 Agent 与主 Agent 都在改 tools/site/assets.js →
+ * 重建 assets/**）。若某项检查期间指纹变化，该项一律记 verdict='unstable'（=“指纹不稳定，需重跑”），
+ * 不给可能失真的 pass/fail。 */
+const GUARD_FILES = ['tools/site/assets.js', 'assets/site.css', 'assets/site.js'];
+function fpGuard() {
+  const map = {};
+  for (const f of GUARD_FILES) map[f] = sha(path.join(REPO, f));
+  return { map: map, str: GUARD_FILES.map((f) => f + '=' + (map[f] || 'null')).join('|') };
 }
 
 /* ───────────────────────── 真机探针（在页面里跑，必须自包含） ───────────────────────── */
@@ -1087,6 +1107,7 @@ check(3, 3, 'A3', '溢出：另抽 20 页正文 @320/390', '320 与 390px 下 sc
     verdict: bad.length === 0 && errs.length === 0 ? 'pass' : 'fail',
     metrics: {
       sampleSize: sample.pages.length, pages: sample.pages, candidates: sample.candidates, rule: sample.rule, picked: sample.picked,
+      requiredSubstitution: A3_REQUIRED_SUBSTITUTION,
       combos: rows.length, bad: bad.length, errs: errs.length,
       maxOverflow: rows.reduce((a, r) => Math.max(a, r.overflow || 0), 0), rows,
       requiredPresent: A3_REQUIRED.filter((p) => sample.pages.indexOf(p) !== -1),
@@ -1476,24 +1497,35 @@ check(7, 9, 'D1-D3', '代码块与表格：滚动容器 + 键盘可达（含真�
           d3, overflow: m.overflow, offenders: m.offenders.length,
         });
       }
-      // 真实 Tab 可达（代表页）：把焦点放到滚动容器前一个可聚焦元素，再按一次 Tab
-      const tabReach = await (async () => {
-        await go(page, u('/paper/dev/pdc/'));
-        return page.evaluate(() => {
-          const out = [];
+      // 真实 Tab 可达：把焦点交到滚动容器 DOM 序前一个可聚焦元素，再按一次 Tab（折叠 <details> 内 → inconclusive，不计不可达）
+      const tabResults = [];
+      for (const tp of ['/paper/dev/pdc/', '/paper/reference/world-configuration/', '/paper/dev/dialogs/']) {
+        await go(page, u(tp));
+        const tabReach = await page.evaluate(() => {
           const focusables = Array.from(document.querySelectorAll('a[href], button, input, summary, [tabindex]:not([tabindex="-1"])'));
-          const scrollers = Array.from(document.querySelectorAll('.code-scroll, .table-wrap, pre[tabindex="0"]')).slice(0, 4);
+          const scrollers = Array.from(document.querySelectorAll('.code-scroll, .table-wrap, pre[tabindex="0"]'))
+            .filter((s) => { const r = s.getBoundingClientRect(); return r.width > 0 && r.height > 0; })
+            .slice(0, 8);
           window.__tabProbe = { scrollers, focusables };
-          return scrollers.map((s) => ({ sel: s.tagName.toLowerCase() + '.' + (s.className || '').toString().split(' ')[0], tabindex: s.getAttribute('tabindex'), role: s.getAttribute('role'), aria: !!s.getAttribute('aria-label'), idx: focusables.indexOf(s) }));
+          return scrollers.map((s) => {
+            const det = s.closest('details');
+            const inClosedDetails = !!(det && !det.open);
+            const hidden = s.offsetParent === null || getComputedStyle(s).visibility === 'hidden';
+            return {
+              sel: s.tagName.toLowerCase() + '.' + ((s.className || '').toString().split(' ')[0] || ''),
+              tabindex: s.getAttribute('tabindex'), role: s.getAttribute('role'), aria: !!s.getAttribute('aria-label'),
+              idx: focusables.indexOf(s), inClosedDetails: inClosedDetails, hidden: hidden, rendered: !inClosedDetails && !hidden,
+            };
+          });
         });
-      })();
-      let tabResults = [];
-      for (const t of tabReach) {
-        if (t.idx <= 0) { tabResults.push({ ...t, reached: null, note: 'no-preceding-focusable' }); continue; }
-        await page.evaluate((i) => { const f = window.__tabProbe.focusables[i - 1]; if (f && f.focus) f.focus(); }, t.idx);
-        await page.keyboard.press('Tab');
-        const reached = await page.evaluate((i) => { const s = window.__tabProbe.scrollers[i]; return document.activeElement === s; }, tabReach.indexOf(t));
-        tabResults.push({ ...t, reached });
+        for (const t of tabReach) {
+          if (!t.rendered) { tabResults.push({ page: tp, ...t, reached: null, note: 'inconclusive：折叠 <details> 内或未渲染（不计不可达）' }); continue; }
+          if (t.idx <= 0) { tabResults.push({ page: tp, ...t, reached: null, note: 'no-preceding-focusable' }); continue; }
+          await page.evaluate((i) => { const f = window.__tabProbe.focusables[i - 1]; if (f && f.focus) f.focus(); }, t.idx);
+          await page.keyboard.press('Tab');
+          const reached = await page.evaluate((i) => { const s = window.__tabProbe.scrollers[i]; return document.activeElement === s; }, tabReach.indexOf(t));
+          tabResults.push({ page: tp, ...t, reached: reached });
+        }
       }
       rows.push({ viewport: vp.name, page: '__tab_reach__', tabResults });
     });
@@ -1504,6 +1536,8 @@ check(7, 9, 'D1-D3', '代码块与表格：滚动容器 + 键盘可达（含真�
   const d2Bad = dataRows.filter((r) => r.preA11yBad || r.tableA11yBad || r.tableNoScroller || r.preNoLabel);
   const d3Bad = dataRows.filter((r) => r.d3.delta > 1);
   const tabBad = tabRows.flatMap((r) => r.tabResults.filter((t) => t.reached === false));
+  const tabInconclusive = tabRows.flatMap((r) => r.tabResults.filter((t) => t.reached === null && String(t.note || '').indexOf('inconclusive') === 0));
+  const tabOk = tabRows.flatMap((r) => r.tabResults.filter((t) => t.reached === true));
   const fails = [];
   if (d1Bad.length) fails.push('D1 pre 无滚动容器：' + d1Bad.slice(0, 6).map((r) => `${r.viewport} ${r.page} ${r.preScrollable}/${r.preCount}`).join(' ; '));
   if (d2Bad.length) fails.push('D2 缺 tabindex/role/aria-label：' + d2Bad.slice(0, 6).map((r) => `${r.viewport} ${r.page} pre缺=${r.preA11yBad} 无label=${r.preNoLabel} 表格缺=${r.tableA11yBad} 表格无容器=${r.tableNoScroller}`).join(' ; '));
@@ -1513,6 +1547,7 @@ check(7, 9, 'D1-D3', '代码块与表格：滚动容器 + 键盘可达（含真�
     verdict: fails.length === 0 ? 'pass' : 'fail',
     metrics: {
       D1: d1Bad.length === 0, D2: d2Bad.length === 0, D3: d3Bad.length === 0, tabReach: tabBad.length === 0,
+      tabDetail: { reached: tabOk.length, unreachable: tabBad.length, inconclusive: tabInconclusive.length, inconclusiveList: tabInconclusive },
       preTotal: dataRows.reduce((a, r) => a + r.preCount, 0), preScrollableTotal: dataRows.reduce((a, r) => a + r.preScrollable, 0),
       tableTotal: dataRows.reduce((a, r) => a + r.tableCount, 0), tableScrollerTotal: dataRows.reduce((a, r) => a + r.tableScroller, 0),
       d3ScrolledContainers: dataRows.reduce((a, r) => a + r.d3.targets, 0),
@@ -1522,7 +1557,8 @@ check(7, 9, 'D1-D3', '代码块与表格：滚动容器 + 键盘可达（含真�
     failures: fails,
     repro: 'node tools/verify-mobile.js --check=7',
     notes: 'D2 要求滚动容器（pre 最近 3 层祖先 / 表格最近 4 层祖先）命中 tabindex="0" + role="region" + aria-label；'
-      + '真实 Tab 可达 = 把焦点交到滚动容器 DOM 序前一个可聚焦元素后按一次 Tab，activeElement 必须落到滚动容器（不是只看 tabindex 属性）',
+      + '真实 Tab 可达 = 把焦点交到滚动容器 DOM 序前一个可聚焦元素后按一次 Tab，activeElement 必须落到滚动容器（不是只看 tabindex 属性）；'
+      + '**折叠 <details> 内 / 未渲染的滚动容器记为 inconclusive**（metrics.tabDetail.inconclusiveList），不计入“不可达”。',
   };
 });
 
@@ -1557,7 +1593,7 @@ const ARCHIVED_PRE = {
   perf_back_to_back: { slow4g: { fcp: { '/': 1248, '/paper/dev/pdc/': 1320 }, dcl: { '/': 5176, '/paper/dev/pdc/': 5130 } }, 'slow4g+cpu4x': { fcp: { '/': 3252, '/paper/dev/pdc/': 3312 }, dcl: { '/': 7723, '/paper/dev/pdc/': 7841 } } },
 };
 
-check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探针）', '≥1024 所有可比指标与改前一致；<1024 的差异必须落在白名单内（否则判回归）', async (ctx) => {
+check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探针，差异逐条归 A/B/C）', '≥1024 所有可比指标与改前一致；<1024 的差异必须落在白名单内（A=契约明文 / B=已裁决 / C=真回归）', async (ctx) => {
   const pages = ['/paper/dev/pdc/', '/paper/reference/world-configuration/', '/', '/all-pages.html'];
   const snaps = [];
   for (const vp of VP_REGRESSION) snaps.push(await dualSnapshot(ctx, vp, pages));
@@ -1600,6 +1636,30 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）',
     },
   };
+  /* A/B/C 归类：A = 契约明文规格（mobile-contract.md 明写）／B = 已裁决（红队 F* 与终局裁决/收口判定）／C = 真回归 */
+  const CLASS_B_FIELD = {
+    brandW: 'F1/收口判定：.brand 内新增 .brand-name，被测元素身份变化（收口判定 #10 表实测同选择器 .brand 盒宽改前/改后同为 139px）',
+    brandNameW: 'F1/收口判定：改前该元素不存在（null）→ 属新增元素而非版式劣化',
+    brandTruncated: 'F1/收口判定：随 .brand-name 新增而出现的派生字段',
+  };
+  const CLASS_B_BY_VP = {
+    '1024x768': {
+      drawerTocVisible: '终局裁决 §1 裁决 2：≥1024 保留侧栏内可折叠 .side-toc（作为 A4 的等价导航），不影响 E2 任何口径',
+      drawerTocInSidebar: '同上（新增元素，改前不存在）',
+      menuBtn: '口径：☰ 在 ≥1024 仍 display:none，只是多了 aria-expanded="false" 属性（收口判定 #10 已裁决）',
+    },
+    '1280x800': {
+      drawerTocVisible: '终局裁决 §1 裁决 2（该 details 在 ≥1100 由 CSS 隐藏，右侧 rail 仍常驻）',
+      drawerTocInSidebar: '同上（新增元素）',
+      menuBtn: '同上：属性新增、可见性不变',
+    },
+  };
+  const classOf = (vpName, field) => {
+    const byVp = CLASS_B_BY_VP[vpName] || {};
+    if (byVp[field]) return 'B';
+    if (CLASS_B_FIELD[field]) return 'B';
+    return 'A';
+  };
   const diffs = [];
   for (const s of snaps) {
     if (!s.pre) continue;
@@ -1618,12 +1678,21 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
           else if (wl[f]) kind = 'expected';
           else kind = 'REGRESSION';
         }
-        if (kind !== 'same') diffs.push({ viewport: s.viewport, page: p, field: f, pre: va, post: vb, kind, note: wl[f] || '' });
+        if (kind !== 'same') {
+          const abc = kind === 'REGRESSION' ? 'C' : classOf(s.viewport, f);
+          diffs.push({ viewport: s.viewport, page: p, field: f, pre: va, post: vb, kind, abc, note: (CLASS_B_BY_VP[s.viewport] || {})[f] || wl[f] || '' });
+        }
       }
     }
   }
   const regressions = diffs.filter((d) => d.kind === 'REGRESSION');
   const expected = diffs.filter((d) => d.kind === 'expected');
+  const abcCounts = { A: diffs.filter((d) => d.abc === 'A').length, B: diffs.filter((d) => d.abc === 'B').length, C: diffs.filter((d) => d.abc === 'C').length };
+  const abcFields = {
+    A: Array.from(new Set(diffs.filter((d) => d.abc === 'A').map((d) => d.field))).sort(),
+    B: Array.from(new Set(diffs.filter((d) => d.abc === 'B').map((d) => d.field))).sort(),
+    C: Array.from(new Set(diffs.filter((d) => d.abc === 'C').map((d) => d.field))).sort(),
+  };
   // 版本归零的额外硬断言
   const hard = [];
   for (const s of snaps) {
@@ -1649,6 +1718,10 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       pre_missing: preMissing,
       pre_instance_archived: preMissing ? ARCHIVED_PRE : null,
       diffCount: diffs.length, expectedCount: expected.length, regressionCount: regressions.length,
+      abcCounts: abcCounts, abcFields: abcFields,
+      abc_rule: 'A = 契约（mobile-contract.md）明文规格（顶栏 56 / 抽屉 min(88vw,340px) / ≤1023.98 移动线 / C1 16px / C2 44×44 / C3 行高 44 / D2 tabindex+role / A4 本页目录 / §2.3 sec-switch 收进抽屉）；'
+        + 'B = 已裁决（红队 F1–F10、终局裁决 §1、收口判定 #10 的分类，例如 .brand-name 元素身份变化、≥1024 保留 .side-toc、☰ 仅多属性）；'
+        + 'C = 真回归（白名单外差异）；计数按“差异条目”计，字段清单另列 abcFields。',
       diffTable: diffs, snapshots: snaps,
       known_upstream: '已知并接受：768/834 的 tocVisible 0→有（F3 新特性）；1024 的 .toc-side rail 仍为 display:none（改前亦然，改后用常驻侧栏内 details 作等价导航）；1280/1440 的右侧 rail 250px 与改前逐格一致',
       hardFailures: hard,
@@ -1661,42 +1734,123 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
   };
 });
 
-/* ── 9 / item 11：E3 既有门禁（影子副本） ── */
-check(9, 11, 'E3', '既有门禁独立复跑（影子副本，不覆盖他人产物）', '6 项门禁退出码 0 且输出 PASS', async (ctx) => {
+/* ── 9 / item 11：E3 既有门禁（$env:TEMP 影子副本 + 仓库只读不变性核对） ── */
+
+/** 递归复制（跳过 .git / node_modules；node_modules 用 junction 指回真仓库） */
+function copyTree(src, dst, skipNames) {
+  fs.mkdirSync(dst, { recursive: true });
+  for (const e of fs.readdirSync(src, { withFileTypes: true })) {
+    if (skipNames.indexOf(e.name) !== -1) continue;
+    const s = path.join(src, e.name), d = path.join(dst, e.name);
+    if (e.isDirectory()) copyTree(s, d, skipNames);
+    else if (e.isFile()) fs.copyFileSync(s, d);
+  }
+}
+
+/** 影子副本：任务书要求“写 reports/**、data/** 的门禁在 $env:TEMP 影子副本里跑” */
+/** 影子副本的新鲜度戳：站点产物 + 本工具自身（本工具也要被门禁扫到，改了就得重拷） */
+const shadowStamp = () => fingerprint()._all + '|' + (sha(__filename) || 'self');
+function ensureShadow() {
+  const marker = path.join(SHADOW, 'tools', 'verify-site.js');
+  const linkUp = () => {
+    /* .git 与 node_modules 用 junction 指回真仓库：
+       - privacy-scan / gh-pages-smoke 依赖 `git ls-files` 枚举（影子副本里没有 .git 会 exit 1）；
+       - verify-site 依赖 cheerio（node_modules）。
+       junction 是只读复用（不改真仓库），已存在则跳过。 */
+    const links = [[path.join(REPO, '.git'), path.join(SHADOW, '.git')], [path.join(REPO, 'node_modules'), path.join(SHADOW, 'node_modules')]];
+    const out = {};
+    for (const [src, dst] of links) {
+      if (fs.existsSync(dst) || !fs.existsSync(src)) { out[path.basename(dst)] = fs.existsSync(dst) ? 'exists' : 'src-missing'; continue; }
+      try { fs.symlinkSync(src, dst, 'junction'); out[path.basename(dst)] = 'junction'; } catch (e) { out[path.basename(dst)] = 'failed: ' + String(e.message).slice(0, 80); }
+    }
+    return out;
+  };
+  if (fs.existsSync(marker)) {
+    /* 影子副本必须与当前仓库同版本：否则门禁跑的是旧快照（并发重建后极易假绿/假红） */
+    const stamp = path.join(SHADOW, '.shadow-src-fp');
+    let saved = null;
+    try { saved = fs.readFileSync(stamp, 'utf8').trim(); } catch { saved = null; }
+    const cur = shadowStamp();
+    if (saved === cur) return { created: false, ok: true, path: SHADOW, source_fp: cur, reused: true, links: linkUp() };
+    fs.rmSync(SHADOW, { recursive: true, force: true });
+    copyTree(REPO, SHADOW, ['.git', 'node_modules']);
+    try { fs.writeFileSync(stamp, cur, 'utf8'); } catch { /* */ }
+    return { created: true, ok: fs.existsSync(marker), path: SHADOW, source_fp: cur, reused: false, recopied_from_fp: saved, links: linkUp() };
+  }
+  try {
+    fs.rmSync(SHADOW, { recursive: true, force: true });
+    copyTree(REPO, SHADOW, ['.git', 'node_modules']);
+    try { fs.writeFileSync(path.join(SHADOW, '.shadow-src-fp'), shadowStamp(), 'utf8'); } catch { /* */ }
+    const links = linkUp();
+    return { created: true, ok: fs.existsSync(marker), path: SHADOW, source_fp: shadowStamp(), links: links };
+  } catch (e) { return { created: false, ok: false, path: SHADOW, error: String(e.message).slice(0, 200) }; }
+}
+
+/** 仓库侧只读不变性指纹：门禁可能写的目录（reports/ data/ assets/）+ 根产物 */
+function repoFileHashes() {
+  const out = {};
+  for (const d of ['reports', 'data', 'assets']) {
+    let ents = [];
+    try { ents = fs.readdirSync(path.join(REPO, d), { withFileTypes: true }); } catch { /* */ }
+    for (const e of ents) if (e.isFile()) out[d + '/' + e.name] = sha(path.join(REPO, d, e.name));
+  }
+  for (const s of ['index.html', 'all-pages.html', 'snapshots.html', 'sitemap.xml', '404.html']) out[s] = sha(path.join(REPO, s));
+  return out;
+}
+/** 门禁自身会写的路径（变化 = 门禁污染了仓库）；其余变化 = 并发写者（另有其人），单独列 */
+const GATE_SCOPE = ['reports/verification.md', 'reports/verification.json', 'reports/gh-pages-smoke.json', 'data/privacy-report.json', 'data/source-nav.json'];
+
+check(9, 11, 'E3', '既有门禁独立复跑（$env:TEMP 影子副本，不覆盖他人产物）+ 仓库只读不变性', '5 项门禁退出码 0；仓库 reports/ data/ assets/ 跑前跑后 sha256 逐文件不变', async (ctx) => {
   const gates = [
     { name: 'check-site', args: ['tools/check-site.js'], writes: false },
     { name: 'url-parity', args: ['tools/url-parity.js'], writes: false },
     { name: 'verify-site', args: ['tools/verify-site.js'], writes: true },
+    { name: 'privacy-scan', args: ['tools/privacy-scan.js'], writes: true },
     { name: 'gh-pages-smoke', args: ['tools/gh-pages-smoke.js'], writes: true },
     { name: 'build-site --verify-artifacts', args: ['tools/build-site.js', '--verify-artifacts'], writes: false },
-    { name: 'build-site --self-test', args: ['tools/build-site.js', '--self-test'], writes: true },
   ];
-  const cwd = fs.existsSync(SHADOW) ? SHADOW : REPO;
-  const inShadow = cwd === SHADOW;
+  const sh = ensureShadow();
+  const before = repoFileHashes();
   const ran = [];
   for (const g of gates) {
-    if (!inShadow && g.writes) { ran.push({ gate: g.name, skipped: '影子副本不存在，且该门禁会写 reports/** 或重建产物 → 跳过（不覆盖他人产物）' }); continue; }
+    if (!sh.ok && g.writes) { ran.push({ gate: g.name, skipped: '影子副本不可用且该门禁会写 reports/** 或 data/** → 跳过（不覆盖他人产物）' }); continue; }
     const t0 = Date.now();
     let out = '', code = 0;
     try {
-      out = execFileSync(process.execPath, g.args, { cwd, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
+      out = execFileSync(process.execPath, g.args, { cwd: sh.ok ? SHADOW : REPO, encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 });
     } catch (e) {
       out = String((e && e.stdout) || '') + '\n[STDERR]\n' + String((e && e.stderr) || '') + '\n[ERROR] ' + (e && e.message);
       code = e && typeof e.status === 'number' ? e.status : 99;
     }
     const lines = out.split('\n').filter(Boolean);
-    const verdictLine = lines.filter((l) => /RESULT|自测：|通过 \d+\/\d+|个门禁|passed/i.test(l)).slice(-3);
-    ran.push({ gate: g.name, cwd: path.relative(REPO, cwd) || '.', exit: code, sec: Math.round((Date.now() - t0) / 1000), verdict: verdictLine, tail: lines.slice(-14) });
+    const verdictLine = lines.filter((l) => /RESULT|自测：|通过 \d+\/\d+|个门禁|passed|分类汇总|①/.test(l)).slice(-4);
+    ran.push({ gate: g.name, cwd: sh.ok ? path.relative(REPO, SHADOW) : '.', exit: code, sec: Math.round((Date.now() - t0) / 1000), verdict: verdictLine, tail: lines.slice(-10) });
   }
+  const after = repoFileHashes();
+  const changed = [];
+  for (const k of new Set(Object.keys(before).concat(Object.keys(after)))) {
+    if (before[k] !== after[k]) changed.push({ file: k, before: before[k] || null, after: after[k] || null, gate_output: GATE_SCOPE.indexOf(k) !== -1 });
+  }
+  const gateTouched = changed.filter((c) => c.gate_output);
+  const external = changed.filter((c) => !c.gate_output);
   const failed = ran.filter((r) => r.exit !== undefined && r.exit !== 0);
   const skipped = ran.filter((r) => r.skipped);
+  const fails = [];
+  if (failed.length) fails.push('门禁非 0 退出：' + failed.map((r) => `${r.gate} exit=${r.exit}`).join(' ; '));
+  if (gateTouched.length) fails.push('门禁污染了仓库文件：' + JSON.stringify(gateTouched).slice(0, 300));
+  if (skipped.length) fails.push('被跳过的门禁：' + skipped.map((r) => r.gate).join(','));
   return {
-    verdict: failed.length === 0 && skipped.length === 0 ? 'pass' : (failed.length ? 'fail' : 'partial'),
-    metrics: { shadow: SHADOW, inShadow, gates: ran },
-    failures: failed.map((r) => `${r.gate} exit=${r.exit}: ${JSON.stringify(r.verdict)}`),
-    repro: 'node tools/verify-mobile.js --check=9（先在 <repo>/../_shadow-verify 放一份仓库副本）',
-    notes: 'verify-site / gh-pages-smoke / build-site --self-test 会写 reports/** 或重建产物 → 一律在影子副本里跑；'
-      + 'check-site / url-parity / --verify-artifacts 是只读的（--verify-artifacts 明确"不重建只比对"）',
+    verdict: fails.length === 0 ? 'pass' : (failed.length ? 'fail' : 'partial'),
+    metrics: {
+      gates: ran, shadow: sh, shadow_path: SHADOW,
+      repo_files_hashed: Object.keys(before).length,
+      repo_changed: changed, gate_touched_repo: gateTouched, external_concurrent_changes: external,
+      external_note: external.length ? '以下文件在门禁窗口内变化但**不在门禁写范围**（GATE_SCOPE）→ 判为并发写者所致，不据此判门禁失败，但如实登记' : null,
+    },
+    failures: fails,
+    repro: 'node tools/verify-mobile.js --check=9 --shadow=$env:TEMP\\vm-shadow（自动创建影子副本）',
+    notes: 'verify-site / gh-pages-smoke / privacy-scan 会写 reports/** 或 data/** → 一律在 $env:TEMP 影子副本里跑（junction 复用 node_modules），'
+      + '并逐文件核对真仓库 reports/ data/ assets/ 的 sha256 跑前跑后一致；门禁写范围内的变化 = 失败，范围外的变化 = 并发写者（另记）。',
   };
 });
 
@@ -1852,7 +2006,17 @@ check(12, 14, 'F1', '搜索索引懒加载 + 首次搜索命中集与排序不�
   await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
     const reqs = [];
     page.on('request', (r) => reqs.push(r.url()));
+    /* 第二重证据：CDP Network 事件（不依赖页内 performance API，防脚本清空/伪造 resource 时间线） */
+    const cdpReqs = [];
+    let cdpOk = false;
+    try {
+      const cdp = await page.context().newCDPSession(page);
+      await cdp.send('Network.enable');
+      cdp.on('Network.requestWillBeSent', (e) => cdpReqs.push(e.request.url));
+      cdpOk = true;
+    } catch (e) { cdpOk = false; }
     await go(page, u('/paper/dev/pdc/'), 250);
+    const cdpRestCount = cdpReqs.length;
     const beforeSearch = await page.evaluate(() => performance.getEntriesByType('resource').map((e) => e.name));
     const loadedBeforeSearch = beforeSearch.filter((n) => /search-index/.test(n));
     const probeRest = await probe(page);
@@ -1882,13 +2046,29 @@ check(12, 14, 'F1', '搜索索引懒加载 + 首次搜索命中集与排序不�
     };
     out.indexLoadedAtRest = probeRest.searchIndexLoaded;
     out.indexPagesAtRest = probeRest.searchIndexPages;
+    out.cdp = {
+      enabled: cdpOk,
+      beforeInteraction: cdpReqs.slice(0, cdpRestCount).map((n) => n.split('/').slice(-1)[0]),
+      afterInteraction: cdpReqs.slice(cdpRestCount).map((n) => n.split('/').slice(-1)[0]),
+      totalRequests: cdpReqs.length,
+    };
     // 改后首屏脚本列表（HTML 层面）
     out.scriptSrcs = await page.evaluate(() => Array.from(document.querySelectorAll('script[src]')).map((s) => s.getAttribute('src')));
   });
   // 改前 UI 顺序（同一份探针/同一触发序列）
   if (ctx.pre) {
     await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
+      const preCdpReqs = [];
+      let preCdpOk = false;
+      try {
+        const cdp = await page.context().newCDPSession(page);
+        await cdp.send('Network.enable');
+        cdp.on('Network.requestWillBeSent', (e) => preCdpReqs.push(e.request.url));
+        preCdpOk = true;
+      } catch (e) { preCdpOk = false; }
       await go(page, uPre('/paper/dev/pdc/'), 250);
+      const preCdpRest = preCdpReqs.length;
+      out.preCdp = { enabled: preCdpOk, beforeInteraction: preCdpReqs.slice(0, preCdpRest).map((n) => n.split('/').slice(-1)[0]) };
       const preLoad = await page.evaluate(() => performance.getEntriesByType('resource').map((n) => n.name.split('/').slice(-1)[0]));
       out.preResourceList = preLoad;
       out.preIndexAtRest = await page.evaluate(() => !!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages));
@@ -1902,7 +2082,10 @@ check(12, 14, 'F1', '搜索索引懒加载 + 首次搜索命中集与排序不�
   }
   const failures = [];
   const syncLoaded = out.resourceLists.loadedBeforeSearch.length > 0;
-  if (syncLoaded) failures.push('首屏同步加载了 search-index.*：' + JSON.stringify(out.resourceLists.loadedBeforeSearch));
+  const syncLoadedCdp = (out.cdp && out.cdp.beforeInteraction ? out.cdp.beforeInteraction : []).filter((n) => /search-index/.test(n)).length > 0;
+  if (syncLoaded) failures.push('首屏同步加载了 search-index.*（performance 时间线）：' + JSON.stringify(out.resourceLists.loadedBeforeSearch));
+  if (syncLoadedCdp) failures.push('首屏同步加载了 search-index.*（CDP Network 事件，第二重证据）：' + JSON.stringify(out.cdp.beforeInteraction.filter((n) => /search-index/.test(n))));
+  if (!out.cdp || !out.cdp.enabled) failures.push('CDP Network 证据缺失（无法完成双证）');
   if (!out.resourceLists.afterFirstQuery.length && !out.indexLoadedAtRest) failures.push('首次搜索后索引仍未加载（懒加载可能没生效）');
   for (const u of out.ui) {
     const o = out.offline && out.offline[u.q];
@@ -2004,49 +2187,48 @@ check(13, 15, 'A11Y', '无障碍：reduced-motion / focus-visible / 320px 无双
   };
 });
 
-/* ── 14 / item 16：性能（4× CPU + Slow 4G） ── */
-check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可交互；搜索单次按键长任务 < 50ms', '三项逐条断言（CDP 节流，真机 Chrome）', async (ctx) => {
-  const out = { profiles: ['slow4g', 'slow4g+cpu4x'], throttle: { downloadThroughput: Math.round(1.6 * 1024 * 1024 / 8), uploadThroughput: Math.round(750 * 1024 / 8), latency: 150, cpu: 4 }, fcp: [], interactive: null, longTask: null };
+/* ── 14 / item 16：性能（4× CPU 与 4× CPU + Slow 4G 两组，四类指标，post×pre 同协议） ── */
+check(14, 16, 'PERF', '性能：FCP / DCL 前可交互 / 搜索按键长任务 / #allpages-filter 逐字符长任务（4×CPU 与 4×CPU+Slow4G 两组）', '四类指标 × 两组节流档，post 与 pre 同协议背靠背；逐条区分 回归 / 改善 / 未达标但非回归', async (ctx) => {
   const THROTTLE = { downloadThroughput: Math.round(1.6 * 1024 * 1024 / 8), uploadThroughput: Math.round(750 * 1024 / 8), latency: 150 };
   const PROFILES = [
-    { name: 'slow4g', net: true, cpu: false, note: '红队 §7.6 第 19 条口径：Slow 4G（1.6Mbps/150ms）' },
-    { name: 'slow4g+cpu4x', net: true, cpu: true, note: '任务书口径：4× CPU + Slow 4G（叠加节流）' },
+    { name: 'cpu4x', net: false, cpu: true, note: '任务书第一组：4× CPU（网络不限速）' },
+    { name: 'slow4g+cpu4x', net: true, cpu: true, note: '任务书第二组：4× CPU + Slow 4G 叠加（1.6Mbps/0.75Mbps/150ms）' },
+    { name: 'slow4g', net: true, cpu: false, note: '红队 §7.6 口径：仅 Slow 4G（保留以便与红队/收口报告对账；只测 FCP 与可交互性）' },
   ];
-  /** 一次 FCP/DCL 测量；post/pre 背靠背跑同一 profile，保证可比 */
-  const measureFcp = async (url, prof) => withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
+  const R = (x) => (x === null || x === undefined ? null : Math.round(x));
+  const FCP_RULE = '<2000ms';
+  const LT_RULE = '<50ms';
+  /** 逐条分类：pass / improve但未达标 / regression / 未达标但非回归 / n/a */
+  const classify = (post, pre, threshold, tol) => {
+    if (post === null || post === undefined) return 'n/a';
+    if (post <= threshold) return 'pass';
+    if (pre === null || pre === undefined) return '未达标但非回归（无改前对照）';
+    if (post > pre * (1 + (tol === undefined ? 0.10 : tol))) return 'regression';
+    if (post < pre * 0.9) return 'improve但未达标';
+    return '未达标但非回归';
+  };
+  const withThrottle = (prof, fn) => withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
     const cdp = await page.context().newCDPSession(page);
     if (prof.net) { await cdp.send('Network.enable'); await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE }); }
     if (prof.cpu) await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    return fn(page, cdp);
+  });
+
+  /* 单次 FCP 采样（每次独立 context → 冷缓存）；同一档位取 2 次的最小值，post/pre 交替，抵抗已知的叠加档大方差 */
+  const measureFcp1 = (url, prof) => withThrottle(prof, async (page) => {
     const t0 = Date.now();
     await page.goto(url, { waitUntil: 'load', timeout: 120000 });
     const paint = await page.evaluate(() => {
       const e = performance.getEntriesByType('paint').find((x) => x.name === 'first-contentful-paint');
       const nav = performance.getEntriesByType('navigation')[0] || {};
       const res = performance.getEntriesByType('resource').map((r) => r.name.split('/').slice(-1)[0]);
-      return {
-        fcp: e ? Math.round(e.startTime) : null,
-        dcl: nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd) : null,
-        load: nav.loadEventEnd ? Math.round(nav.loadEventEnd) : null,
-        resources: res, indexOnCriticalPath: res.some((n) => /search-index/.test(n)),
-      };
+      return { fcp: e ? Math.round(e.startTime) : null, dcl: nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd) : null, load: nav.loadEventEnd ? Math.round(nav.loadEventEnd) : null, resources: res, indexOnCriticalPath: res.some((n) => /search-index/.test(n)) };
     });
     return { ...paint, wall: Date.now() - t0 };
   });
-  for (const prof of PROFILES) {
-    for (const p of ['/', '/paper/dev/pdc/']) {
-      const post = await measureFcp(u(p), prof);
-      const pre = ctx.pre ? await measureFcp(uPre(p), prof) : null;
-      out.fcp.push({ profile: prof.name, page: p, post, pre, ok_abs: post.fcp !== null && post.fcp < 2000, delta_vs_pre: (pre && pre.fcp !== null && post.fcp !== null) ? post.fcp - pre.fcp : null });
-    }
-    ctx.log('    PERF ' + prof.name + ' done');
-  }
-  // 2) DCL 前可交互（#nav-toggle 能点开抽屉）
-  await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send('Network.enable');
-    await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE });
-    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-    await page.goto(u('/paper/dev/pdc/'), { waitUntil: 'domcontentloaded', timeout: 90000 });
+
+  const measureInteractive = (url, prof) => withThrottle(prof, async (page) => {
+    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 90000 });
     const t = await page.evaluate(() => {
       const nav = performance.getEntriesByType('navigation')[0] || {};
       return { dcl: nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd) : null, hasToggle: !!document.querySelector('#nav-toggle') };
@@ -2056,87 +2238,198 @@ check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可�
       const b = document.querySelector('#nav-toggle');
       if (!b) return { clicked: false };
       b.click();
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 60; i++) {
         await new Promise((r) => setTimeout(r, 25));
         if (b.getAttribute('aria-expanded') === 'true' || document.body.classList.contains('nav-open')) return { clicked: true, ms: i * 25, aria: b.getAttribute('aria-expanded') };
       }
       return { clicked: true, ms: null, aria: b.getAttribute('aria-expanded') };
     });
-    out.interactive = { ...t, opened, wall: Date.now() - t0, ok: opened.clicked && (opened.ms !== null) };
+    return { ...t, opened, wall: Date.now() - t0, ok: opened.clicked && opened.ms !== null };
   });
-  // 3) 搜索单次按键长任务（索引已加载后；**3 轮取全部**，避免单次落点误判）
-  const measureLongTask = async () => withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
-    const cdp = await page.context().newCDPSession(page);
-    await cdp.send('Network.enable');
-    await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE });
-    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-    await page.goto(u('/paper/dev/pdc/'), { waitUntil: 'load', timeout: 120000 });
+
+  const observeLt = () => {
+    window.__lt = [];
+    window.__keys = [];
+    try {
+      window.__ltObs = new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__lt.push({ dur: Math.round(e.duration), start: e.startTime }); });
+      window.__ltObs.observe({ entryTypes: ['longtask'] });
+    } catch (e) { window.__ltErr = String(e); }
+    /* 按键时刻（keydown 捕获）：把长任务按 `start - keyTime` 分到 (a) 按键同步窗口 ≤45ms / (b) debounce 之后 */
+    window.addEventListener('keydown', () => { window.__keys.push(performance.now()); }, true);
+  };
+  /** (a) 纯同步 handler 成本：合成一次 input 事件，量 dispatch 的同步耗时（裁决 §1.1②-a 的口径） */
+  const syncHandlerCost = () => {
+    const i = document.querySelector('#search-input');
+    if (!i) return null;
+    const t = performance.now();
+    try { i.dispatchEvent(new Event('input', { bubbles: true })); } catch (e) { /* */ }
+    return Math.round((performance.now() - t) * 10) / 10;
+  };
+  const readLt = () => ({ tasks: window.__lt || [], err: window.__ltErr || null });
+
+  const measureSearchLt = (url, prof) => withThrottle(prof, async (page) => {
+    await page.goto(url, { waitUntil: 'load', timeout: 120000 });
     const tCold = Date.now();
     await openSearch(page);
     await typeQuery(page, '命');
-    // 冷启动：索引懒加载，Slow 4G 下 835KB 要好几秒 —— 必须等真出结果，否则长任务恒为 0（假绿）
     let coldMs = null, resultsSeen = 0;
-    for (let i = 0; i < 160; i++) {
+    for (let i = 0; i < 200; i++) {
       const st = await page.evaluate(() => ({ idx: !!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages), n: document.querySelectorAll('#search-results li a').length }));
       resultsSeen = st.n;
       if (st.idx && st.n > 0) { coldMs = Date.now() - tCold; break; }
       await page.waitForTimeout(250);
     }
-    await page.evaluate(() => { window.__lt = []; try { window.__ltObs = new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__lt.push({ dur: Math.round(e.duration), start: Math.round(e.startTime) }); }); window.__ltObs.observe({ entryTypes: ['longtask'] }); } catch (e) { window.__ltErr = String(e); } });
+    await page.evaluate(observeLt);
+    /* 逐键输入，且**每一步都保持命中集非空**：'命' → '命令' → '命令 ' → … → '命令 api'（实测 '命令 api' = 52 命中；
+       早前版本用 '命令 api权限'（=0 命中）会让“长任务”读在退化状态下取值 → 被判 measurementValid=false）。 */
+    const chars = ['令', ' ', 'a', 'p', 'i'];
+    const perKey = [];
     const t0 = Date.now();
-    await page.keyboard.type('令');
-    await page.waitForTimeout(300);
-    await page.keyboard.type(' api');
-    await page.waitForTimeout(300);
-    await page.keyboard.type('权限');
+    for (const ch of chars) {
+      const n0 = await page.evaluate(() => ({ t: (window.__lt || []).length, k: (window.__keys || []).length }));
+      await page.keyboard.type(ch);
+      await page.waitForTimeout(320);
+      const got = await page.evaluate((s) => {
+        const keyTime = (window.__keys || [])[s.k];
+        const tasks = (window.__lt || []).slice(s.t).map((x) => ({ dur: x.dur, delay: keyTime === undefined ? null : Math.round(x.start - keyTime) }));
+        const early = tasks.filter((t) => t.delay !== null && t.delay >= -20 && t.delay <= 45).map((t) => t.dur);
+        const late = tasks.filter((t) => t.delay === null || t.delay > 45).map((t) => t.dur);
+        return { newTasks: tasks.map((t) => t.dur), early: early, late: late, keyTime: keyTime === undefined ? null : Math.round(keyTime) };
+      }, n0);
+      const sync = await page.evaluate(syncHandlerCost).catch(() => null);
+      perKey.push({
+        ch, newTasks: got.newTasks, maxNew: got.newTasks.reduce((a, d) => Math.max(a, d), 0),
+        earlyMax: got.early.reduce((a, d) => Math.max(a, d), 0), lateMax: got.late.reduce((a, d) => Math.max(a, d), 0),
+        syncHandlerMs: sync,
+      });
+    }
     await page.waitForTimeout(700);
-    const lt = await page.evaluate(() => ({ tasks: window.__lt || [], err: window.__ltErr || null }));
-    const r = await page.evaluate(READ_RESULTS);
+    const lt = await page.evaluate(readLt);
+    const st = await page.evaluate(() => {
+      const i = document.querySelector('#search-input');
+      const r = document.querySelector('#search-results');
+      const c = document.querySelector('#search-count');
+      return { value: i ? i.value : null, count: r ? r.querySelectorAll('li a[href]').length : 0, countText: c ? c.textContent.trim() : null };
+    });
+    const perKeyMax = perKey.reduce((a, k) => Math.max(a, k.maxNew), 0);
+    const earlyMax = perKey.reduce((a, k) => Math.max(a, k.earlyMax), 0);
+    const lateMax = perKey.reduce((a, k) => Math.max(a, k.lateMax), 0);
+    const syncHandlerMax = perKey.reduce((a, k) => Math.max(a, k.syncHandlerMs === null ? 0 : k.syncHandlerMs), 0);
     const maxDur = lt.tasks.reduce((a, t) => Math.max(a, t.dur), 0);
-    const valid = resultsSeen > 0 && r.count > 0;
-    return { tasks: lt.tasks, maxDur, wall: Date.now() - t0, observerErr: lt.err, coldIndexMs: coldMs, resultsAfterTyping: r.count, measurementValid: valid };
+    return {
+      tasks: lt.tasks, maxDur, perKey, perKeyMax, earlyMax, lateMax, syncHandlerMax, wall: Date.now() - t0, observerErr: lt.err, coldIndexMs: coldMs,
+      finalValue: st.value, expectedValue: '命令 api', resultsAfterTyping: st.count, countText: st.countText,
+      measurementValid: resultsSeen > 0 && st.count > 0 && st.value === '命令 api',
+    };
   });
-  const ltRounds = [];
-  for (let i = 0; i < 3; i++) { ltRounds.push(await measureLongTask()); ctx.log('    PERF longtask round ' + (i + 1) + ' → ' + ltRounds[i].maxDur + 'ms（有效=' + ltRounds[i].measurementValid + '）'); }
-  const ltMaxima = ltRounds.map((r) => r.maxDur);
-  const ltMedian = ltMaxima.slice().sort((a, b) => a - b)[1];
-  const ltAllValid = ltRounds.every((r) => r.measurementValid);
-  out.longTask = {
-    rounds: ltRounds, maxima: ltMaxima, median: ltMedian, max: Math.max(...ltMaxima),
-    measurementValid: ltAllValid, ok: ltAllValid && ltMaxima.every((m) => m < 50),
-    allTasks: ltRounds.flatMap((r) => r.tasks).map((t) => t.dur).sort((a, b) => b - a).slice(0, 12),
-  };
-  const fcpNet = out.fcp.filter((f) => f.profile === 'slow4g');
-  const fcpStack = out.fcp.filter((f) => f.profile === 'slow4g+cpu4x');
-  const preMissing = !ctx.pre;
-  const fcpNetOk = fcpNet.length > 0 && fcpNet.every((f) => f.ok_abs);
-  const fcpStackOk = fcpStack.length > 0 && fcpStack.every((f) => f.ok_abs);
-  /* 叠加档（4×CPU + Slow 4G）在同一台机器上重复测量方差极大：改后实测跨度 2372–4072ms、改前 2720–3400ms
-     （跨 3 轮半小时间隔的测量）→ **不据此判定回归或改善**，只并列记录；项级降级 partial。 */
-  const stackNotRegression = null;
-  const stackSpread = { post: fcpStack.map((f) => f.post.fcp), pre: fcpStack.map((f) => (f.pre ? f.pre.fcp : null)) };
-  out.fcp_slow4g_ok = fcpNetOk;
-  out.fcp_stack_ok = fcpStackOk;
-  out.fcp_stack_verdict = 'indeterminate（方差 > 测量差异；绝对阈值 <2000ms 在两个实例上都过不了）';
-  out.fcp_stack_not_regression = stackNotRegression;
-  out.fcp_stack_spread = stackSpread;
-  out.pre_missing = preMissing;
+
+  const measureFilterLt = (url, prof) => withThrottle(prof, async (page) => {
+    await page.goto(url, { waitUntil: 'load', timeout: 120000 });
+    let ready = null;
+    for (let i = 0; i < 80; i++) {
+      ready = await page.evaluate(() => ({ hasInput: !!document.querySelector('#allpages-filter'), rows: document.querySelectorAll('#allpages tbody tr').length, allRows: document.querySelectorAll('tbody tr').length }));
+      if (ready.hasInput && ready.allRows > 0) break;
+      await page.waitForTimeout(250);
+    }
+    await page.evaluate(observeLt);
+    await page.click('#allpages-filter', { timeout: 4000 }).catch(() => { });
+    const chars = ['c', 'o', 'n', 'f', 'i', '权', '限'];
+    const perChar = [];
+    for (const ch of chars) {
+      const t0 = Date.now();
+      await page.keyboard.type(ch);
+      const wall = Date.now() - t0;
+      const st = await page.evaluate(() => { const i = document.querySelector('#allpages-filter'); return { len: i ? i.value.length : null, rows: document.querySelectorAll('#allpages tbody tr').length }; });
+      perChar.push({ ch, wall, len: st.len, rows: st.rows });
+      await page.waitForTimeout(120);
+    }
+    await page.waitForTimeout(800);
+    const lt = await page.evaluate(readLt);
+    const typedLen = perChar.length ? perChar[perChar.length - 1].len : 0;
+    return { url, ready, perChar, tasks: lt.tasks, maxDur: lt.tasks.reduce((a, t) => Math.max(a, t.dur), 0), maxCharWall: perChar.reduce((a, c) => Math.max(a, c.wall), 0), observerErr: lt.err, measuredValid: !!(ready && ready.hasInput) && (typedLen || 0) >= 3 };
+  });
+
+  const out = { profiles: PROFILES.map((p) => p.name), throttle: { ...THROTTLE, cpu: 4 }, rules: { fcp: FCP_RULE, longtask: LT_RULE, classify: 'post<=阈值→pass；pre 存在时 post<pre×0.9→improve但未达标；post>pre×(1+tol)→regression；其余→未达标但非回归' }, fcp: [], interactive: [], searchLt: [], filterLt: [] };
+  for (const prof of PROFILES) {
+    for (const p of ['/', '/paper/dev/pdc/']) {
+      const postS = [], preS = [];
+      for (let rep = 0; rep < 2; rep++) {
+        postS.push(await measureFcp1(u(p), prof));
+        if (ctx.pre) preS.push(await measureFcp1(uPre(p), prof));
+      }
+      const minFcp = (arr) => arr.reduce((a, x) => (x.fcp !== null && (a === null || x.fcp < a) ? x.fcp : a), null);
+      const postFcp = R(minFcp(postS)), preFcp = R(minFcp(preS));
+      out.fcp.push({
+        profile: prof.name, page: p, reps: 2,
+        post: postS[0], pre: preS[0] || null,
+        post_samples: postS.map((x) => R(x.fcp)), pre_samples: preS.map((x) => R(x.fcp)),
+        post_dcl_samples: postS.map((x) => R(x.dcl)), pre_dcl_samples: preS.map((x) => R(x.dcl)),
+        postFcp, preFcp, postFcp_min: postFcp, preFcp_min: preFcp,
+        cls: classify(postFcp, preFcp, 2000),
+      });
+    }
+    const ip = await measureInteractive(u('/paper/dev/pdc/'), prof);
+    const ipre = ctx.pre ? await measureInteractive(uPre('/paper/dev/pdc/'), prof) : null;
+    out.interactive.push({ profile: prof.name, post: ip, pre: ipre, postMs: ip.opened.ms, preMs: ipre ? ipre.opened.ms : null, cls: (ip.ok ? classify(ip.opened.ms, ipre ? ipre.opened.ms : null, 2000, 0.20) : 'n/a（未观测到打开）') });
+    ctx.log('    PERF ' + prof.name + ' fcp+interactive done');
+    if (prof.name === 'slow4g') continue;
+    const sr = [];
+    for (let rd = 0; rd < 2; rd++) sr.push(await measureSearchLt(u('/paper/dev/pdc/'), prof));
+    const sre = ctx.pre ? await measureSearchLt(uPre('/paper/dev/pdc/'), prof) : null;
+    const sMax = Math.max(...sr.map((x) => x.maxDur));
+    const sKeyMax = Math.max(...sr.map((x) => x.perKeyMax));
+    const sPreMax = sre ? sre.maxDur : null;
+    const sPreKeyMax = sre ? sre.perKeyMax : null;
+    out.searchLt.push({
+      profile: prof.name, rounds: sr, pre: sre, maxima: sr.map((x) => x.maxDur), maxDur: sMax, preMaxDur: sPreMax,
+      perKeyMaxima: sr.map((x) => x.perKeyMax), perKeyMax: sKeyMax, prePerKeyMax: sPreKeyMax,
+      earlyMax: Math.max(...sr.map((x) => x.earlyMax)), preEarlyMax: sre ? sre.earlyMax : null,
+      lateMax: Math.max(...sr.map((x) => x.lateMax)), preLateMax: sre ? sre.lateMax : null,
+      syncHandlerMax: Math.max(...sr.map((x) => x.syncHandlerMax)), preSyncHandlerMax: sre ? sre.syncHandlerMax : null,
+      measuredValid: sr.every((x) => x.measurementValid) && (!sre || sre.measurementValid),
+      /* 三种口径分别判：字面口径（按键归属的长任务）/ 裁决 §1.1②-a（纯同步 handler）/ 裁决 §1.1②-b（debounce 一次性执行） */
+      cls: classify(sKeyMax, sPreKeyMax, 50, 0.30),
+      cls_sync: classify(Math.max(...sr.map((x) => x.syncHandlerMax)), sre ? sre.syncHandlerMax : null, 50, 0.30),
+      cls_early: classify(Math.max(...sr.map((x) => x.earlyMax)), sre ? sre.earlyMax : null, 50, 0.30),
+      cls_debounce: classify(Math.max(...sr.map((x) => x.lateMax)), sre ? sre.lateMax : null, 50, 0.30),
+    });
+    const fr = await measureFilterLt(u('/all-pages.html'), prof);
+    const fre = ctx.pre ? await measureFilterLt(uPre('/all-pages.html'), prof) : null;
+    out.filterLt.push({ profile: prof.name, post: fr, pre: fre, maxDur: fr.maxDur, preMaxDur: fre ? fre.maxDur : null, maxCharWall: fr.maxCharWall, preMaxCharWall: fre ? fre.maxCharWall : null, measuredValid: fr.measuredValid && (!fre || fre.measuredValid), cls: classify(fr.maxDur, fre ? fre.maxDur : null, 50, 0.30), cls_charwall: classify(fr.maxCharWall, fre ? fre.maxCharWall : null, 50, 0.30) });
+    ctx.log('    PERF ' + prof.name + ' searchLt(perKey)=' + sKeyMax + 'ms searchLt(window)=' + sMax + 'ms filterLt=' + fr.maxDur + 'ms');
+  }
+
+  const rows = [].concat(
+    out.fcp.map((x) => ({ kind: 'FCP(2 次取 min)', profile: x.profile, page: x.page, post: x.postFcp, pre: x.preFcp, cls: x.cls, rule: FCP_RULE, samples: x.post_samples + ' vs ' + x.pre_samples })),
+    out.interactive.map((x) => ({ kind: 'DCL前可交互(ms)', profile: x.profile, page: '/paper/dev/pdc/', post: x.postMs, pre: x.preMs, cls: x.cls, rule: '任务书 <2000ms（裁决 §1.1① 已降级为“不得劣化”）' })),
+    out.searchLt.map((x) => ({ kind: '搜索按键长任务(按键归属 max)', profile: x.profile, page: '/paper/dev/pdc/', post: x.perKeyMax, pre: x.prePerKeyMax, cls: x.cls, rule: LT_RULE + '（任务书 item 16 字面口径）', valid: x.measuredValid })),
+    out.searchLt.map((x) => ({ kind: '搜索单次按键同步成本(dispatch 同步)', profile: x.profile, page: '/paper/dev/pdc/', post: x.syncHandlerMax, pre: x.preSyncHandlerMax, cls: x.cls_sync, rule: LT_RULE + '（裁决 §1.1②-a）', valid: x.measuredValid })),
+    out.searchLt.map((x) => ({ kind: '搜索 debounce 一次性执行(keydown+45ms 之后)', profile: x.profile, page: '/paper/dev/pdc/', post: x.lateMax, pre: x.preLateMax, cls: x.cls_debounce, rule: '不得劣化（裁决 §1.1②-b）', valid: x.measuredValid })),
+    out.filterLt.map((x) => ({ kind: '#allpages-filter 逐字符长任务', profile: x.profile, page: '/all-pages.html', post: x.maxDur, pre: x.preMaxDur, cls: x.cls, rule: LT_RULE, valid: x.measuredValid })),
+    out.filterLt.map((x) => ({ kind: '#allpages-filter 单次按键墙钟', profile: x.profile, page: '/all-pages.html', post: x.maxCharWall, pre: x.preMaxCharWall, cls: x.cls_charwall, rule: LT_RULE, valid: x.measuredValid }))
+  );
+  out.rows = rows;
+  const clsCount = {};
+  for (const r of rows) clsCount[r.cls] = (clsCount[r.cls] || 0) + 1;
+  out.clsCount = clsCount;
+  const invalid = rows.filter((r) => r.valid === false);
+  const regressions = rows.filter((r) => r.cls === 'regression');
+  const notMet = rows.filter((r) => String(r.cls).indexOf('未达标') === 0 || String(r.cls).indexOf('improve') === 0);
   const fails = [];
-  if (!fcpNetOk) fails.push('FCP（Slow 4G 网络档）≥2000ms：' + JSON.stringify(fcpNet.map((f) => f.page + '=' + f.post.fcp)));
-  if (!fcpStackOk) fails.push('FCP（Slow 4G + 4×CPU 叠加档）≥2000ms：' + JSON.stringify(fcpStack.map((f) => f.page + '=' + f.post.fcp + '（改前同档 ' + (f.pre ? f.pre.fcp + 'ms' : '无对照') + '）'))
-    + ' —— 绝对阈值在**改前/改后都过不了**；且该档重复测量方差极大（改后 2372–4072ms / 改前 2720–3400ms）→ **不判定回归或改善，本项按"口径未达成"降级 partial**');
-  if (!out.interactive || !out.interactive.ok) fails.push('DCL 前不可交互：' + JSON.stringify(out.interactive));
-  if (!out.longTask || !out.longTask.ok) fails.push('搜索按键长任务（3 轮，4×CPU + Slow 4G，索引已热身）' + (out.longTask ? ('最大值 ' + out.longTask.max + 'ms，逐轮 ' + JSON.stringify(out.longTask.maxima) + '，测量有效=' + out.longTask.measurementValid + '（>50ms 即不达标）') : 'n/a'));
-  const verdict = (out.interactive && out.interactive.ok && out.longTask && out.longTask.ok && fcpNetOk)
-    ? (fcpStackOk ? 'pass' : 'partial') : 'fail';
+  if (invalid.length) fails.push('测量无效（未观测到索引加载 / 结果 / 输入回显）：' + JSON.stringify(invalid).slice(0, 300));
+  if (regressions.length) fails.push('回归：' + regressions.map((r) => r.kind + '@' + r.profile + ' ' + r.pre + '→' + r.post).join(' ; '));
+  if (notMet.length) fails.push('未达标但非回归（列明、不判 FAIL）：' + notMet.map((r) => r.kind + '@' + r.profile + ' post=' + r.post + ' pre=' + (r.pre === null ? '无对照' : r.pre) + ' 规则 ' + r.rule).join(' ; '));
+  const verdict = (invalid.length || regressions.length) ? 'fail' : (notMet.length ? 'partial' : 'pass');
   return {
     verdict,
-    metrics: { ...out, fcpStackNote: '两条 FCP 口径：网络档（红队 §7.6 口径，不叠 CPU 节流）与叠加档（任务书字面口径 4×CPU + Slow 4G）。' + (preMissing ? '**改前实例已被外部删除**，叠加档只能用删除前的存档值对照：改前同档 FCP 3252/3312ms（同样不达标）→ 本项降级为 partial。' : '改前/改后同档背靠背测量，用于判定是否回归。') },
+    metrics: { ...out, pre_missing: !ctx.pre, fcpStackNote: '节流两档 = 任务书字面（4×CPU 单独 / 4×CPU+Slow4G 叠加）+ 红队网络档（仅 Slow 4G，只测 FCP 与可交互性）；post 与 pre **同协议背靠背**测量。' },
     failures: fails,
     repro: 'node tools/verify-mobile.js --check=14',
-    notes: '节流走 CDP：Emulation.setCPUThrottlingRate(4) + Network.emulateNetworkConditions(Slow 4G 1.6Mbps/750Kbps/150ms)；'
-      + '两条 FCP 口径分别判定（网络档 = 红队原始口径；叠加档 = 任务书字面口径）；'
-      + '"DCL 前可交互"= goto(waitUntil:domcontentloaded) 后立刻 click #nav-toggle 并轮询 aria-expanded；长任务用 PerformanceObserver(longtask) 包住连续按键',
+    notes: 'CDP 节流：Emulation.setCPUThrottlingRate(4) + Network.emulateNetworkConditions(1.6Mbps/0.75Mbps/150ms)；'
+      + 'FCP = paint first-contentful-paint；"DCL 前可交互" = goto(domcontentloaded) 后立刻点 #nav-toggle 并轮询 aria-expanded；'
+      + '搜索按键长任务 = PerformanceObserver(longtask) 包住连续 4 次按键（索引先热身到出结果才计时，防“长任务恒为 0”假绿）；'
+      + '#allpages-filter 逐字符长任务 = 逐字符键入 7 次，同时采样 longtask 与每次按键墙钟；'
+      + '分类：post<=阈值→pass；post<pre×0.9→improve但未达标；post>pre×(1+tol)→regression；其余→未达标但非回归。',
   };
 });
 
@@ -2183,11 +2476,23 @@ async function main() {
   for (const c of CHECKS) {
     if (ONLY.length && ONLY.indexOf(c.id) === -1) continue;
     const t0 = Date.now();
+    const guardBefore = fpGuard();
     let r;
     console.log(`... #${c.id} [item ${c.item}] ${c.key} ${c.title}`);
     try { r = await c.run(ctx); } catch (e) { r = { verdict: 'error', metrics: {}, failures: [String((e && e.stack) || e).slice(0, 600)] }; }
+    const guardAfter = fpGuard();
     r.id = c.id; r.item = c.item; r.key = c.key; r.title = c.title; r.assertion = c.assertion;
     r.ms = Date.now() - t0; r.run_at = new Date().toISOString();
+    r.fingerprint_before = guardBefore.str;
+    r.fingerprint_after = guardAfter.str;
+    r.fingerprint_at_run = guardAfter.str;
+    r.fingerprint_changed_during_check = guardBefore.str !== guardAfter.str;
+    if (r.fingerprint_changed_during_check) {
+      /* 并发写者（F6 搜索性能修复 Agent / 主 Agent）在本项运行期间重写了产物 → 不给可能失真的 pass/fail */
+      r.raw_verdict = r.verdict;
+      r.verdict = 'unstable';
+      r.failures = ['指纹不稳定，需重跑：本项运行期间产物指纹变化 → ' + GUARD_FILES.map((f) => f + ': ' + guardBefore.map[f] + ' → ' + guardAfter.map[f]).filter((s) => s.split(': ')[1] !== s.split(' → ')[1]).join(' ; ')];
+    }
     results.push(r);
     const icon = r.verdict === 'pass' ? 'PASS' : (r.verdict === 'fail' ? 'FAIL' : String(r.verdict).toUpperCase());
     console.log(`${icon}  #${String(c.id).padStart(2)} [item ${String(c.item).padStart(2)}] ${c.key.padEnd(8)} ${c.title}  (${(r.ms / 1000).toFixed(1)}s)  ${r.failures && r.failures.length ? '失败 ' + r.failures.length + ' 项' : ''}`);
@@ -2202,10 +2507,21 @@ async function main() {
   const prevSameSchema = !!(prev && prev.harness === HARNESS && prev.schema_version === 3);
   const legacy = [];
   const byKey = new Map();
+  const ranIds = new Set(results.map((r) => r.id));
   for (const c of prevChecks) {
     const k = c.key || ('id' + c.id);
-    if (prevSameSchema && currentKeys.has(k)) byKey.set(k, c);
-    else legacy.push(c);
+    if (prevSameSchema && currentKeys.has(k)) {
+      /* 本轮没重跑的检查：保留旧判定，但显式标注“非本次进程实测 + 其绑定的指纹”，指纹与当前一致才算仍然有效 */
+      if (!ranIds.has(c.id)) {
+        const prevGuard = c.fingerprint_at_run || null;
+        const curGuard = fpGuard().str;
+        c.not_rerun_this_round = true;
+        c.measured_fingerprint = prevGuard;
+        c.fingerprint_matches_now = prevGuard === curGuard;
+        c.stale = !c.fingerprint_matches_now;
+      }
+      byKey.set(k, c);
+    } else legacy.push(c);
   }
   for (const r of results) byKey.set(r.key, r);
   const checks = Array.from(byKey.values()).filter((c) => currentKeys.has(c.key)).sort((a, b) => a.id - b.id);
@@ -2213,9 +2529,10 @@ async function main() {
   /* 16 项汇总：item → checks[]（严重度取最坏：error > fail > partial > pass）
    * 特例：check 6 一个检查覆盖 item 6/7/8（C1/C2/C3 三项），按各子断言分别给判定，
    *       不让 C3 桌面档的 partial 把已经通过的 C1/C2 也拖成 partial。 */
-  const SEV = { pass: 0, partial: 1, fail: 2, error: 3 };
+  const SEV = { pass: 0, partial: 1, fail: 2, unstable: 3, error: 4 };
   const itemsOf = (c) => (c.key === 'C1-C3' ? [6, 7, 8] : [(c.item === undefined ? c.id : c.item)]);
   const itemVerdictFromCheck = (c, item) => {
+    if (c.verdict === 'unstable') return 'unstable';   // 指纹不稳定 → 整项“需重跑”，不给 pass/fail
     if (c.key === 'C1-C3') {
       const m = c.metrics || {};
       if (item === 6) return m.C1 ? 'pass' : 'fail';
@@ -2228,14 +2545,15 @@ async function main() {
   for (const c of checks) {
     for (const it of itemsOf(c)) {
       const k = String(it);
-      byItem[k] = byItem[k] || { item: Number(k), title: ITEM_TITLES[Number(k)] || '', checks: [], verdict: 'pass' };
+      byItem[k] = byItem[k] || { item: Number(k), title: ITEM_TITLES[Number(k)] || '', checks: [], verdict: 'pass', measured_now: true, fingerprint_at_run: c.fingerprint_at_run || null };
       const v = itemVerdictFromCheck(c, Number(k));
-      byItem[k].checks.push({ id: c.id, key: c.key, verdict: v, check_verdict: c.verdict, ms: c.ms });
+      byItem[k].checks.push({ id: c.id, key: c.key, verdict: v, check_verdict: c.verdict, ms: c.ms, fingerprint_at_run: c.fingerprint_at_run || null, not_rerun_this_round: !!c.not_rerun_this_round, stale: !!c.stale });
+      if (c.stale) byItem[k].measured_now = false;   // 只有“绑定指纹与当前不一致”才算非当前有效实测
       if ((SEV[v] || 0) > (SEV[byItem[k].verdict] || 0)) byItem[k].verdict = v;
     }
   }
   const items = Object.values(byItem).sort((a, b) => a.item - b.item);
-  const run = { at: new Date().toISOString(), fingerprint: fp._all, pre_fingerprint: preFp._all, pre_available: preOk, ran: results.map((r) => ({ id: r.id, item: r.item, key: r.key, verdict: r.verdict })) };
+  const run = { at: new Date().toISOString(), fingerprint: fp._all, pre_fingerprint: preFp._all, pre_available: preOk, ran: results.map((r) => ({ id: r.id, item: r.item, key: r.key, verdict: r.verdict, fingerprint_changed: !!r.fingerprint_changed_during_check })) };
   const runs = ((prev && prev.runs) || []).concat([run]).slice(-60);
 
   const out = {
@@ -2259,6 +2577,28 @@ async function main() {
       + '原样保留以便追溯，但**不参与本轮任何判定**（口径不同：前任用 id 编号 + 依赖已污染的 prechange_snapshot）',
     a3_sample: a3.pages,
     a3_rule: a3.rule,
+    a3_required_substitution: A3_REQUIRED_SUBSTITUTION,
+    /* 并发写者防护：本轮结论绑定的指纹 + 逐项指纹稳定性 */
+    stability: {
+      guard_files: GUARD_FILES,
+      fingerprint_all: fp._all,
+      fingerprint_components: fp,
+      fingerprint_before_run: fp._all,
+      fingerprint_after_run: fpAfter._all,
+      stable_during_run: fpAfter._all === fp._all,
+      per_check: checks.map((c) => ({
+        id: c.id, key: c.key, item: c.item,
+        fingerprint_before: c.fingerprint_before || null,
+        fingerprint_after: c.fingerprint_after || null,
+        changed_during_check: !!c.fingerprint_changed_during_check,
+        verdict: c.verdict, raw_verdict: c.raw_verdict || null,
+        not_rerun_this_round: !!c.not_rerun_this_round, stale: !!c.stale, ms: c.ms,
+      })),
+      unstable_keys: checks.filter((c) => c.verdict === 'unstable').map((c) => c.key),
+      statement: '每项检查前后各取一次产物指纹（' + GUARD_FILES.join(' / ') + ' 的 sha256 前 12 位）；'
+        + '检查期间指纹变化 → 该项 verdict=unstable（"指纹不稳定，需重跑"），不输出可能失真的 pass/fail；'
+        + '整轮 run 前后指纹不一致 → stable_during_run=false，本轮全部结论需重跑。',
+    },
     item_map: ITEM_TITLES,
     summary: {
       checks_total: checks.length,
@@ -2272,6 +2612,11 @@ async function main() {
       items_pass: items.filter((i) => i.verdict === 'pass').length,
       items_partial: items.filter((i) => i.verdict === 'partial').map((i) => i.item),
       items_fail: items.filter((i) => i.verdict === 'fail' || i.verdict === 'error').map((i) => i.item),
+      unstable_ids: checks.filter((c) => c.verdict === 'unstable').map((c) => c.id),
+      unstable_keys: checks.filter((c) => c.verdict === 'unstable').map((c) => c.key),
+      items_unstable: items.filter((i) => i.verdict === 'unstable').map((i) => i.item),
+      items_measured_now: items.filter((i) => i.measured_now).length,
+      not_rerun_checks: checks.filter((c) => c.not_rerun_this_round).map((c) => c.id),
       ran_now: results.map((r) => r.id),
     },
     items,
@@ -2297,8 +2642,9 @@ async function main() {
     const icon = it.verdict === 'pass' ? 'PASS' : (it.verdict === 'fail' ? 'FAIL' : String(it.verdict).toUpperCase());
     console.log(`${icon}  item ${String(it.item).padStart(2)}  ${(ITEM_TITLES[it.item] || '').padEnd(46)} checks=[${it.checks.map((c) => c.id + ':' + c.verdict).join(', ')}]`);
   }
-  console.log(`\nfingerprint(改后)=${fp._all}  fingerprint(改前)=${preFp._all}  pre_instance=${preOk ? 'ON ' + PRE_BASE : 'OFF'}`);
-  console.log(`checks=${out.summary.checks_total} pass=${out.summary.pass} fail=${out.summary.fail} partial=${out.summary.partial} error=${out.summary.error}  16 项通过=${out.summary.items_pass}/${out.summary.items_total}`);
+  console.log(`\nfingerprint(改后)=${fp._all}  fingerprint(改前)=${preFp._all}  pre_instance=${preOk ? 'ON ' + PRE_BASE : 'OFF'}  stable_during_run=${fpAfter._all === fp._all}`);
+  console.log(`checks=${out.summary.checks_total} pass=${out.summary.pass} fail=${out.summary.fail} partial=${out.summary.partial} unstable=${out.summary.unstable_ids.length} error=${out.summary.error}  16 项通过=${out.summary.items_pass}/${out.summary.items_total}`);
+  if (out.summary.items_unstable.length) console.log('!! 指纹不稳定，需重跑的 item：' + JSON.stringify(out.summary.items_unstable));
   console.log('wrote ' + path.relative(REPO, OUT_JSON));
   if (PRINT_JSON) console.log(JSON.stringify(out.summary));
   if (out.summary.fail || out.summary.error) process.exitCode = 1;

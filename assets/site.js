@@ -618,6 +618,12 @@
 
   function runSearch(q) {
     resetScanCache();
+    /* 查询代次（本轮修复）：**每一次** runSearch（含空查询、零命中）都递增代次，
+       让上一轮尚未执行的 rAF/分片渲染整体作废。原先只在「有命中」的分支里 ++searchGen，
+       于是「先输入一个有命中的词 → 再输入一个零命中的词」时，旧查询的 rAF 会晚于新的空结果执行，
+       把已经清空的结果列表重新填回旧内容（计数文案写着「0 个结果」却有 40 行旧结果）。
+       改后：零命中/空查询的最终 DOM 与改前同步渲染版本逐条一致（列表为空 + 提示文案）。 */
+    var gen = ++searchGen;
     var query = q.trim().toLowerCase();
     var list = doc.getElementById('search-results');
     if (!list) return;
@@ -665,15 +671,22 @@
        按键路径上的长任务不再叠加"整篇文档重绘"；渲染侧再由 CSS 的 contain/content-visibility
        （见 .search-dialog/.search-results/li）把单帧成本压到最小。
        最终 DOM（顺序/内容/条数/链接/文案）与原先逐项一致，命中集合与排序不受影响。 */
-    var gen = ++searchGen;
+    var gen = searchGen;
     var rendered = 0;
     var total = max;
+    /* 分片粒度（2026-10-21 第四轮，本次修复）：红队 M3 的「3 行/片 + 每片一个 setTimeout」在 4× CPU 下
+       实测是最大的成本放大器 —— 每一片都要重新做一次「结果面板 + ::backdrop」的 Layout/Paint，
+       14 片 ≈ 14 次固定开销（CDP trace 实测 Layout 459ms / Paint 619ms，而同口径下不渲染行只有 22/151ms）。
+       改为「一次建进 DocumentFragment 再整片 appendChild」：DOM 结构与顺序逐条不变（同一个 li/a、
+       同一顺序、同一 innerHTML），但每次 appendChild 只触发一轮 Layout/Paint；分片仍保留（避免单任务超长），
+       粒度由 RENDER_CHUNK 控制。 */
+    var RENDER_CHUNK = 40;
     function paintCount() {
       setCount(hits.length > total
         ? ('显示前 ' + total + ' / 共 ' + hits.length + ' 个结果')
         : (hits.length + ' 个结果'));
     }
-    function renderOne(idx) {
+    function renderOne(host, idx) {
       var hit = hits[idx];
       var e = hit.e;
       var li = doc.createElement('li');
@@ -685,21 +698,21 @@
         + (chips ? '<div class="sr-hits">' + chips + '</div>' : '')
         + '<div class="sr-snip">' + (snippet(e, terms, hit.body, hl) || esc(e.u || '')) + '</div>';
       li.appendChild(a);
-      list.appendChild(li);
+      host.appendChild(li);
     }
     function step() {
       if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
-      var t0 = Date.now();
+      var frag = doc.createDocumentFragment();
       var n = 0;
-      while (rendered < total && n < 3 && Date.now() - t0 < 4) { renderOne(rendered); rendered++; n++; }
+      while (rendered < total && n < RENDER_CHUNK) { renderOne(frag, rendered); rendered++; n++; }
+      list.appendChild(frag);
       if (rendered < total) setTimeout(step, 0);
     }
     searchRaf(function () {
       if (gen !== searchGen) return;
       list.textContent = '';
-      if (total > 0) { renderOne(0); rendered = 1; }
       paintCount();
-      if (rendered < total) step();
+      step();
     });
   }
 

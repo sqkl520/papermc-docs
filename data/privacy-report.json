@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-21T16:28:46.787Z",
+  "generated_at": "2026-10-21T18:55:52.212Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 756,
-    "scanned_text_files": 683,
+    "files": 757,
+    "scanned_text_files": 684,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -17,11 +17,11 @@
   "summary": {
     "must_fix": 0,
     "public_url": 326,
-    "loopback_ok": 132,
+    "loopback_ok": 136,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 544
+    "total_hits": 548
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 218,
+      "total": 222,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 132,
+      "loopback_ok": 136,
       "upstream": 86
     },
     {
@@ -307,6 +307,14 @@
       "upstream": 0
     },
     {
+      "file": "tools/verify-mobile-b.js",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
       "file": "tools/verify-mobile-c.js",
       "total": 4,
       "must_fix": 0,
@@ -425,14 +433,6 @@
       "public_url": 0,
       "loopback_ok": 1,
       "upstream": 0
-    },
-    {
-      "file": "all-pages.html",
-      "total": 1,
-      "must_fix": 0,
-      "public_url": 1,
-      "loopback_ok": 0,
-      "upstream": 0
     }
   ],
   "verdict": {
@@ -441,15 +441,6 @@
     "statement": "通过：仓库中不存在必须修复的本机痕迹。"
   },
   "history": [
-    {
-      "at": "2026-10-21T13:59:21.717Z",
-      "files": 755,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 129,
-      "upstream": 86,
-      "clean": true
-    },
     {
       "at": "2026-10-21T14:34:50.349Z",
       "files": 755,
@@ -528,6 +519,15 @@
       "must_fix": 0,
       "public_url": 326,
       "loopback_ok": 132,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T18:55:52.212Z",
+      "files": 757,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 136,
       "upstream": 86,
       "clean": true
     }
