@@ -280,10 +280,16 @@ const DIAG_PREV = (page_) => {
       activeAfter: document.activeElement ? desc(document.activeElement) : null,
     });
   }
+  out.pres = Array.prototype.slice.call(document.querySelectorAll('pre')).slice(0, 6).map((p) => ({
+    sel: desc(p), parent: p.parentElement ? desc(p.parentElement) : null,
+    matchesDirect: p.matches('.code-scroll > .code-pre'),
+    preOverflowX: CS(p).overflowX, parentOverflowX: p.parentElement ? CS(p.parentElement).overflowX : null,
+    scrollW: p.scrollWidth, clientW: p.clientWidth,
+    parentScrollW: p.parentElement ? p.parentElement.scrollWidth : null, parentClientW: p.parentElement ? p.parentElement.clientWidth : null,
+    minWidth: CS(p).minWidth,
+  }));
   return out;
-};
-
-async function diagnose(browser, url, p, vp) {
+};async function diagnose(browser, url, p, vp) {
   let out = null;
   await withCtx(browser, vp, async (page) => {
     await go(page, url + p);

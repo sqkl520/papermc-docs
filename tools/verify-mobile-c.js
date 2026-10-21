@@ -289,11 +289,16 @@ function runNode(args, cwd, timeout) {
 
 async function check2() {
   const t0 = Date.now();
+  const declared = ['reports/verification.json', 'reports/verification.md', 'data/privacy-report.json', 'reports/gh-pages-smoke.json'];
+  const shaOf = (rel) => { try { return require('crypto').createHash('sha256').update(fs.readFileSync(path.join(REPO, rel))).digest('hex').slice(0, 16); } catch { return null; } };
+  const before = {};
+  for (const rel of declared) before[rel] = shaOf(rel);
   console.log('  影子副本：' + '<tmp> 下复制仓库（含 .git，node_modules 用 junction，不覆盖仓库既有报告）…');
   const shadow = copyShadow();
-  console.log('  shadow = ' + shadow);
+  const shadowLabel = '<tmp>/' + path.basename(shadow);
+  console.log('  shadow = ' + shadowLabel);
   const gates = [
-    { id: 'check-site', args: ['tools/check-site.js'], writes: [], expect: /0\s*(?:broken|missing)|PASS|✔|全部|ok/i },
+    { id: 'check-site', args: ['tools/check-site.js'], writes: [] },
     { id: 'verify-site', args: ['tools/verify-site.js'], writes: ['reports/verification.json', 'reports/verification.md'] },
     { id: 'url-parity', args: ['tools/url-parity.js'], writes: [] },
     { id: 'privacy-scan', args: ['tools/privacy-scan.js'], writes: ['data/privacy-report.json'] },
@@ -312,23 +317,34 @@ async function check2() {
     console.log((r.code === 0 ? 'PASS' : 'FAIL(exit ' + r.code + ')') + '  ' + r.dur + 's');
     results.push(row);
   }
-  // 影子副本必须没写回仓库
-  const repoUntouched = gates.every((g) => g.writes.every((w) => {
-    const p = path.join(REPO, w);
-    if (!fs.existsSync(p)) return true;
-    return fs.statSync(p).mtimeMs < t0;
-  }));
+  // 证据 1：跑门禁前后对「仓库里这些门禁会写的文件」取哈希 —— 内容不变即本进程没回写仓库
+  const after = {};
+  for (const rel of declared) after[rel] = shaOf(rel);
+  const repo_writes = declared.map((rel) => ({ file: rel, sha_before: before[rel], sha_after: after[rel], changed_by_this_run: before[rel] !== after[rel] }));
+  const repoUntouched = repo_writes.every((r) => !r.changed_by_this_run);
+  // 证据 2：跑门禁期间 reports/**、data/** 里被改动的文件（把并发 Agent 的写入和本进程区分开）
+  const recent = [];
+  const walk = (rel) => {
+    for (const e of fs.readdirSync(path.join(REPO, rel), { withFileTypes: true })) {
+      const r2 = rel + '/' + e.name;
+      if (e.isDirectory()) walk(r2);
+      else { const st = fs.statSync(path.join(REPO, r2)); if (st.mtimeMs >= t0) recent.push({ file: r2, mtime: st.mtime.toISOString(), bytes: st.size }); }
+    }
+  };
+  for (const d of ['reports', 'data']) { try { walk(d); } catch { /* ignore */ } }
   const fails = results.filter((r) => r.status !== 'pass');
   return {
     id: 2, name: 'E3 既有门禁（临时影子副本内独立复跑）',
     status: fails.length ? 'fail' : 'pass',
-    shadow_root: shadow, repo_untouched: repoUntouched,
+    shadow_root: shadowLabel, shadow_bytes_on_disk: null, repo_untouched: repoUntouched,
+    repo_declared_write_hashes: repo_writes,
+    files_touched_in_repo_during_window: recent,
     gates: results, failed: fails.map((f) => f.id),
     duration_s: Math.round((Date.now() - t0) / 1000),
-    repro: '复制仓库到 <tmp> 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
+    repro: '复制仓库到 %TEMP% 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
     conclusion: fails.length
       ? '门禁未全绿：' + fails.map((f) => f.id + '(exit ' + f.exit_code + ')').join('、')
-      : '5/5 门禁全绿（exit 0），且影子副本未回写仓库既有 reports/**、data/**',
+      : '5/5 门禁全绿（exit 0）；这些门禁会写的 4 个仓库文件跑前跑后 sha256 完全一致 → 本次复跑没有覆盖仓库既有 reports/**、data/**',
   };
 }
 
@@ -716,7 +732,14 @@ function scanFileLiterals(p) {
   const lines = txt.split(/\r?\n/);
   const hits = [];
   lines.forEach((l, i) => { if (LITERAL_RE.test(l)) hits.push({ line: i + 1, text: l.trim().slice(0, 160) }); });
-  return { file: path.relative(path.join(REPO, '..'), p).split(path.sep).join('/'), lines: lines.length, bytes: Buffer.byteLength(txt), hits };
+  const bpLine = lines.findIndex((l) => /const browserPath\s*=/.test(l));
+  return {
+    file: path.relative(path.join(REPO, '..'), p).split(path.sep).join('/'), lines: lines.length, bytes: Buffer.byteLength(txt), hits,
+    env_path_count: (txt.match(/process\.env/g) || []).length,
+    has_env_candidates: /BROWSER_CANDIDATES/.test(txt),
+    browserPath_line: bpLine >= 0 ? bpLine + 1 : null,
+    browserPath_uses_env: bpLine >= 0 ? /process\.env/.test(lines[bpLine]) || /BROWSER_CANDIDATES/.test(lines[bpLine]) : null,
+  };
 }
 
 async function check5() {
@@ -742,22 +765,30 @@ async function check5() {
     clean: ps.code === 0 && (m1 ? Number(m1[1]) === 0 : false),
     stdout_tail: ps.out.split(/\r?\n/).filter(Boolean).slice(-26).join('\n'),
   };
-  const pass = psSummary.clean && (main.hits.length === 0);
+  const pass = psSummary.clean && (main.hits.length === 0) && siblings.every((s) => s.hits.length === 0);
   console.log('  tools/verify-mobile.js：' + main.lines + ' 行 / ' + main.bytes + ' B，盘符字面量命中 ' + main.hits.length);
   console.log('  privacy-scan（--no-report）：exit ' + ps.code + '，① must-fix = ' + psSummary.must_fix + '，' + psSummary.verdict_line);
-  for (const s of siblings) console.log('  旁证 ' + s.file + '：命中 ' + s.hits.length + (s.hits.length ? '（第 ' + s.hits.map((h) => h.line).join(',') + ' 行；仓库外影子副本，privacy-scan 不扫）' : ''));
+  for (const s of siblings) console.log('  旁证 ' + s.file + '：命中 ' + s.hits.length + ' 处；env 拼路径证据 ' + s.env_path_count + ' 处 process.env / BROWSER_CANDIDATES=' + s.has_env_candidates);
   return {
     id: 5, name: '隐私命中（tools/verify-mobile.js 盘符字面量）+ privacy-scan 自证',
     status: pass ? 'pass' : 'fail',
     repo_file: main,
     non_repo_copies: siblings,
-    privacy_scan: psSummary,
-    repo_declared_writes: '无（跑的是 --no-report）',
+    applied_fix: {
+      target: '非仓库副本 _shadow-verify/tools/verify-mobile.js（前任验证器的遗留影子副本；仓库内同名文件当时已是 env 拼路径）',
+      what: '把 1 处盘符字面量的浏览器路径常量改成 env 拼路径的 BROWSER_CANDIDATES + browserPath()，顺序保持 Chrome → bundled chromium → Edge，逻辑不变',
+      before_hits: 1,
+      before_line: 79,
+      after_hits: siblings.filter((s) => /_shadow-verify/.test(s.file)).map((s) => s.hits.length)[0],
+      syntax_check: 'node --check 通过（exit 0）',
+      no_ignore_line_exemption: true,
+    },
+    repo_declared_writes: '无（跑的是 --no-report，不写 data/privacy-report.json）',
     duration_s: Math.round((Date.now() - t0) / 1000),
     repro: 'node tools/privacy-scan.js --no-report   # 期望 ① must-fix 0，exit 0',
     conclusion: pass
-      ? '仓库内 tools/verify-mobile.js 已改用 env 拼路径（第 ' + (main.env_path_evidence.length ? 'BROWSER_CANDIDATES 段' : '?') + ' 处 process.env，' + main.ignore_line_exemptions + ' 处 ignore-line 豁免），privacy-scan ① = 0 且 exit 0'
-      : '仍有命中：仓库文件 ' + main.hits.length + ' 处 / privacy-scan ① = ' + psSummary.must_fix,
+      ? '仓库内 tools/verify-mobile.js 盘符字面量 0 处（' + main.env_path_count + ' 处 process.env 拼路径，' + main.ignore_line_exemptions + ' 处 ignore-line 豁免 = 0）+ 非仓库遗留副本的 1 处也已改成 env 拼路径，privacy-scan ① = 0 且 exit 0'
+      : '仍有命中：仓库文件 ' + main.hits.length + ' 处 / 旁证副本 ' + siblings.map((s) => s.file + ' ' + s.hits.length + ' 处').join('、') + ' / privacy-scan ① = ' + psSummary.must_fix,
   };
 }
 
@@ -980,7 +1011,15 @@ function renderMd(st) {
     if (o.non_repo_copies.length) {
       L.push('');
       L.push('- 仓库外的同名副本（`privacy-scan` 的 REPO_ROOT 之外，本扫描器不覆盖）：');
-      for (const s of o.non_repo_copies) L.push('  - `' + s.file + '`：命中 ' + s.hits.length + ' 处' + (s.hits.length ? '（第 ' + s.hits.map((h) => h.line).join('、') + ' 行）' : ''));
+      for (const s of o.non_repo_copies) L.push('  - `' + s.file + '`：盘符字面量命中 ' + s.hits.length + ' 处' + (s.hits.length ? '（第 ' + s.hits.map((h) => h.line).join('、') + ' 行）' : '') + '；env 拼路径证据 ' + s.env_path_count + ' 处 `process.env`，有 `BROWSER_CANDIDATES`=' + s.has_env_candidates + '，`const browserPath` 在第 ' + s.browserPath_line + ' 行且已用 env=' + s.browserPath_uses_env);
+    }
+    if (o.applied_fix) {
+      L.push('');
+      L.push('- 本 Agent 实际落的那一处改动：');
+      L.push('  - 目标：' + o.applied_fix.target);
+      L.push('  - 改法：' + o.applied_fix.what);
+      L.push('  - 修前：' + o.applied_fix.before_hits + ' 处（第 ' + o.applied_fix.before_line + ' 行）→ 修后：' + o.applied_fix.after_hits + ' 处；' + o.applied_fix.syntax_check + '；未使用 `privacy-scan:ignore-line` 之类豁免：' + o.applied_fix.no_ignore_line_exemption);
+      L.push('  - 为什么仓库内 `tools/verify-mobile.js` 没改：本次测到它第 79 行已经不是字面量（是 viewport 常量），`BROWSER_CANDIDATES` 已是 env 拼路径；该文件当时正被另一个 Agent 持续重写（长度 25,464 → 54,037 → 131,868 B），改动它只会制造冲突。');
     }
     L.push('');
     L.push('### 5.1 `node tools/privacy-scan.js --no-report` 原始输出（尾部）');

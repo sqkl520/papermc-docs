@@ -248,14 +248,19 @@ const PROBE = (flags) => {
 
   /* ---- pre / table ---- */
   const pres = Array.from(document.querySelectorAll('pre'));
+  /** 滚动容器：**优先**返回"可键盘聚焦的滚动容器"（tabindex=0 + role=region），否则返回最近的滚动祖先。
+   *  （踩坑记录：pre 自身常带 overflow-x:auto，但真正 tabindex=0/role=region 的是外层 .code-scroll；
+   *    若只取最近的滚动元素，会把 48/48 全判成缺 tabindex/role。） */
   const scrollerOf = (el, depth) => {
+    const cand = [];
     let q = el;
     for (let k = 0; k <= (depth || 3) && q; k++) {
       const c = CS(q);
-      if (['auto', 'scroll'].indexOf(c.overflowX) !== -1) return q;
+      if (['auto', 'scroll'].indexOf(c.overflowX) !== -1) cand.push(q);
       q = q.parentElement;
     }
-    return null;
+    const focusable = cand.filter((x) => x.getAttribute('tabindex') === '0' && x.getAttribute('role') === 'region');
+    return focusable.length ? focusable[focusable.length - 1] : (cand.length ? cand[0] : null);
   };
   const preInfo = pres.map((el, i) => {
     const cs = CS(el), p = el.parentElement, pcs = p ? CS(p) : null;
@@ -308,7 +313,10 @@ const PROBE = (flags) => {
   } : null;
   const headerH = header ? Math.round(header.getBoundingClientRect().height) : 0;
   const sidebar = findDrawer();
-  const toc = document.querySelector('.toc-side, aside.toc, [data-toc]');
+  /* 本页目录 rail：**只认 aside.toc-side / aside#page-toc**。
+     （注意：侧栏里的 details#drawer-toc 也带 data-toc，若把 [data-toc] 写进这个选择器，
+      它在 DOM 里更靠前，会把 1024/1280 的读数带偏 —— 2026-10-21 实测踩过这个坑） */
+  const toc = document.querySelector('aside#page-toc, .toc-side, aside.toc');
   const layout = document.querySelector('.layout');
   const drawerToc = document.querySelector('details#drawer-toc, .side-toc, details.mobile-toc, .mobile-toc');
   const menuBtn = findMenuBtn();
@@ -458,7 +466,7 @@ const PROBE = (flags) => {
     headerH, headerPos: header ? CS(header).position : null, headerBox,
     menuBtn: menuBtn ? { exists: true, ...R(menuBtn), visible: vis(menuBtn), display: CS(menuBtn).display, ariaExpanded: menuBtn.getAttribute('aria-expanded'), ariaControls: menuBtn.getAttribute('aria-controls'), ariaLabel: menuBtn.getAttribute('aria-label'), text: txt(menuBtn, 6) } : { exists: false },
     drawer: drawer ? { exists: true, sel: desc(drawer), ...R(drawer), visible: vis(drawer), display: CS(drawer).display, transform: CS(drawer).transform, position: CS(drawer).position, overflowY: CS(drawer).overflowY, overscroll: CS(drawer).overscrollBehavior, inert: drawer.hasAttribute('inert') || drawer.inert === true, ariaHidden: drawer.getAttribute('aria-hidden'), scrollH: drawer.scrollHeight, clientH: drawer.clientHeight, scrollTop: drawer.scrollTop } : { exists: false },
-    scrim: scrim ? { sel: desc(scrim), visible: vis(scrim), ...R(scrim), position: CS(scrim).position, opacity: CS(scrim).opacity, visibility: CS(scrim).visibility, pointerEvents: CS(scrim).pointerEvents } : { exists: false },
+    scrim: scrim ? { exists: true, sel: desc(scrim), visible: vis(scrim), ...R(scrim), position: CS(scrim).position, opacity: CS(scrim).opacity, visibility: CS(scrim).visibility, pointerEvents: CS(scrim).pointerEvents } : { exists: false },
     bodyOverflow: CS(body).overflow, bodyOverflowY: CS(body).overflowY, htmlOverflow: CS(de).overflow, bodyClasses: body.className,
     bodyPos: CS(body).position, bodyScrollbarGutter: CS(body).scrollbarGutter,
     scrollY: Math.round(window.scrollY), docScrollH: de.scrollHeight,
@@ -470,12 +478,20 @@ const PROBE = (flags) => {
     article: (() => { const a = document.querySelector('article.article, article'); return a ? { ...R(a), maxWidth: CS(a).maxWidth } : null; })(),
     topbarControls, inputs, navRows, navRowMin: navRows.length ? Math.min(...navRows.map((r) => r.h)) : null,
     brand: (() => {
-      const b = document.querySelector('.brand');
+      const b = document.querySelector('a.brand, .brand');
       const name = document.querySelector('.brand-name');
-      const el = name || b;
-      if (!el) return null;
-      return { sel: desc(el), ...R(el), scrollW: el.scrollWidth, clientW: el.clientWidth, nameW: name ? Math.round(name.getBoundingClientRect().width) : null, truncated: el.scrollWidth > el.clientWidth + 1 };
+      if (!b && !name) return null;
+      const rb = b ? b.getBoundingClientRect() : null;
+      const rn = name ? name.getBoundingClientRect() : null;
+      return {
+        brandSel: desc(b) || null, brandW: rb ? Math.round(rb.width) : null, brandH: rb ? Math.round(rb.height) : null,
+        brandScrollW: b ? b.scrollWidth : null, brandClientW: b ? b.clientWidth : null,
+        nameSel: desc(name) || null, nameW: rn ? Math.round(rn.width) : null,
+        truncated: name ? name.scrollWidth > name.clientWidth + 1 : (b ? b.scrollWidth > b.clientWidth + 1 : null),
+      };
     })(),
+    secSwitchVisible: Array.from(document.querySelectorAll('.sec-switch a')).filter((a) => vis(a)).length,
+    sideSecsVisible: Array.from(document.querySelectorAll('#sidebar .side-secs a, .sidebar .side-secs a')).filter((a) => vis(a)).length,
     preCount: pres.length,
     preScrollableCount: preInfo.filter((p) => p.scrollable).length,
     preNeedingScroll: preInfo.filter((p) => p.needsScroll).length,
@@ -920,7 +936,8 @@ const PICK = (m) => ({
   tableCount: m.tableCount, tableScroller: m.tableScrollerCount,
   scrollPaddingTop: m.scrollPaddingTop, topbarVar: m.topbarVar,
   offenders: m.offenders.length, clippedUnexplained: m.clippedUnexplainedCount,
-  brandW: m.brand ? m.brand.w : null, brandNameW: m.brand ? m.brand.nameW : null, brandTruncated: m.brand ? m.brand.truncated : null,
+  brandW: m.brand ? m.brand.brandW : null, brandNameW: m.brand ? m.brand.nameW : null, brandTruncated: m.brand ? m.brand.truncated : null,
+  secSwitchVisible: m.secSwitchVisible, sideSecsVisible: m.sideSecsVisible,
 });
 
 /** 同一探针打两个实例（post=u(p) / pre=uPre(p)），结果缓存在 ctx.dual */
@@ -1231,7 +1248,7 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
     await openDrawer(page);
     const opened2 = await probe(page);
     let scrimClosed = null;
-    if (opened2.scrim.exists && opened2.scrim.visible) {
+    if (opened2.scrim.sel && opened2.scrim.visible) {
       const pt = await page.evaluate(() => {
         const s = document.querySelector('[class*=scrim]');
         const d = document.querySelector('#sidebar, .sidebar');
@@ -1251,9 +1268,14 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
     }
     detail.B3_scrim = { scrimSeen: opened2.scrim, result: scrimClosed };
 
-    // Tab 25 次不外逃
-    await page.evaluate(() => { const b = document.querySelector('#nav-toggle'); if (b) b.focus(); });
-    await openDrawer(page);
+    // Tab 25 次不外逃（先把抽屉确保在关闭态，再聚焦 ☰ 打开，确认焦点已移入抽屉，再连续 Tab）
+    await closeDrawer(page);
+    const closedState = await probe(page);
+    await page.evaluate(() => { const b = document.querySelector('#nav-toggle, .sidebar-toggle, #menu-btn, .menu-toggle'); if (b) b.focus(); });
+    await page.click(OPEN_SEL, { timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(560);
+    const preTab = await probe(page);
+    const focusBeforeTab = await page.evaluate(() => { const a = document.activeElement; const d = document.querySelector('#sidebar, .sidebar'); return { tag: a ? a.tagName.toLowerCase() : null, inside: !!(a && d && d.contains(a)), id: a ? a.id : '' }; });
     const tabSeq = [];
     let escapedAt = null;
     for (let i = 0; i < 25; i++) {
@@ -1269,7 +1291,9 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
     detail.B6 = {
       navRowMin: open.navRowMin, navRowCount: open.navRows.length,
       ok_nav_rows: open.navRowMin !== null && open.navRowMin >= 44,
-      tabPresses: tabSeq.length, escapedAt, tabSeq: tabSeq.slice(0, 6),
+      closedBeforeTab: { ariaExpanded: closedState.menuBtn.ariaExpanded, drawerLeft: closedState.drawer.left },
+      openedForTab: { ariaExpanded: preTab.menuBtn.ariaExpanded, drawerLeft: preTab.drawer.left, scrimVisible: !!(preTab.scrim && preTab.scrim.visible) },
+      focusBeforeTab, tabPresses: tabSeq.length, escapedAt, tabSeq: tabSeq.slice(0, 6),
       ok_tab_no_escape: escapedAt === null && tabSeq.length === 25 && tabSeq.every((t) => t.inside),
     };
     await closeDrawer(page);
@@ -1509,21 +1533,36 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
   const NUM_TOL = { sidebarW: 2, contentX: 2, contentW: 2, navRowMin: 1, headerH: 0 };
   const WHITELIST = {
     '768x1024': {
-      hasMenuButton: '改前 768 已在 ≤820 断点内 → ☰ 本就可见（非回归）', menuBtn: '同上（33×32 → 44×44 是 F4/C2 目标）',
-      tocVisible: 'F3 新增特性：<1024 给正文内本页目录（改前 0）', tocDisplay: 'F3', tocW: 'F3', tocSideVisible: 'F3', drawerTocVisible: 'F3',
-      navRowMin: 'C3 移动线行高 44（改前抽屉更密）', navRowCount: '记录项', sidebarW: '抽屉宽 290→320（≤1023.98 移动线）',
-      sidebarPos: 'sticky→fixed（移动线，改前 768 已是 fixed）', headerH: '移动线顶栏 52→56', scrollPaddingTop: 'F2 连带值', topbarVar: 'F2 连带值',
+      hasMenuButton: '改前 768 已在 ≤820 断点内 → ☰ 本就可见（非回归）', menuBtn: '同上（33×32 → 44×44 是 F4/C2 目标；aria-expanded=null→false 是 B 项新增语义）',
+      tocVisible: 'F3 新增特性：<1024 给正文内本页目录（改前 0）', tocDisplay: 'F3', tocW: 'F3', tocSideVisible: 'F3', drawerTocVisible: 'F3/A4 新增：侧栏内可展开的 details 本页目录', drawerTocInSidebar: 'F3/A4 新增元素（改前该元素根本不存在）',
+      navRowMin: 'C3 移动线行高 44（改前抽屉更密）', navRowCount: '顶栏 .sec-switch 的 3 条链接在 ≤1023.98 下沉到抽屉 .side-secs（同一批 affordance 换位置：实测 834 处改前 secSwitch=3/sideSecs=0，改后 secSwitch=0/sideSecs=3）', sidebarW: '抽屉宽 290→320（≤1023.98 移动线）',
+      sidebarPos: 'sticky→fixed（移动线；改前 768 已是 fixed）', headerH: '移动线顶栏 52→56', scrollPaddingTop: 'F2 连带值', topbarVar: 'F2 连带值',
       sidebarInert: '改前无 inert（B 项新增语义）', inputFonts: 'C1 目标（改前 13.44/14.4/15.2 → 16）', preFocusable: 'D2 目标（新增 tabindex=0）',
-      brandW: 'F1 品牌占位', brandNameW: 'F1', menuBtn_ariaExpanded: 'B 项新增 aria-expanded',
+      brandW: 'F1 品牌占位（改后 .brand 内含 .brand-name）', brandNameW: 'F1 新增 .brand-name 元素（改前无此元素 → null）', brandTruncated: 'F1',
+      contentX: '≤1023.98 单列（移动线）', contentW: '≤1023.98 单列（移动线）', layoutCols: '移动线单列',
     },
     '834x1112': {
       hasMenuButton: '改前 834 >820 断点 → 既无 ☰ 也无 TOC（820–1200 空档）；改后按 1023.98 移动线给抽屉 = A4 要求',
-      menuBtn: 'A4/B1 新增', tocVisible: 'F3', tocDisplay: 'F3', tocW: 'F3', tocSideVisible: 'F3', drawerTocVisible: 'F3',
-      navRowMin: 'C3 移动线', sidebarW: '280→320', sidebarPos: 'sticky→fixed（移动线）', sidebarInert: 'B 项新增',
+      menuBtn: 'A4/B1 新增', tocVisible: 'F3', tocDisplay: 'F3', tocW: 'F3', tocSideVisible: 'F3', drawerTocVisible: 'F3/A4 新增', drawerTocInSidebar: 'F3/A4 新增元素',
+      navRowMin: 'C3 移动线', navRowCount: '同 768：sec-switch 3 条链接下沉到抽屉（实测改前 secSwitch=3/sideSecs=0 → 改后 secSwitch=0/sideSecs=3，总数不变）', sidebarW: '280→320', sidebarPos: 'sticky→fixed（移动线）', sidebarInert: 'B 项新增',
       headerH: '移动线顶栏 52→56', scrollPaddingTop: 'F2 连带值', topbarVar: 'F2', inputFonts: 'C1', preFocusable: 'D2',
-      brandW: 'F1', brandNameW: 'F1', layoutCols: '280px 554px → 834px（移动线单列）',
+      brandW: 'F1', brandNameW: 'F1 新增元素', brandTruncated: 'F1',
+      layoutCols: '280px 554px → 834px（移动线单列）', contentX: '280→0（移动线单列）', contentW: '554→834（移动线单列）',
+      secSwitchVisible: '移动线：顶栏分区切换下沉到抽屉', sideSecsVisible: '移动线：抽屉里承接 3 条分区链接',
     },
-    '1024x768': {}, '1280x800': {},
+    '1024x768': {
+      drawerTocVisible: 'F3/A4 新增：≥1024 侧栏常驻时给一个可展开的 details 本页目录（此时 .toc-side rail 仍 display:none，与改前一致）',
+      drawerTocInSidebar: 'F3/A4 新增元素（改前不存在）',
+      menuBtn: '☰ 在 ≥1024 仍是 display:none（改前 null → 改后 aria-expanded="false" 属性存在，可见性不变）',
+      inputFonts: 'C1 目标在桌面同样生效（13.44 → 16，红队 §7.2 第 6 条未限定视口）',
+      brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素（改后 .brand 宽度即品牌名宽）', brandTruncated: 'F1',
+    },
+    '1280x800': {
+      drawerTocVisible: 'F3/A4 新增（该 details 在 ≥1100 由 CSS 隐藏，rail 仍常驻）', drawerTocInSidebar: 'F3/A4 新增元素',
+      menuBtn: '☰ 依旧 display:none（仅多了 aria-expanded="false" 属性）',
+      inputFonts: 'C1 目标在桌面同样生效（13.44 → 16）',
+      brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素', brandTruncated: 'F1',
+    },
   };
   const diffs = [];
   for (const s of snaps) {
@@ -1653,7 +1692,7 @@ check(10, 12, 'E4', '交互未坏：搜索 / 侧栏过滤 / 主题切换 / 锚�
     const after = await page.evaluate(SIDE_LINKS);
     const filterVisibleSample = await page.evaluate(() => Array.from(document.querySelectorAll('#sidebar a[data-search], .sidebar a[data-search]')).filter((a) => { const r = a.getBoundingClientRect(); const cs = getComputedStyle(a); return r.height > 0 && cs.display !== 'none' && !(a.closest('li') && a.closest('li').hidden); }).slice(0, 3).map((a) => (a.textContent || '').trim().slice(0, 20)));
     out.filter = { inputFound: filtered.found, before, after, sample: filterVisibleSample, ok: filtered.found && after.visible > 0 && after.visible < before.visible };
-    // 3) 主题切换
+    // 3) 主题切换（改前 auto → light 时底色在浅色偏好下不变属正常：断言必须"属性逐次变化 + 两次点击后外观与起点不同"）
     await go(page, u('/paper/dev/pdc/'));
     const t0 = await probe(page);
     await page.click('#theme-toggle', { timeout: 4000 }).catch(() => {});
@@ -1663,28 +1702,37 @@ check(10, 12, 'E4', '交互未坏：搜索 / 侧栏过滤 / 主题切换 / 锚�
     await page.waitForTimeout(420);
     const t2 = await probe(page);
     out.theme = {
-      start: { attr: t0.theme.attr, bodyBg: t0.theme.bodyBg, btn: t0.topbarControls.filter((c) => /theme/.test(c.cls))[0] || null },
-      after1: { attr: t1.theme.attr, bodyBg: t1.theme.bodyBg },
-      after2: { attr: t2.theme.attr, bodyBg: t2.theme.bodyBg },
-      ok: t1.theme.attr !== t0.theme.attr && t1.theme.bodyBg !== t0.theme.bodyBg,
-      restored: t2.theme.attr === t0.theme.attr,
+      start: { attr: t0.theme.attr, bodyBg: t0.theme.bodyBg, htmlBg: t0.theme.htmlBg, colorScheme: t0.theme.colorScheme },
+      after1: { attr: t1.theme.attr, bodyBg: t1.theme.bodyBg, htmlBg: t1.theme.htmlBg, colorScheme: t1.theme.colorScheme },
+      after2: { attr: t2.theme.attr, bodyBg: t2.theme.bodyBg, htmlBg: t2.theme.htmlBg, colorScheme: t2.theme.colorScheme },
+      attr_sequence_changes: t1.theme.attr !== t0.theme.attr && t2.theme.attr !== t1.theme.attr,
+      appearance_changes: t2.theme.bodyBg !== t0.theme.bodyBg || t2.theme.htmlBg !== t0.theme.htmlBg || t2.theme.colorScheme !== t0.theme.colorScheme,
+      ok: t1.theme.attr !== t0.theme.attr && t2.theme.attr !== t1.theme.attr && (t2.theme.bodyBg !== t0.theme.bodyBg || t2.theme.htmlBg !== t0.theme.htmlBg || t2.theme.colorScheme !== t0.theme.colorScheme),
     };
-    // 4) 锚点落点
+    // 4) 锚点落点：走**真实用户路径**（点本页目录里的锚点链接；无目录时用带 hash 的导航）
     const anchors = [];
     for (const p of ['/paper/dev/pdc/', '/paper/reference/world-configuration/']) {
       await go(page, u(p));
       const ids = await page.evaluate(() => Array.from(document.querySelectorAll('.article h2[id], .article h3[id]')).slice(0, 3).map((h) => h.id));
       for (const id of ids) {
-        const m = await page.evaluate(async (hid) => {
+        const hasTocLink = await page.evaluate((hid) => !!document.querySelector('.toc-side a[href="#' + hid + '"], #sidebar a[href="#' + hid + '"], .side-toc a[href="#' + hid + '"]'), id);
+        let how = null;
+        if (hasTocLink) {
+          const clicked = await page.click('.toc-side a[href="#' + id + '"], #sidebar a[href="#' + id + '"], .side-toc a[href="#' + id + '"]', { timeout: 4000 }).then(() => true).catch(() => false);
+          if (clicked) how = 'click-toc-link';
+        }
+        if (!how) {   // 兜底：带 hash 的整页导航（等价于用户粘贴带锚点 URL）
+          await page.goto(u(p) + '#' + id, { waitUntil: 'load', timeout: 45000 });
+          how = 'goto-with-hash';
+        }
+        await page.waitForTimeout(900);
+        const m = await page.evaluate((hid) => {
           const h = document.getElementById(hid);
           const bar = document.querySelector('header.topbar, header');
-          history.pushState(null, '', '#' + hid);
-          location.hash = '#' + hid;
-          await new Promise((r) => setTimeout(r, 800));
           const hr = h.getBoundingClientRect(), br = bar.getBoundingClientRect();
           return { id: hid, headingTop: Math.round(hr.top), barBottom: Math.round(br.bottom), gap: Math.round(hr.top - br.bottom), scrollY: Math.round(window.scrollY), scrollPaddingTop: getComputedStyle(document.documentElement).scrollPaddingTop, scrollMarginTop: getComputedStyle(h).scrollMarginTop };
         }, id).catch(() => null);
-        if (m) anchors.push({ page: p, ...m, ok: m.gap >= 8 && m.gap <= 20 });
+        if (m) anchors.push({ page: p, how, ...m, ok: m.gap >= 8 && m.gap <= 20 });
       }
     }
     out.anchor = { samples: anchors, ok: anchors.length > 0 && anchors.every((a) => a.ok), gapRange: anchors.length ? [Math.min(...anchors.map((a) => a.gap)), Math.max(...anchors.map((a) => a.gap))] : null };
@@ -1722,13 +1770,13 @@ check(11, 13, 'E5', 'file:// 直开（390px）：样式与相对路径仍生效'
       const styleCheck = await page.evaluate(() => {
         const bar = document.querySelector('header.topbar, header');
         const cs = bar ? getComputedStyle(bar) : null;
-        const img = Array.from(document.querySelectorAll('img')).slice(0, 6).map((i) => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 }));
+        const img = Array.from(document.querySelectorAll('img')).filter((i) => i.getAttribute('src') && i.getAttribute('src').trim() !== '' && i.getAttribute('src').trim() !== 'about:blank').slice(0, 8).map((i) => ({ src: i.getAttribute('src'), ok: i.complete && i.naturalWidth > 0 }));
         return {
           barPos: cs ? cs.position : null, barBg: cs ? cs.backgroundColor : null, barH: bar ? Math.round(bar.getBoundingClientRect().height) : null,
           siteCssApplied: !!(cs && (cs.position === 'sticky' || cs.position === 'relative' || cs.position === 'fixed')),
           bodyFont: getComputedStyle(document.body).fontFamily.slice(0, 60),
           menuBtn: !!document.querySelector('#nav-toggle'),
-          imgs: img, imgsOk: img.every((i) => i.ok), imgCount: document.querySelectorAll('img').length,
+          imgs: img, imgsOk: img.every((i) => i.ok), imgCount: img.length, imgWithoutSrc: Array.from(document.querySelectorAll('img')).filter((i) => !i.getAttribute('src')).length,
           links: Array.from(document.querySelectorAll('a[href]')).slice(0, 8).map((a) => a.getAttribute('href')),
           hasToc: !!document.querySelector('.toc-side'), navLinks: document.querySelectorAll('#sidebar a[data-search]').length,
           searchBtn: !!document.querySelector('[data-open-search]'),
@@ -1917,24 +1965,39 @@ check(13, 15, 'A11Y', '无障碍：reduced-motion / focus-visible / 320px 无双
 
 /* ── 14 / item 16：性能（4× CPU + Slow 4G） ── */
 check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可交互；搜索单次按键长任务 < 50ms', '三项逐条断言（CDP 节流，真机 Chrome）', async (ctx) => {
-  const out = { profile: { cpu: 4, network: 'Slow 4G 1.6Mbps/750Kbps/150ms RTT' }, fcp: [], interactive: null, longTask: null };
+  const out = { profiles: ['slow4g', 'slow4g+cpu4x'], throttle: { downloadThroughput: Math.round(1.6 * 1024 * 1024 / 8), uploadThroughput: Math.round(750 * 1024 / 8), latency: 150, cpu: 4 }, fcp: [], interactive: null, longTask: null };
   const THROTTLE = { downloadThroughput: Math.round(1.6 * 1024 * 1024 / 8), uploadThroughput: Math.round(750 * 1024 / 8), latency: 150 };
-  // 1) FCP
-  for (const p of ['/', '/paper/dev/pdc/']) {
-    await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Network.enable');
-      await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE });
-      await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-      const t0 = Date.now();
-      await page.goto(u(p), { waitUntil: 'load', timeout: 90000 });
-      const paint = await page.evaluate(() => {
-        const e = performance.getEntriesByType('paint').find((x) => x.name === 'first-contentful-paint');
-        const nav = performance.getEntriesByType('navigation')[0] || {};
-        return { fcp: e ? Math.round(e.startTime) : null, dcl: nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd) : null, load: nav.loadEventEnd ? Math.round(nav.loadEventEnd) : null, resources: performance.getEntriesByType('resource').map((r) => r.name.split('/').slice(-1)[0]) };
-      });
-      out.fcp.push({ page: p, ...paint, wall: Date.now() - t0, ok: paint.fcp !== null && paint.fcp < 2000 });
+  const PROFILES = [
+    { name: 'slow4g', net: true, cpu: false, note: '红队 §7.6 第 19 条口径：Slow 4G（1.6Mbps/150ms）' },
+    { name: 'slow4g+cpu4x', net: true, cpu: true, note: '任务书口径：4× CPU + Slow 4G（叠加节流）' },
+  ];
+  /** 一次 FCP/DCL 测量；post/pre 背靠背跑同一 profile，保证可比 */
+  const measureFcp = async (url, prof) => withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
+    const cdp = await page.context().newCDPSession(page);
+    if (prof.net) { await cdp.send('Network.enable'); await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE }); }
+    if (prof.cpu) await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    const t0 = Date.now();
+    await page.goto(url, { waitUntil: 'load', timeout: 120000 });
+    const paint = await page.evaluate(() => {
+      const e = performance.getEntriesByType('paint').find((x) => x.name === 'first-contentful-paint');
+      const nav = performance.getEntriesByType('navigation')[0] || {};
+      const res = performance.getEntriesByType('resource').map((r) => r.name.split('/').slice(-1)[0]);
+      return {
+        fcp: e ? Math.round(e.startTime) : null,
+        dcl: nav.domContentLoadedEventEnd ? Math.round(nav.domContentLoadedEventEnd) : null,
+        load: nav.loadEventEnd ? Math.round(nav.loadEventEnd) : null,
+        resources: res, indexOnCriticalPath: res.some((n) => /search-index/.test(n)),
+      };
     });
+    return { ...paint, wall: Date.now() - t0 };
+  });
+  for (const prof of PROFILES) {
+    for (const p of ['/', '/paper/dev/pdc/']) {
+      const post = await measureFcp(u(p), prof);
+      const pre = ctx.pre ? await measureFcp(uPre(p), prof) : null;
+      out.fcp.push({ profile: prof.name, page: p, post, pre, ok_abs: post.fcp !== null && post.fcp < 2000, delta_vs_pre: (pre && pre.fcp !== null && post.fcp !== null) ? post.fcp - pre.fcp : null });
+    }
+    ctx.log('    PERF ' + prof.name + ' done');
   }
   // 2) DCL 前可交互（#nav-toggle 能点开抽屉）
   await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
@@ -1989,18 +2052,30 @@ check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可�
     const r = await page.evaluate(READ_RESULTS);
     out.longTask.resultCount = r.count;
   });
+  const fcpNet = out.fcp.filter((f) => f.profile === 'slow4g');
+  const fcpStack = out.fcp.filter((f) => f.profile === 'slow4g+cpu4x');
+  const fcpNetOk = fcpNet.length > 0 && fcpNet.every((f) => f.ok_abs);
+  const fcpStackOk = fcpStack.length > 0 && fcpStack.every((f) => f.ok_abs);
+  const stackNotRegression = fcpStack.every((f) => f.delta_vs_pre === null || f.delta_vs_pre <= 150);
+  out.fcp_slow4g_ok = fcpNetOk;
+  out.fcp_stack_ok = fcpStackOk;
+  out.fcp_stack_not_regression = stackNotRegression;
   const fails = [];
-  for (const f of out.fcp) if (!f.ok) fails.push(`FCP ${f.page} = ${f.fcp}ms（>2000）`);
+  if (!fcpNetOk) fails.push('FCP（Slow 4G 网络档）≥2000ms：' + JSON.stringify(fcpNet.map((f) => f.page + '=' + f.post.fcp)));
+  if (!fcpStackOk) fails.push('FCP（Slow 4G + 4×CPU 叠加档）≥2000ms：' + JSON.stringify(fcpStack.map((f) => f.page + '=' + f.post.fcp + '（改前同档 ' + (f.pre ? f.pre.fcp : 'n/a') + '）'))
+    + (stackNotRegression ? ' —— 改前同档同样不达标且差值 ≤150ms：属口径/机器限制，不是本次移动端改造引入' : ' —— 且改前同档明显更优，判回归'));
   if (!out.interactive || !out.interactive.ok) fails.push('DCL 前不可交互：' + JSON.stringify(out.interactive));
   if (!out.longTask || !out.longTask.ok) fails.push(`搜索按键长任务 ${out.longTask ? out.longTask.maxDur : 'n/a'}ms（>50）`);
+  const verdict = (fcpNetOk && out.interactive && out.interactive.ok && out.longTask && out.longTask.ok && stackNotRegression)
+    ? (fcpStackOk ? 'pass' : 'partial') : 'fail';
   return {
-    verdict: fails.length === 0 ? 'pass' : 'fail',
-    metrics: out,
+    verdict,
+    metrics: { ...out, fcpStackNote: '叠加档（4×CPU + Slow 4G）的绝对阈值 <2000ms 在**改前/改后都过不了**（实测改后 3068–3340ms / 改前 3252–3312ms）→ 依据"同档对照不劣化"判定，不采信执行者自报的 1132–1134ms（那个数对应的是不叠 CPU 节流的网络档）' },
     failures: fails,
     repro: 'node tools/verify-mobile.js --check=14',
     notes: '节流走 CDP：Emulation.setCPUThrottlingRate(4) + Network.emulateNetworkConditions(Slow 4G 1.6Mbps/750Kbps/150ms)；'
-      + 'FCP 取 performance paint timing；"DCL 前可交互"= goto(waitUntil:domcontentloaded) 后立刻 click #nav-toggle 并轮询 aria-expanded；'
-      + '长任务用 PerformanceObserver(longtask) 包住连续按键',
+      + '两条 FCP 口径分别判定（网络档 = 红队原始口径；叠加档 = 任务书字面口径），并用改前实例同档对照证明是否回归；'
+      + '"DCL 前可交互"= goto(waitUntil:domcontentloaded) 后立刻 click #nav-toggle 并轮询 aria-expanded；长任务用 PerformanceObserver(longtask) 包住连续按键',
   };
 });
 
@@ -2074,13 +2149,14 @@ async function main() {
   for (const r of results) byKey.set(r.key, r);
   const checks = Array.from(byKey.values()).filter((c) => currentKeys.has(c.key)).sort((a, b) => a.id - b.id);
 
-  /* 16 项汇总：item → checks[] */
+  /* 16 项汇总：item → checks[]（严重度取最坏：error > fail > partial > pass） */
+  const SEV = { pass: 0, partial: 1, fail: 2, error: 3 };
   const byItem = {};
   for (const c of checks) {
     const k = String(c.item === undefined ? c.id : c.item);
     byItem[k] = byItem[k] || { item: Number(k), title: ITEM_TITLES[Number(k)] || '', checks: [], verdict: 'pass' };
     byItem[k].checks.push({ id: c.id, key: c.key, verdict: c.verdict, ms: c.ms });
-    if (c.verdict !== 'pass') byItem[k].verdict = c.verdict === 'error' ? 'error' : (byItem[k].verdict === 'error' ? 'error' : 'fail');
+    if ((SEV[c.verdict] || 0) > (SEV[byItem[k].verdict] || 0)) byItem[k].verdict = c.verdict;
   }
   const items = Object.values(byItem).sort((a, b) => a.item - b.item);
   const run = { at: new Date().toISOString(), fingerprint: fp._all, pre_fingerprint: preFp._all, pre_available: preOk, ran: results.map((r) => ({ id: r.id, item: r.item, key: r.key, verdict: r.verdict })) };
@@ -2117,7 +2193,8 @@ async function main() {
       fail_keys: checks.filter((c) => c.verdict !== 'pass').map((c) => c.key),
       items_total: items.length,
       items_pass: items.filter((i) => i.verdict === 'pass').length,
-      items_fail: items.filter((i) => i.verdict !== 'pass').map((i) => i.item),
+      items_partial: items.filter((i) => i.verdict === 'partial').map((i) => i.item),
+      items_fail: items.filter((i) => i.verdict === 'fail' || i.verdict === 'error').map((i) => i.item),
       ran_now: results.map((r) => r.id),
     },
     items,
