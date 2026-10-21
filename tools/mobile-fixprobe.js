@@ -473,6 +473,59 @@ async function main() {
   if (ONLY.indexOf('c') !== -1) { report.taskC.post = await searchOn(browser, BASE, report.taskC.queries); console.log('  C done'); }
   if (ONLY.indexOf('d') !== -1) { report.taskC.pre = await searchOn(browser, PRE, report.taskC.queries); console.log('  C(pre) done'); }
 
+  if (ONLY.indexOf('y') !== -1) {
+    report.taskY = { rows: [] };
+    for (const vp of [{ name: '390x844', w: 390, h: 844 }, { name: '1280x800', w: 1280, h: 800 }, { name: '320x568', w: 320, h: 568 }]) {
+      await withCtx(browser, vp, async (page) => {
+        await go(page, BASE + '/paper/dev/using-databases/');
+        const raw = await page.evaluate(FIRST_HOST_TAB);
+        if (raw.pending) { await page.keyboard.press('Tab'); const r = await page.evaluate(IS_HOST); raw.reached = r.hit; raw.activeSel = r.activeSel; }
+        const opened = await page.evaluate(OPEN_ALL_DETAILS);
+        await page.waitForTimeout(150);
+        const after = await page.evaluate(FIRST_HOST_TAB);
+        if (after.pending) { await page.keyboard.press('Tab'); const r2 = await page.evaluate(IS_HOST); after.reached = r2.hit; after.activeSel = r2.activeSel; }
+        const tripleAfter = await page.evaluate(() => {
+          const h = window.__fh;
+          return h ? { tabindex: h.getAttribute('tabindex'), role: h.getAttribute('role'), ariaLabel: h.getAttribute('aria-label'), over: h.scrollWidth > h.clientWidth + 1, scrollLeftWorks: (function () { const b = h.scrollLeft; h.scrollLeft = 40; const v = h.scrollLeft > 0; h.scrollLeft = b; return v; })() } : null;
+        });
+        report.taskY.rows.push({ viewport: vp.name, page: '/paper/dev/using-databases/', raw, detailsOpened: opened, afterOpen: after, tripleAfter });
+      });
+    }
+    console.log('  Y done'); console.log(JSON.stringify(report.taskY, null, 1));
+  }
+
+  if (ONLY.indexOf('z') !== -1) {
+    report.taskZ = { rows: [] };
+    await withCtx(browser, { name: '390x844', w: 390, h: 844 }, async (page) => {
+      await go(page, BASE + '/paper/dev/pdc/', 250);
+      const strat = await openSearch(page);
+      /* 输入前的初始列表（弹窗默认内容） */
+      const before = await page.evaluate(READ_RESULTS);
+      await page.fill('#search-input', '权限', { timeout: 2500 }).catch(() => {});
+      const seq = [];
+      for (let t = 0; t <= 1800; t += 60) {
+        if (t > 0) await page.waitForTimeout(60);
+        const r = await page.evaluate(READ_RESULTS);
+        seq.push({ t, liCount: r.liCount, countText: r.countText });
+      }
+      const last = seq[seq.length - 1];
+      /* 结果区滚动后再读（排除虚拟化/懒渲染） */
+      const afterScroll = await page.evaluate(() => {
+        const res = document.querySelector('#search-results');
+        if (res) res.scrollTop = res.scrollHeight;
+        return null;
+      });
+      await page.waitForTimeout(250);
+      const afterScrollRead = await page.evaluate(READ_RESULTS);
+      report.taskZ.rows.push({
+        strategy: strat, beforeInput: { liCount: before.liCount, countText: before.countText, first3: before.first3 },
+        seq, finalCount: last.liCount, finalText: last.countText, afterScroll: afterScrollRead.liCount,
+        distinctCounts: Array.from(new Set(seq.map((s) => s.liCount))),
+      });
+    });
+    console.log('  Z done'); console.log(JSON.stringify(report.taskZ, null, 1));
+  }
+
   if (ONLY.indexOf('x') !== -1) {
     report.diag = {
       udb_390: await diagnose(browser, BASE, '/paper/dev/using-databases/', { name: '390x844', w: 390, h: 844 }),

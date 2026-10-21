@@ -169,8 +169,37 @@ const getv = (rec, f) => {
   return v === undefined ? null : v;
 };
 
+const validRecord = (rec) => !!(rec && !rec.error && rec.metrics && rec.metrics.title && rec.metrics.headerSel && rec.metrics.navRowMin !== null);
+
+/** 实例体检：BASELINE 可能被别的 Agent 中途重建（本机实测踩到过），空页必须识别成「基线不可用」而不是「差异」 */
+async function instanceHealth(browser, tag, base) {
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false, deviceScaleFactor: 1 });
+  const page = await ctx.newPage();
+  const h = { instance: tag, url: base + '/', healthy: false };
+  try {
+    const resp = await page.goto(base + '/', { waitUntil: 'load', timeout: 30000 });
+    await sleep(120);
+    const m = await page.evaluate(PROBE_C);
+    h.http_status = resp ? resp.status() : null;
+    h.title = m.title;
+    h.header_sel = m.headerSel;
+    h.navRowMin = m.navRowMin;
+    h.nav_links = m.navLinks;
+    h.topbar_var = m.topbarVar;
+    h.overflow = m.overflow;
+    h.generation_marker = { has_menu_button: m.hasMenuButton, has_html_class: m.clientWidth > 0 };
+    h.healthy = !!(m.title && m.headerSel && m.navRowMin !== null);
+  } catch (e) {
+    h.error = String(e.message || e).slice(0, 160);
+  }
+  await ctx.close();
+  return h;
+}
+
 async function check1(browser) {
   const t0 = Date.now();
+  const health = { pre: await instanceHealth(browser, 'pre(改前 8788)', PRE), post: await instanceHealth(browser, 'post(改后 8787)', BASE) };
+  console.log('  实例体检 pre=' + (health.pre.healthy ? 'OK' : 'BROKEN') + ' post=' + (health.post.healthy ? 'OK' : 'BROKEN'));
   const records = { pre: [], post: [] };
   for (const inst of ['pre', 'post']) {
     const b = inst === 'pre' ? PRE : BASE;
@@ -184,7 +213,8 @@ async function check1(browser) {
           await sleep(120);
           rec.metrics = await page.evaluate(PROBE_C);
         } catch (e) { rec.error = String(e.message || e).slice(0, 200); }
-        console.log('  ' + (rec.error ? 'ERR ' : ' ok ') + inst.padEnd(5) + vp.name.padEnd(9) + p.padEnd(52) +
+        rec.valid = validRecord(rec);
+        console.log('  ' + (rec.valid ? ' ok ' : 'BAD ') + inst.padEnd(5) + vp.name.padEnd(9) + p.padEnd(52) +
           (rec.metrics ? 'overflow=' + rec.metrics.overflow + ' ☰=' + rec.metrics.hasMenuButton + ' navRowMin=' + rec.metrics.navRowMin +
             ' toc=' + rec.metrics.tocVisible + '(' + rec.metrics.tocLinks + ')' + ' headerH=' + rec.metrics.headerH +
             ' sidebar=' + (rec.metrics.sidebar ? rec.metrics.sidebar.display + '/' + rec.metrics.sidebar.w : '-') +
@@ -194,14 +224,22 @@ async function check1(browser) {
       await ctx.close();
     }
   }
+  const badRecords = { pre: records.pre.filter((r) => !r.valid).length, post: records.post.filter((r) => !r.valid).length };
 
   const diffs = [];
   let cells = 0;
+  let invalidPairs = 0;
+  const invalidList = [];
   for (const vp of AB_VP) {
     for (const p of AB_PAGES) {
       const a = records.pre.find((r) => r.vp === vp.name && r.page === p);
       const c = records.post.find((r) => r.vp === vp.name && r.page === p);
-      if (!a || !c || a.error || c.error) continue;
+      if (!a || !c) continue;
+      if (!a.valid || !c.valid) {
+        invalidPairs++;
+        invalidList.push({ vp: vp.name, page: p, pre_valid: !!a.valid, post_valid: !!c.valid, pre_title: a.metrics ? a.metrics.title : null, post_title: c.metrics ? c.metrics.title : null });
+        continue;                      // 一侧是空页（基线被并发重建/服务掉了）→ 不算差异
+      }
       for (const f of AB_FIELDS) {
         const av = getv(a, f);
         const cv = getv(c, f);
@@ -226,10 +264,13 @@ async function check1(browser) {
     byVpField[k] = (byVpField[k] || 0) + 1;
   }
   const unexpected = diffs.filter((d) => d.klass === 'unexpected');
+  const blocked = invalidPairs > 0 || !health.pre.healthy || !health.post.healthy;
   const item = {
     id: 1, name: 'E1/E2 零回归对打（双实例同探针）',
-    status: unexpected.length ? 'fail' : 'pass',
+    status: blocked ? 'fail' : (unexpected.length ? 'fail' : 'pass'),
     instance_pre: PRE, instance_post: BASE,
+    instance_health: health,
+    invalid_pairs: invalidPairs, invalid_records: badRecords, invalid_list: invalidList.slice(0, 10),
     viewports: AB_VP.map((v) => v.name), pages: AB_PAGES, fields: AB_FIELDS,
     cells_compared: cells, diff_rows: diffs.length,
     diff_by_vp_field: byVpField,
@@ -243,12 +284,16 @@ async function check1(browser) {
     records,
     duration_s: Math.round((Date.now() - t0) / 1000),
     repro: 'node tools/verify-mobile-c.js --check=1 --url=' + BASE + ' --pre=' + PRE,
-    conclusion: unexpected.length
-      ? '发现 ' + unexpected.length + ' 条裁决外差异，逐条见 unexpected（需父裁决 / 可能是真回归）'
-      : cells + ' 格全比对：差异 ' + diffs.length + ' 行全部落在「父已裁决」或「契约明文规格」内（1024/1280 两档逐格零差异），零回归成立',
+    conclusion: blocked
+      ? '对打不成立：' + invalidPairs + ' 个 (视口,页面) 组合有一侧是空页（实例体检 pre=' + health.pre.healthy + ' post=' + health.post.healthy +
+        '）——本机确实踩到基线实例被并发重建的窗口；等实例恢复后复跑 --check=1（基线不在跑就：node tools/serve.js --port 8788 --root ..\\_pre-mobile）'
+      : (unexpected.length
+        ? '发现 ' + unexpected.length + ' 条裁决外差异，逐条见 unexpected（需父裁决 / 可能是真回归）'
+        : cells + ' 格全比对：差异 ' + diffs.length + ' 行全部落在「父已裁决」或「契约明文规格」内（1024/1280 两档逐格零差异），零回归成立'),
   };
   console.log('  → #1 ' + item.status.toUpperCase() + '：' + cells + ' 格，差异 ' + diffs.length +
-    '（裁决内 ' + item.counts.adjudicated + ' / 规格内 ' + item.counts.spec + ' / 裁决外 ' + item.counts.unexpected + '）');
+    '（裁决内 ' + item.counts.adjudicated + ' / 规格内 ' + item.counts.spec + ' / 裁决外 ' + item.counts.unexpected + '）' +
+    '；空页组合 ' + invalidPairs);
   return item;
 }
 
@@ -308,11 +353,15 @@ async function check2() {
   for (const g of gates) {
     process.stdout.write('  run ' + g.id + ' … ');
     const r = runNode(g.args, shadow, 1200000);
-    const tail = r.out.split(/\r?\n/).filter(Boolean).slice(-14).join('\n');
+    const outLines = r.out.split(/\r?\n/);
+    const tail = outLines.filter(Boolean).slice(-24).join('\n');
+    const mfStart = outLines.findIndex((l) => /①\s*必须修复/.test(l));
     const row = {
       id: g.id, cmd: 'node ' + g.args.join(' '), cwd: '<shadow>', exit_code: r.code,
       status: r.code === 0 ? 'pass' : 'fail', duration_s: r.dur,
       writes_in_shadow: g.writes, stdout_tail: tail, stdout_lines: r.out.split(/\r?\n/).length,
+      mustfix_block: mfStart >= 0 ? outLines.slice(mfStart, mfStart + 12).filter(Boolean).join('\n') : null,
+      verdict_line: (r.out.match(/✔ 通过[^\n]*|✘ 未通过[^\n]*|RESULT:[^\n]*|汇总：[^\n]*/) || [])[0] || null,
     };
     console.log((r.code === 0 ? 'PASS' : 'FAIL(exit ' + r.code + ')') + '  ' + r.dur + 's');
     results.push(row);
@@ -331,7 +380,7 @@ async function check2() {
       else { const st = fs.statSync(path.join(REPO, r2)); if (st.mtimeMs >= t0) recent.push({ file: r2, mtime: st.mtime.toISOString(), bytes: st.size }); }
     }
   };
-  for (const d of ['reports', 'data']) { try { walk(d); } catch { /* ignore */ } }
+  for (const d of ['reports', 'data', 'tools']) { try { walk(d); } catch { /* ignore */ } }
   const fails = results.filter((r) => r.status !== 'pass');
   return {
     id: 2, name: 'E3 既有门禁（临时影子副本内独立复跑）',
@@ -463,7 +512,7 @@ async function check3(browser) {
     duration_s: Math.round((Date.now() - t0) / 1000),
     repro: 'node tools/verify-mobile-c.js --check=3（file:// 直开 index.html / world-configuration / anti-xray）',
     conclusion: bad.length ? 'file:// 下 ' + bad.map((r) => r.page).join('、') + ' 未达标（见 rows）' :
-      '3 页 file:// 直开：自定义属性可读（--topbar-h=56px / headerH=56）、CSS 规则不抛 SecurityError、相对路径 CSS/JS/正文图全部解析（requestfailed 0、0 张坏图）、overflow ≤ 1、☰ 抽屉 JS 生效',
+      '3 页 file:// 直开：样式生效（getComputedStyle 读到 --topbar-h=56px、header 56px + position:sticky、overflow ≤ 1）、相对路径 CSS/JS/正文图全部解析（资源类 requestfailed 0、0 张坏图）、☰ 抽屉 JS 生效；stylesheet.cssRules 因 file:// 同源策略不可读（SecurityError）属浏览器安全模型，已改用 computed style 作为「样式生效」证据，不计失败',
   };
 }
 
@@ -749,7 +798,7 @@ async function check5() {
   const mainStat = fs.statSync(target);
   main.sha256_16 = require('crypto').createHash('sha256').update(fs.readFileSync(target)).digest('hex').slice(0, 16);
   main.mtime = mainStat.mtime.toISOString();
-  main.line79 = fs.readFileSync(target, 'utf8').split(/\r?\n/)[78] || null;
+  main.line79 = (fs.readFileSync(target, 'utf8').split(/\r?\n/)[78] !== undefined) ? fs.readFileSync(target, 'utf8').split(/\r?\n/)[78] : '(文件不足 79 行)';
   main.env_path_evidence = (fs.readFileSync(target, 'utf8').match(/process\.env(?:\[[^\]]+\]|\.[A-Za-z_]+)/g) || []).slice(0, 8);
   main.ignore_line_exemptions = (fs.readFileSync(target, 'utf8').match(/privacy-scan:ignore-line/g) || []).length;
 
@@ -774,6 +823,8 @@ async function check5() {
     status: pass ? 'pass' : 'fail',
     repo_file: main,
     non_repo_copies: siblings,
+    privacy_scan: psSummary,
+    self_scan_note: '本脚本自身也必须是 ① 类干净的：跑门禁时 privacy-scan 会连 tools/verify-mobile-c.js 一起扫（曾经命中过 tools/verify-mobile-c.js 的 temp-path 规则，已改成 <tmp> 写法）',
     applied_fix: {
       target: '非仓库副本 _shadow-verify/tools/verify-mobile.js（前任验证器的遗留影子副本；仓库内同名文件当时已是 env 拼路径）',
       what: '把 1 处盘符字面量的浏览器路径常量改成 env 拼路径的 BROWSER_CANDIDATES + browserPath()，顺序保持 Chrome → bundled chromium → Edge，逻辑不变',
@@ -853,7 +904,13 @@ function renderMd(st) {
     L.push('## 1. E1/E2 零回归对打（同一探针 + 双实例）');
     L.push('');
     L.push('- 视口 ×{768×1024, 1024×768, 1280×800}　页面 ×{`/`、`/paper/`、`/paper/dev/command-api/basics/introduction/`、`/all-pages.html`、`/velocity/tuning/`}');
-    L.push('- 字段：' + o.fields.map((f) => '`' + f + '`').join('、'));
+    L.push('- 字段：' + o.fields.map((f) => '`' + f + '`').join('、') + '（前 9 项为父要求项，最后 2 项是 ☰ 尺寸附加证据）');
+    L.push('- 实例体检（测量前 + 测量中逐条校验，空页会被识别成「基线不可用」而不是差异）：');
+    for (const k of Object.keys(o.instance_health || {})) {
+      const h = o.instance_health[k];
+      L.push('  - `' + k + '` ' + h.url + '：healthy=' + h.healthy + '，HTTP ' + h.http_status + '，title=`' + cell(h.title) + '`，header=' + cell(h.header_sel) + '，navRowMin=' + h.navRowMin + '，sidebar 链接=' + h.nav_links + '，--topbar-h=' + cell(h.topbar_var));
+    }
+    L.push('  - 无效记录：pre ' + ((o.invalid_records || {}).pre || 0) + ' 条 / post ' + ((o.invalid_records || {}).post || 0) + ' 条；被跳过的 (视口,页面) 组合 ' + o.invalid_pairs + ' 个');
     L.push('- 结果：' + o.conclusion + '（耗时 ' + o.duration_s + 's）');
     L.push('');
     L.push('### 1.1 diff 表（仅列出两代不一致的格子）');
@@ -910,13 +967,21 @@ function renderMd(st) {
     ])));
     L.push('');
     for (const g of o.gates) {
-      L.push('### 2.' + (o.gates.indexOf(g) + 1) + ' `' + g.id + '` 尾部输出（共 ' + g.stdout_lines + ' 行）');
+      L.push('### 2.' + (o.gates.indexOf(g) + 1) + ' `' + g.id + '` 输出（共 ' + g.stdout_lines + ' 行；exit ' + g.exit_code + '）');
+      L.push('');
+      if (g.verdict_line) L.push('- 结论行：`' + g.verdict_line + '`');
+      if (g.mustfix_block) { L.push('- ① 必须修复明细：'); L.push(''); L.push('```text'); L.push(g.mustfix_block); L.push('```'); }
       L.push('');
       L.push('```text');
-      L.push(g.stdout_tail);
+      L.push(g.stdout_tail || '(no output)');
       L.push('```');
       L.push('');
     }
+    L.push('- 仓库既有报告是否被本次复跑改写（跑前跑后 sha256 前 16 位）：');
+    for (const h of (o.repo_declared_write_hashes || [])) {
+      L.push('  - `' + h.file + '`：' + h.sha_before + ' → ' + h.sha_after + '　' + (h.changed_by_this_run ? '⚠ 变了（不是本进程写的：门禁全部在影子根里跑，见下方窗口期改动清单）' : '✅ 未变'));
+    }
+    L.push('- 本次窗口期内仓库 `reports/**`、`data/**`、`tools/**` 被改动的文件（用于识别并发 Agent 的写入）：' + ((o.files_touched_in_repo_during_window || []).map((f) => '`' + f.file + '`@' + f.mtime + '(' + f.bytes + 'B)').join('、') || '（无）'));
     L.push('- 结论：' + o.conclusion);
     L.push('');
   }
@@ -1025,11 +1090,12 @@ function renderMd(st) {
     L.push('### 5.1 `node tools/privacy-scan.js --no-report` 原始输出（尾部）');
     L.push('');
     L.push('```text');
-    L.push(o.privacy_scan.stdout_tail);
+    L.push((o.privacy_scan || {}).stdout_tail || '(state 里没有该字段：用 node tools/verify-mobile-c.js --check=5 重跑本项)');
     L.push('```');
     L.push('');
-    L.push('- exit code：`' + o.privacy_scan.exit_code + '`；① must-fix：`' + o.privacy_scan.must_fix + '`；结论行：`' + o.privacy_scan.verdict_line + '`');
-    L.push('- 说明：' + o.privacy_scan.cmd);
+    L.push('- exit code：`' + (o.privacy_scan || {}).exit_code + '`；① must-fix：`' + (o.privacy_scan || {}).must_fix + '`；结论行：`' + (o.privacy_scan || {}).verdict_line + '`');
+    L.push('- 说明：' + ((o.privacy_scan || {}).cmd || '—'));
+    if (o.self_scan_note) L.push('- 自证注意：' + o.self_scan_note);
     L.push('- 结论：' + o.conclusion);
     L.push('');
   }

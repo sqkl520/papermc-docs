@@ -1416,15 +1416,17 @@ check(6, 6, 'C1-C3', '触控与字号：C1 输入框 ≥16px / C2 顶栏 ≥44×
     && rows.every((r) => r.topbarSelf && r.topbarSelf.flexWrap !== 'wrap');
   const c3mobile = mobRows.every((r) => r.navRowMin !== null && r.navRowMin >= 44);
   const c3desk = deskRows.every((r) => r.pre === null || Math.abs(r.post - r.pre) <= 1);
+  const c3deskJudged = !!(ctx.pre && deskRows.every((r) => r.pre !== null));
   const fails = [];
   if (!c1) fails.push('C1 输入框字号<16：' + JSON.stringify(rows.filter((r) => !r.inputsOk).map((r) => ({ vp: r.viewport, page: r.page, rest: r.inputsRest, drawer: r.inputsDrawer, search: r.inputsSearch }))).slice(0, 400));
   if (!c2) fails.push('C2 顶栏：' + JSON.stringify(rows.filter((r) => !r.topbarAllOk || !r.topbarSelf || r.topbarSelf.scrollW !== r.topbarSelf.clientW || r.topbarSelf.h > 56).map((r) => ({ vp: r.viewport, page: r.page, small: r.topbar.filter((c) => c.w < 44 || c.h < 44), self: r.topbarSelf }))).slice(0, 400));
   if (!c3mobile) fails.push('C3 移动抽屉行高<44：' + JSON.stringify(mobRows));
   if (!c3desk) fails.push('C3 桌面行高与改前不一致：' + JSON.stringify(deskRows));
+  if (!c3deskJudged) fails.push('C3 桌面档：**改前实例不可达 → 无法双实例判定（本项降级 partial）**；仅记录改后值 ' + JSON.stringify(deskRows.map((r) => r.viewport + '=' + r.post)));
   return {
-    verdict: fails.length === 0 ? 'pass' : 'fail',
+    verdict: (c1 && c2 && c3mobile && c3desk) ? (c3deskJudged ? 'pass' : 'partial') : 'fail',
     metrics: {
-      C1: c1, C2: c2, C3_mobile: c3mobile, C3_desktop: c3desk,
+      C1: c1, C2: c2, C3_mobile: c3mobile, C3_desktop: c3desk, C3_desktop_judged: c3deskJudged, pre_missing: !ctx.pre,
       rows, mobileRows: mobRows, desktopRows: deskRows,
       c3_rule: '两套阈值：≤1023.98px（抽屉/移动线）行高 ≥44px；≥1024px 桌面密度与改前实例逐档对照（容差 ±1px）',
       inputFontHistogram: (() => { const h = {}; for (const r of rows) for (const i of r.inputsRest.concat(r.inputsDrawer, r.inputsSearch)) h[i.fontSize] = (h[i.fontSize] || 0) + 1; return h; })(),
@@ -1525,6 +1527,36 @@ check(7, 9, 'D1-D3', '代码块与表格：滚动容器 + 键盘可达（含真�
 });
 
 /* ── 8 / item 10：E1/E2 零回归（双实例逐格对打） ── */
+
+/**
+ * 改前实例（<repo>/../_pre-mobile）**在网络环境里被外部进程删除前**（2026-10-21 21:5x），
+ * 本探针实测到的存档值。测量窗口 21:24–21:47（改前产物指纹 27338ada4b28），**不可复跑**，
+ * 只在改前实例不可达时用于"降级判定"（item 10 / C3 桌面 / PERF 改前对照 → partial），不得冒充双实例对打结论。
+ */
+const ARCHIVED_PRE = {
+  measured_at: '2026-10-21T21:24+08:00 ~ 2026-10-21T21:47+08:00',
+  pre_fingerprint: '27338ada4b28',
+  pre_url: 'http://127.0.0.1:8788',
+  note: '<repo>/../_pre-mobile 于 21:5x 被外部删除（8788 端口仍占用但根目录已空，/ 与 /paper/dev/pdc/ 均 404）→ 以下数值是我的存档实测，不能被本脚本复跑',
+  a1_overflow_10pages_10pages: {
+    '320x568': { min: 267, max: 425, bad: 10 }, '360x640': { min: 227, max: 385, bad: 10 },
+    '390x844': { min: 197, max: 355, bad: 10 }, '414x896': { min: 173, max: 331, bad: 10 },
+    innerWidth_at_320: 745, note: '320px 下 innerWidth 745 > clientWidth 320（顶栏 flex 行把 ICB 撑开）',
+  },
+  geometry: {
+    '320x568': { sidebarPos: 'fixed', sidebarX: -296, sidebarW: 290, navToggle: '33x32 visible', ariaExpanded: null, layoutCols: '320px', headerH: 52, scrollPaddingTop: '64px', topbarSelf: '745/320', tocSide: 'display:none' },
+    '768x1024': { sidebarPos: 'fixed', sidebarW: 290, navToggle: 'visible', tocSide: 'display:none', headerH: 52 },
+    '834x1112': { sidebarPos: 'sticky', sidebarW: 280, sidebarX: 0, navToggle: 'display:none', tocSide: 'display:none', layoutCols: '280px 554px', secSwitch: 3, sideSecs: 0 },
+    '1024x768': { sidebarPos: 'sticky', sidebarW: 280, tocSide: 'display:none', layoutCols: '280px 744px', secSwitch: 3, navRowMin_ref: '21（红队 + 执行者均报 21；我 21:24 那轮 C3 桌面判定 |Δ|≤1 通过）' },
+    '1100x900': { layoutCols: '280px 820px', tocSide: 'display:none' },
+    '1280x800': { sidebarPos: 'sticky', sidebarW: 290, tocSide: 'aside.toc-side visible 250px @x=1030', layoutCols: '290px 740px 250px', headerH: 52 },
+    '1440x900': { tocSide: 'visible 250px @x=1190', layoutCols: '290px 900px 250px' },
+  },
+  first_paint_resources: ['site.css', 'search-index.js', 'site.js', 'favicon.svg'],
+  search_ui_order: { '插件': '40/109', 'pdc': '3/3', '配置': '40/67', '命令': '40/79', note: '与改后 UI 逐条 href 完全一致（21:40 实测）' },
+  perf_back_to_back: { slow4g: { fcp: { '/': 1248, '/paper/dev/pdc/': 1320 }, dcl: { '/': 5176, '/paper/dev/pdc/': 5130 } }, 'slow4g+cpu4x': { fcp: { '/': 3252, '/paper/dev/pdc/': 3312 }, dcl: { '/': 7723, '/paper/dev/pdc/': 7841 } } },
+};
+
 check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探针）', '≥1024 所有可比指标与改前一致；<1024 的差异必须落在白名单内（否则判回归）', async (ctx) => {
   const pages = ['/paper/dev/pdc/', '/paper/reference/world-configuration/', '/', '/all-pages.html'];
   const snaps = [];
@@ -1540,6 +1572,8 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       sidebarInert: '改前无 inert（B 项新增语义）', inputFonts: 'C1 目标（改前 13.44/14.4/15.2 → 16）', preFocusable: 'D2 目标（新增 tabindex=0）',
       brandW: 'F1 品牌占位（改后 .brand 内含 .brand-name）', brandNameW: 'F1 新增 .brand-name 元素（改前无此元素 → null）', brandTruncated: 'F1',
       contentX: '≤1023.98 单列（移动线）', contentW: '≤1023.98 单列（移动线）', layoutCols: '移动线单列',
+      secSwitchVisible: '移动线：顶栏分区切换（Paper/Velocity/Folia 3 条）在 ≤1023.98 下沉到抽屉 .side-secs（实测改前 768 secSwitch=3/sideSecs=0 → 改后 0/3，affordance 总数不变）',
+      sideSecsVisible: '同上（3 条分区链接换位置，不是新增或删除导航）',
     },
     '834x1112': {
       hasMenuButton: '改前 834 >820 断点 → 既无 ☰ 也无 TOC（820–1200 空档）；改后按 1023.98 移动线给抽屉 = A4 要求',
@@ -1556,12 +1590,14 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       menuBtn: '☰ 在 ≥1024 仍是 display:none（改前 null → 改后 aria-expanded="false" 属性存在，可见性不变）',
       inputFonts: 'C1 目标在桌面同样生效（13.44 → 16，红队 §7.2 第 6 条未限定视口）',
       brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素（改后 .brand 宽度即品牌名宽）', brandTruncated: 'F1',
+      preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）——契约 D2 的改进，桌面同样生效，不是版式/密度变化',
     },
     '1280x800': {
       drawerTocVisible: 'F3/A4 新增（该 details 在 ≥1100 由 CSS 隐藏，rail 仍常驻）', drawerTocInSidebar: 'F3/A4 新增元素',
       menuBtn: '☰ 依旧 display:none（仅多了 aria-expanded="false" 属性）',
       inputFonts: 'C1 目标在桌面同样生效（13.44 → 16）',
       brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素', brandTruncated: 'F1',
+      preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）',
     },
   };
   const diffs = [];
@@ -1604,19 +1640,24 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       }
     }
   }
+  const preMissing = !ctx.pre;
   return {
-    verdict: regressions.length === 0 && hard.length === 0 ? 'pass' : 'fail',
+    verdict: preMissing ? 'partial' : (regressions.length === 0 && hard.length === 0 ? 'pass' : 'fail'),
     metrics: {
       viewports: VP_REGRESSION.map((v) => v.name), pages,
       pre_instance: ctx.pre ? PRE_BASE : null,
+      pre_missing: preMissing,
+      pre_instance_archived: preMissing ? ARCHIVED_PRE : null,
       diffCount: diffs.length, expectedCount: expected.length, regressionCount: regressions.length,
       diffTable: diffs, snapshots: snaps,
-      known_upstream: '已知并接受：768/834 的 tocVisible 0→有（F3 新特性）；1024 的 .toc-side 仍为 display:none（改前亦然，改后用常驻侧栏内 details 作等价导航）；1280 的 .toc-side 仍常驻',
+      known_upstream: '已知并接受：768/834 的 tocVisible 0→有（F3 新特性）；1024 的 .toc-side rail 仍为 display:none（改前亦然，改后用常驻侧栏内 details 作等价导航）；1280/1440 的右侧 rail 250px 与改前逐格一致',
       hardFailures: hard,
     },
-    failures: regressions.map((d) => `REGRESSION ${d.viewport} ${d.page} ${d.field}: ${JSON.stringify(d.pre)} → ${JSON.stringify(d.post)}`).concat(hard),
+    failures: preMissing
+      ? ['改前实例不可达（' + PRE_BASE + '，目录 <repo>/../_pre-mobile 已被外部删除）→ **本项无法完成双实例对打，判定降级为 partial**；删除前（21:24–21:47，改前指纹 ' + ARCHIVED_PRE.pre_fingerprint + '）我用同一探针实测的存档值见 metrics.pre_instance_archived，报告 §6b 有完整表']
+      : regressions.map((d) => `REGRESSION ${d.viewport} ${d.page} ${d.field}: ${JSON.stringify(d.pre)} → ${JSON.stringify(d.post)}`).concat(hard),
     repro: 'node tools/verify-mobile.js --check=8',
-    notes: '同一份探针（PROBE）对 8787/8788 两个实例逐格对打；白名单只覆盖契约里显式声明的变化（F2/F3/C1/C2/C3/D2/B 项新增语义 + 1023.98 移动线），其余差异一律判回归',
+    notes: '同一份探针（PROBE）对 8787/8788 两个实例逐格对打；白名单只覆盖契约里显式声明的变化（F2/F3/C1/C2/C3/D2/B 项新增语义 + 1023.98 移动线），其余差异一律判回归。**改前实例缺失时本项只能是 partial，不会假绿**',
   };
 });
 
@@ -2054,27 +2095,34 @@ check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可�
   });
   const fcpNet = out.fcp.filter((f) => f.profile === 'slow4g');
   const fcpStack = out.fcp.filter((f) => f.profile === 'slow4g+cpu4x');
+  const preMissing = !ctx.pre;
   const fcpNetOk = fcpNet.length > 0 && fcpNet.every((f) => f.ok_abs);
   const fcpStackOk = fcpStack.length > 0 && fcpStack.every((f) => f.ok_abs);
-  const stackNotRegression = fcpStack.every((f) => f.delta_vs_pre === null || f.delta_vs_pre <= 150);
+  /* 叠加档（4×CPU + Slow 4G）在同一台机器上重复测量方差极大：改后实测跨度 2372–4072ms、改前 2720–3400ms
+     （跨 3 轮半小时间隔的测量）→ **不据此判定回归或改善**，只并列记录；项级降级 partial。 */
+  const stackNotRegression = null;
+  const stackSpread = { post: fcpStack.map((f) => f.post.fcp), pre: fcpStack.map((f) => (f.pre ? f.pre.fcp : null)) };
   out.fcp_slow4g_ok = fcpNetOk;
   out.fcp_stack_ok = fcpStackOk;
+  out.fcp_stack_verdict = 'indeterminate（方差 > 测量差异；绝对阈值 <2000ms 在两个实例上都过不了）';
   out.fcp_stack_not_regression = stackNotRegression;
+  out.fcp_stack_spread = stackSpread;
+  out.pre_missing = preMissing;
   const fails = [];
   if (!fcpNetOk) fails.push('FCP（Slow 4G 网络档）≥2000ms：' + JSON.stringify(fcpNet.map((f) => f.page + '=' + f.post.fcp)));
-  if (!fcpStackOk) fails.push('FCP（Slow 4G + 4×CPU 叠加档）≥2000ms：' + JSON.stringify(fcpStack.map((f) => f.page + '=' + f.post.fcp + '（改前同档 ' + (f.pre ? f.pre.fcp : 'n/a') + '）'))
-    + (stackNotRegression ? ' —— 改前同档同样不达标且差值 ≤150ms：属口径/机器限制，不是本次移动端改造引入' : ' —— 且改前同档明显更优，判回归'));
+  if (!fcpStackOk) fails.push('FCP（Slow 4G + 4×CPU 叠加档）≥2000ms：' + JSON.stringify(fcpStack.map((f) => f.page + '=' + f.post.fcp + '（改前同档 ' + (f.pre ? f.pre.fcp + 'ms' : '无对照') + '）'))
+    + ' —— 绝对阈值在**改前/改后都过不了**；且该档重复测量方差极大（改后 2372–4072ms / 改前 2720–3400ms）→ **不判定回归或改善，本项按"口径未达成"降级 partial**');
   if (!out.interactive || !out.interactive.ok) fails.push('DCL 前不可交互：' + JSON.stringify(out.interactive));
   if (!out.longTask || !out.longTask.ok) fails.push(`搜索按键长任务 ${out.longTask ? out.longTask.maxDur : 'n/a'}ms（>50）`);
-  const verdict = (fcpNetOk && out.interactive && out.interactive.ok && out.longTask && out.longTask.ok && stackNotRegression)
+  const verdict = (out.interactive && out.interactive.ok && out.longTask && out.longTask.ok && fcpNetOk)
     ? (fcpStackOk ? 'pass' : 'partial') : 'fail';
   return {
     verdict,
-    metrics: { ...out, fcpStackNote: '叠加档（4×CPU + Slow 4G）的绝对阈值 <2000ms 在**改前/改后都过不了**（实测改后 3068–3340ms / 改前 3252–3312ms）→ 依据"同档对照不劣化"判定，不采信执行者自报的 1132–1134ms（那个数对应的是不叠 CPU 节流的网络档）' },
+    metrics: { ...out, fcpStackNote: '两条 FCP 口径：网络档（红队 §7.6 口径，不叠 CPU 节流）与叠加档（任务书字面口径 4×CPU + Slow 4G）。' + (preMissing ? '**改前实例已被外部删除**，叠加档只能用删除前的存档值对照：改前同档 FCP 3252/3312ms（同样不达标）→ 本项降级为 partial。' : '改前/改后同档背靠背测量，用于判定是否回归。') },
     failures: fails,
     repro: 'node tools/verify-mobile.js --check=14',
     notes: '节流走 CDP：Emulation.setCPUThrottlingRate(4) + Network.emulateNetworkConditions(Slow 4G 1.6Mbps/750Kbps/150ms)；'
-      + '两条 FCP 口径分别判定（网络档 = 红队原始口径；叠加档 = 任务书字面口径），并用改前实例同档对照证明是否回归；'
+      + '两条 FCP 口径分别判定（网络档 = 红队原始口径；叠加档 = 任务书字面口径）；'
       + '"DCL 前可交互"= goto(waitUntil:domcontentloaded) 后立刻 click #nav-toggle 并轮询 aria-expanded；长任务用 PerformanceObserver(longtask) 包住连续按键',
   };
 });
@@ -2171,6 +2219,7 @@ async function main() {
     base_url: BASE,
     pre_url: PRE_BASE,
     pre_instance_available: preOk,
+    pre_instance_archive: preOk ? null : ARCHIVED_PRE,
     shadow_repo: SHADOW,
     shadow_exists: fs.existsSync(SHADOW),
     browser: exe,
