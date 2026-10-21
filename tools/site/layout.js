@@ -345,7 +345,7 @@ function head(prefix, title, description, canonical) {
     + '<link rel="icon" href="' + libUrl(prefix, 'assets/favicon.svg') + '" type="image/svg+xml">\n'
     + '<link rel="stylesheet" href="' + libUrl(prefix, 'assets/site.css') + '">\n'
     + '<script>(function(){try{var t=localStorage.getItem("lcb-theme")||"auto";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>\n'
-    // 搜索索引（~800 KB）首屏不加载：assets/site.js 在首次触发搜索或空闲时才注入（契约 v2 F1）
+    // 搜索索引（~800 KB）首屏不加载：assets/site.js 只在首次搜索交互（聚焦搜索框 / 点搜索按钮 / 首次输入）时注入（契约 v2 F1；不再做空闲预取）
     + '<script src="' + libUrl(prefix, 'assets/site.js') + '" defer></script>\n'
     + '</head>\n<body>\n'
     + '<a class="skip" href="#main">跳到正文</a>\n';

@@ -2064,35 +2064,48 @@ check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可�
     });
     out.interactive = { ...t, opened, wall: Date.now() - t0, ok: opened.clicked && (opened.ms !== null) };
   });
-  // 3) 搜索单次按键长任务（索引已加载后）
-  await withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
+  // 3) 搜索单次按键长任务（索引已加载后；**3 轮取全部**，避免单次落点误判）
+  const measureLongTask = async () => withCtx(ctx.browser, VP_MOBILE[2], async (page) => {
     const cdp = await page.context().newCDPSession(page);
     await cdp.send('Network.enable');
     await cdp.send('Network.emulateNetworkConditions', { offline: false, ...THROTTLE });
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-    await page.goto(u('/paper/dev/pdc/'), { waitUntil: 'load', timeout: 90000 });
+    await page.goto(u('/paper/dev/pdc/'), { waitUntil: 'load', timeout: 120000 });
+    const tCold = Date.now();
     await openSearch(page);
     await typeQuery(page, '命');
-    await page.evaluate(() => {
-      window.__lt = [];
-      try {
-        window.__ltObs = new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__lt.push({ dur: Math.round(e.duration), start: Math.round(e.startTime) }); });
-        window.__ltObs.observe({ entryTypes: ['longtask'] });
-      } catch (e) { window.__ltErr = String(e); }
-    });
+    // 冷启动：索引懒加载，Slow 4G 下 835KB 要好几秒 —— 必须等真出结果，否则长任务恒为 0（假绿）
+    let coldMs = null, resultsSeen = 0;
+    for (let i = 0; i < 160; i++) {
+      const st = await page.evaluate(() => ({ idx: !!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages), n: document.querySelectorAll('#search-results li a').length }));
+      resultsSeen = st.n;
+      if (st.idx && st.n > 0) { coldMs = Date.now() - tCold; break; }
+      await page.waitForTimeout(250);
+    }
+    await page.evaluate(() => { window.__lt = []; try { window.__ltObs = new PerformanceObserver((l) => { for (const e of l.getEntries()) window.__lt.push({ dur: Math.round(e.duration), start: Math.round(e.startTime) }); }); window.__ltObs.observe({ entryTypes: ['longtask'] }); } catch (e) { window.__ltErr = String(e); } });
     const t0 = Date.now();
     await page.keyboard.type('令');
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(300);
     await page.keyboard.type(' api');
-    await page.waitForTimeout(250);
+    await page.waitForTimeout(300);
     await page.keyboard.type('权限');
-    await page.waitForTimeout(600);
-    const lt = await page.evaluate(() => ({ tasks: window.__lt || [], err: window.__ltErr || null, count: (window.__lt || []).length }));
-    const maxDur = lt.tasks.reduce((a, t) => Math.max(a, t.dur), 0);
-    out.longTask = { tasks: lt.tasks, maxDur, wall: Date.now() - t0, observerErr: lt.err, ok: maxDur < 50 };
+    await page.waitForTimeout(700);
+    const lt = await page.evaluate(() => ({ tasks: window.__lt || [], err: window.__ltErr || null }));
     const r = await page.evaluate(READ_RESULTS);
-    out.longTask.resultCount = r.count;
+    const maxDur = lt.tasks.reduce((a, t) => Math.max(a, t.dur), 0);
+    const valid = resultsSeen > 0 && r.count > 0;
+    return { tasks: lt.tasks, maxDur, wall: Date.now() - t0, observerErr: lt.err, coldIndexMs: coldMs, resultsAfterTyping: r.count, measurementValid: valid };
   });
+  const ltRounds = [];
+  for (let i = 0; i < 3; i++) { ltRounds.push(await measureLongTask()); ctx.log('    PERF longtask round ' + (i + 1) + ' → ' + ltRounds[i].maxDur + 'ms（有效=' + ltRounds[i].measurementValid + '）'); }
+  const ltMaxima = ltRounds.map((r) => r.maxDur);
+  const ltMedian = ltMaxima.slice().sort((a, b) => a - b)[1];
+  const ltAllValid = ltRounds.every((r) => r.measurementValid);
+  out.longTask = {
+    rounds: ltRounds, maxima: ltMaxima, median: ltMedian, max: Math.max(...ltMaxima),
+    measurementValid: ltAllValid, ok: ltAllValid && ltMaxima.every((m) => m < 50),
+    allTasks: ltRounds.flatMap((r) => r.tasks).map((t) => t.dur).sort((a, b) => b - a).slice(0, 12),
+  };
   const fcpNet = out.fcp.filter((f) => f.profile === 'slow4g');
   const fcpStack = out.fcp.filter((f) => f.profile === 'slow4g+cpu4x');
   const preMissing = !ctx.pre;
@@ -2113,7 +2126,7 @@ check(14, 16, 'PERF', '性能：4× CPU + Slow 4G 下 FCP < 2000ms、DCL 前可�
   if (!fcpStackOk) fails.push('FCP（Slow 4G + 4×CPU 叠加档）≥2000ms：' + JSON.stringify(fcpStack.map((f) => f.page + '=' + f.post.fcp + '（改前同档 ' + (f.pre ? f.pre.fcp + 'ms' : '无对照') + '）'))
     + ' —— 绝对阈值在**改前/改后都过不了**；且该档重复测量方差极大（改后 2372–4072ms / 改前 2720–3400ms）→ **不判定回归或改善，本项按"口径未达成"降级 partial**');
   if (!out.interactive || !out.interactive.ok) fails.push('DCL 前不可交互：' + JSON.stringify(out.interactive));
-  if (!out.longTask || !out.longTask.ok) fails.push(`搜索按键长任务 ${out.longTask ? out.longTask.maxDur : 'n/a'}ms（>50）`);
+  if (!out.longTask || !out.longTask.ok) fails.push('搜索按键长任务（3 轮，4×CPU + Slow 4G，索引已热身）' + (out.longTask ? ('最大值 ' + out.longTask.max + 'ms，逐轮 ' + JSON.stringify(out.longTask.maxima) + '，测量有效=' + out.longTask.measurementValid + '（>50ms 即不达标）') : 'n/a'));
   const verdict = (out.interactive && out.interactive.ok && out.longTask && out.longTask.ok && fcpNetOk)
     ? (fcpStackOk ? 'pass' : 'partial') : 'fail';
   return {
@@ -2197,14 +2210,29 @@ async function main() {
   for (const r of results) byKey.set(r.key, r);
   const checks = Array.from(byKey.values()).filter((c) => currentKeys.has(c.key)).sort((a, b) => a.id - b.id);
 
-  /* 16 项汇总：item → checks[]（严重度取最坏：error > fail > partial > pass） */
+  /* 16 项汇总：item → checks[]（严重度取最坏：error > fail > partial > pass）
+   * 特例：check 6 一个检查覆盖 item 6/7/8（C1/C2/C3 三项），按各子断言分别给判定，
+   *       不让 C3 桌面档的 partial 把已经通过的 C1/C2 也拖成 partial。 */
   const SEV = { pass: 0, partial: 1, fail: 2, error: 3 };
+  const itemsOf = (c) => (c.key === 'C1-C3' ? [6, 7, 8] : [(c.item === undefined ? c.id : c.item)]);
+  const itemVerdictFromCheck = (c, item) => {
+    if (c.key === 'C1-C3') {
+      const m = c.metrics || {};
+      if (item === 6) return m.C1 ? 'pass' : 'fail';
+      if (item === 7) return m.C2 ? 'pass' : 'fail';
+      if (item === 8) return (m.C3_mobile && m.C3_desktop) ? (m.C3_desktop_judged ? 'pass' : 'partial') : 'fail';
+    }
+    return c.verdict;
+  };
   const byItem = {};
   for (const c of checks) {
-    const k = String(c.item === undefined ? c.id : c.item);
-    byItem[k] = byItem[k] || { item: Number(k), title: ITEM_TITLES[Number(k)] || '', checks: [], verdict: 'pass' };
-    byItem[k].checks.push({ id: c.id, key: c.key, verdict: c.verdict, ms: c.ms });
-    if ((SEV[c.verdict] || 0) > (SEV[byItem[k].verdict] || 0)) byItem[k].verdict = c.verdict;
+    for (const it of itemsOf(c)) {
+      const k = String(it);
+      byItem[k] = byItem[k] || { item: Number(k), title: ITEM_TITLES[Number(k)] || '', checks: [], verdict: 'pass' };
+      const v = itemVerdictFromCheck(c, Number(k));
+      byItem[k].checks.push({ id: c.id, key: c.key, verdict: v, check_verdict: c.verdict, ms: c.ms });
+      if ((SEV[v] || 0) > (SEV[byItem[k].verdict] || 0)) byItem[k].verdict = v;
+    }
   }
   const items = Object.values(byItem).sort((a, b) => a.item - b.item);
   const run = { at: new Date().toISOString(), fingerprint: fp._all, pre_fingerprint: preFp._all, pre_available: preOk, ran: results.map((r) => ({ id: r.id, item: r.item, key: r.key, verdict: r.verdict })) };

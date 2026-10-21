@@ -716,7 +716,22 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     }, true);
   }
 
-  /* ---------- 全部页面清单：页内过滤（Ctrl+F 之外的第二条路） ---------- */
+  /* ---------- 全部页面清单：页内过滤（Ctrl+F 之外的第二条路） ----------
+     性能修复（本轮缺陷 2）：/all-pages.html 的 141 行过滤原先**每次按键**都
+       (a) 对整表重新 getAttribute + toLowerCase（每次约 24 KB 字符）
+       (b) 无条件对 141 行写 style.display（即使显示性没变）
+     4× CPU 实测最坏一次按键 468ms 长任务（longtask 437/115/106/77/67ms）。
+     现在（三处改动，语义完全不变）：
+       1. 小写 haystack 与「目标/当前可见性」两张表一次性预计算并缓存，按键路径不再 toLowerCase；
+       2. 只对「显示性真正翻转」的行落盘 —— 以 "permissions" 为例 11 次按键里只有 4 次
+          （2/32/1/104 行）需要写 DOM，其余 7 次按键零 DOM 写入；
+       3. 落盘合并：本表**任何一次**可见性变更都会触发一次整表重排 + 整页重绘
+          （4× CPU 实测单帧 33–300ms，见报告的表驱动实测），所以按键路径只做
+          扫描与计数（计数文案即时更新，用户马上看到「2 / 141 行」），
+          行的显示性在「停止输入 300ms 后」用**一个批次**落盘。
+          —— 不采用跨帧分片：141 行表的分片会变成 N 次整表重排
+          （实测 9 帧分片 1099ms vs 单批 59ms），反而放大长任务。
+     最终 tr 的 display 值、可见行集合与顺序、计数文案与一次性实现逐项一致。 */
   function initTableFilter() {
     var inputs = doc.querySelectorAll('[data-table-filter]');
     for (var i = 0; i < inputs.length; i++) {
@@ -727,19 +742,61 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         var rows = table.querySelectorAll('tbody tr');
         var counter = doc.getElementById(id + '-count');
         var clearBtn = doc.querySelector('[data-filter-clear="' + id + '"]');
+        var total = rows.length;
+        var hay = null;      /* 每行小写 haystack：只算一次 */
+        var want = null;     /* 每行目标可见性 */
+        var vis = null;      /* 每行 DOM 当前可见性 */
+        var timer = null;
+        var FLUSH_MS = 300;  /* 停止输入后多久把行的显示性一次落盘 */
+
+        function buildCaches() {
+          if (hay) return;
+          hay = new Array(total);
+          want = new Array(total);
+          vis = new Array(total);
+          for (var k = 0; k < total; k++) {
+            hay[k] = String(rows[k].getAttribute('data-search') || rows[k].textContent || '').toLowerCase();
+            vis[k] = rows[k].style.display !== 'none';
+            want[k] = vis[k];
+          }
+        }
+        /** 单批落盘：只写 vis 与 want 不同的行 */
+        function flush() {
+          if (timer) { clearTimeout(timer); timer = null; }
+          if (!vis) return;
+          for (var r = 0; r < total; r++) {
+            if (vis[r] === want[r]) continue;
+            vis[r] = want[r];
+            rows[r].style.display = want[r] ? '' : 'none';
+          }
+        }
         var apply = function () {
+          buildCaches();
           var q = inp.value.trim().toLowerCase();
           var shown = 0;
-          for (var r = 0; r < rows.length; r++) {
-            var hay = (rows[r].getAttribute('data-search') || rows[r].textContent || '').toLowerCase();
-            var ok = !q || hay.indexOf(q) !== -1;
-            rows[r].style.display = ok ? '' : 'none';
+          var changed = false;
+          for (var r = 0; r < total; r++) {
+            var ok = !q || hay[r].indexOf(q) !== -1;
             if (ok) shown += 1;
+            if (want[r] !== ok) { changed = true; want[r] = ok; }
           }
-          if (counter) counter.textContent = shown + ' / ' + rows.length + ' 行';
+          if (counter) counter.textContent = shown + ' / ' + total + ' 行';
+          /* 连续输入期间一直顺延，停止输入 FLUSH_MS 后只落盘一次 */
+          if (changed || timer) {
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(flush, FLUSH_MS);
+          }
         };
         inp.addEventListener('input', apply);
-        if (clearBtn) clearBtn.addEventListener('click', function () { inp.value = ''; apply(); inp.focus(); });
+        inp.addEventListener('blur', flush);          /* 离开输入框 = 输入结束，立即落盘 */
+        if (clearBtn) clearBtn.addEventListener('click', function () {
+          inp.value = '';
+          buildCaches();
+          for (var r = 0; r < total; r++) want[r] = true;
+          if (counter) counter.textContent = total + ' / ' + total + ' 行';
+          flush();                                    /* 显式动作：不等防抖 */
+          inp.focus();
+        });
       })(inputs[i]);
     }
   }
@@ -1095,7 +1152,8 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     if (!list) return;
     if (!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages)) {
       list.innerHTML = '';
-      renderEmpty('正在加载搜索索引…');
+      if (indexState === 'failed') renderEmpty(indexFailedHint());
+      else renderEmpty('正在加载搜索索引…');
       setCount('');
       ensureIndex(function () { runSearch(q); });
       return;
@@ -1296,9 +1354,39 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     }
   }
 
-  /* ---------- 搜索索引按需加载（契约 v2 F1）：首屏不加载 ~800KB 索引 ---------- */
+  /* ---------- 搜索索引按需加载（契约 v2 F1 + 本轮缺陷 1 修复）----------
+     首屏不加载 ~800KB 索引；并且**只在首次搜索交互**（聚焦搜索框 / 点击搜索按钮 /
+     第一次输入 三者任一）时才注入。原来那条「load 之后延迟 1.2s 再走空闲回调预取」已删除：
+     它在没有任何用户交互的情况下仍下载 ≈800KB 并在 4× CPU 下产生一次 ~550ms 的脚本求值
+     长任务（正好撞上用户打字时就是最坏体验）。
+     加载期间的反馈：搜索结果区显示「正在加载搜索索引…」，搜索框本身不阻塞、可继续输入
+     （输入走 90ms 防抖，索引就绪后自动补跑当前查询）。file:// 兜底不变：
+     先注入 assets/search-index.js（脚本标签，file:// 可用），失败再退回 XHR 读 search-index.json，
+     两者都不可用时给出明确提示而不是无限「加载中」。 */
   var indexState = 'idle';
   var indexWaiters = [];
+  function searchDialogEl() { return doc.getElementById('search-dialog'); }
+  function indexFailedHint() {
+    return '索引未能载入（<code>file://</code> 下浏览器可能禁止读取 <code>assets/search-index.js</code>）：'
+      + '可先用浏览器 <b>Ctrl+F</b> 页内查找，或执行 <code>node tools/serve.js</code> 起本地服务后重试。';
+  }
+  /** 首次搜索交互触发；重复调用无副作用 */
+  function startIndexLoad() {
+    if (indexState !== 'idle') return;
+    var dlg = searchDialogEl();
+    var list = doc.getElementById('search-results');
+    if (dlg && dlg.open && list) { list.innerHTML = ''; renderEmpty('正在加载搜索索引…'); setCount(''); }
+    ensureIndex(function () {
+      if (indexState === 'failed') {
+        var l2 = doc.getElementById('search-results');
+        if (dlg && dlg.open && l2) { l2.innerHTML = ''; renderEmpty(indexFailedHint()); }
+        return;
+      }
+      /* 索引就绪：用户还没输入时把占位提示换回默认引导（已输入则由 input 防抖那条路径负责） */
+      var input = doc.getElementById('search-input');
+      if (input && !input.value.trim() && dlg && dlg.open) runSearch('');
+    });
+  }
   function applySearchData() {
     var data = window.__LIBRARY_SEARCH__;
     INDEX = (data && data.pages) || [];
@@ -1340,7 +1428,6 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     sc.onerror = function () { loadJsonFallback(done); };
     doc.head.appendChild(sc);
   }
-  function preloadIndex() { if (indexState === 'idle') ensureIndex(null); }
 
 
   function renderEmpty(htmlStr) {
@@ -1361,6 +1448,7 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
       lastFocus = doc.activeElement;
       if (!dlg.open) dlg.showModal();
       input.focus(); input.select();
+      startIndexLoad();            /* 交互触发点 ②：点击搜索按钮 / Ctrl+K / “/” 打开搜索 */
     }
     doc.addEventListener('click', function (ev) {
       var t = ev.target;
@@ -1374,7 +1462,9 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
           && doc.activeElement.tagName !== 'TEXTAREA') { ev.preventDefault(); open(); }
     });
     var timer = null;
+    input.addEventListener('focus', startIndexLoad);   /* 交互触发点 ①：聚焦搜索框 */
     input.addEventListener('input', function () {
+      startIndexLoad();                                /* 交互触发点 ③：第一次输入 */
       if (timer) clearTimeout(timer);
       timer = setTimeout(function () { runSearch(input.value); }, 90);
     });
@@ -1393,6 +1483,7 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         var q = hero.value;
         if (!dlg.open) { lastFocus = doc.activeElement; dlg.showModal(); }
         input.value = q;
+        startIndexLoad();            /* 交互触发：首页/清单页大搜索框聚焦或输入 */
         runSearch(q);
         if (takeFocus) { input.focus(); input.select(); }
       };
@@ -1430,12 +1521,6 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
   window.addEventListener('resize', function () {
     if (rsTimer) clearTimeout(rsTimer);
     rsTimer = setTimeout(syncScrollRegions, 150);
-  });
-  window.addEventListener('load', function () {
-    setTimeout(function () {
-      if (window.requestIdleCallback) window.requestIdleCallback(preloadIndex, { timeout: 3000 });
-      else preloadIndex();
-    }, 1200);
   });
 
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init);

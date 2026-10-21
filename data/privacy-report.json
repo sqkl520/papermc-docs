@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-21T14:34:50.349Z",
+  "generated_at": "2026-10-21T15:38:11.667Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 755,
-    "scanned_text_files": 682,
+    "files": 756,
+    "scanned_text_files": 683,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -17,11 +17,11 @@
   "summary": {
     "must_fix": 0,
     "public_url": 326,
-    "loopback_ok": 130,
+    "loopback_ok": 132,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 542
+    "total_hits": 544
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 216,
+      "total": 218,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 130,
+      "loopback_ok": 132,
       "upstream": 86
     },
     {
@@ -371,6 +371,14 @@
       "upstream": 0
     },
     {
+      "file": "tools/mobile-closeout.js",
+      "total": 2,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 2,
+      "upstream": 0
+    },
+    {
       "file": "tools/mobile-measure.js",
       "total": 2,
       "must_fix": 0,
@@ -425,14 +433,6 @@
       "public_url": 1,
       "loopback_ok": 0,
       "upstream": 0
-    },
-    {
-      "file": "archive/paper/html/reference/server-properties/index.html",
-      "total": 1,
-      "must_fix": 0,
-      "public_url": 0,
-      "loopback_ok": 0,
-      "upstream": 1
     }
   ],
   "verdict": {
@@ -441,33 +441,6 @@
     "statement": "通过：仓库中不存在必须修复的本机痕迹。"
   },
   "history": [
-    {
-      "at": "2026-10-21T13:08:51.557Z",
-      "files": 754,
-      "must_fix": 4,
-      "public_url": 326,
-      "loopback_ok": 126,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-21T13:12:03.249Z",
-      "files": 754,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 126,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-21T13:26:14.343Z",
-      "files": 754,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 125,
-      "upstream": 86,
-      "clean": true
-    },
     {
       "at": "2026-10-21T13:44:51.162Z",
       "files": 755,
@@ -528,6 +501,33 @@
       "must_fix": 0,
       "public_url": 326,
       "loopback_ok": 130,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T14:42:02.153Z",
+      "files": 755,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 130,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T15:10:13.778Z",
+      "files": 755,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 130,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T15:38:11.667Z",
+      "files": 756,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 132,
       "upstream": 86,
       "clean": true
     }
