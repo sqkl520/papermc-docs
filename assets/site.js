@@ -5,11 +5,23 @@
   var html = doc.documentElement;
 
   /* ---------- theme ---------- */
+  function themeIcon(t) { return t === 'light' ? '☀' : (t === 'dark' ? '🌙' : '🖥'); }
   function applyTheme(t) {
     html.setAttribute('data-theme', t);
     try { localStorage.setItem('lcb-theme', t); } catch (e) {}
     var btn = doc.getElementById('theme-toggle');
-    if (btn) btn.textContent = t === 'light' ? '浅色' : (t === 'dark' ? '深色' : '跟随系统');
+    if (!btn) return;
+    var label = t === 'light' ? '浅色' : (t === 'dark' ? '深色' : '跟随系统');
+    var lbl = btn.querySelector('.lbl');
+    var ic = btn.querySelector('.theme-icon');
+    if (lbl && ic) {
+      lbl.textContent = label;
+      ic.textContent = themeIcon(t);
+      btn.setAttribute('aria-label', '切换主题：' + label);
+      btn.setAttribute('title', '切换主题（当前：' + label + '）');
+    } else {
+      btn.textContent = label;
+    }
   }
   function initTheme() {
     var saved = null;
@@ -110,8 +122,6 @@
         empty.textContent = shown ? '' : ('没有匹配的页面（共 ' + total + ' 个条目，可试试更短的词）');
       }
     });
-    var toggle = doc.getElementById('nav-toggle');
-    if (toggle) toggle.addEventListener('click', function () { doc.body.classList.toggle('nav-open'); });
     // 组标题里的「组首页 →」链接：只导航，不要顺带折叠/展开所属分组
     doc.addEventListener('click', function (ev) {
       var t = ev.target;
@@ -242,17 +252,97 @@
     return norm((e.h || []).filter(function (x) { return String(x).indexOf('关键词：') !== 0; }).join(' \u0001 '));
   }
 
+  /* 红队 F6/M3：每条目的小写副本只算一次（原实现每次按键都对 ~700KB 正文 toLowerCase）。
+     用 WeakMap 缓存，避免把临时字段写进索引对象被序列化。 */
+  var LC = (typeof WeakMap === 'function') ? new WeakMap() : null;
+  function lc(e) {
+    var c = LC ? LC.get(e) : null;
+    if (c) return c;
+    var kw = e.kw || [];
+    var lkw = [];
+    for (var i = 0; i < kw.length; i++) lkw.push(norm(kw[i]));
+    c = {
+      t: norm(e.t), u: norm(e.u),
+      h: headingText(e),
+      c: norm((e.c || '') + ' ' + (e.cd || '')),
+      x: norm(e.x),
+      m: norm([e.u, kw.join(' '), e.c, e.cd, e.lt].join(' \u0001 ')),
+      kw: lkw
+    };
+    if (LC) LC.set(e, c);
+    return c;
+  }
+
+  /* 红队 F6/M3 第二步：正文预筛位图（单字 + 相邻双字哈希）。
+     位图只用来跳过“肯定没有”的正文；出现假阳性时照旧走精确 indexOf，
+     因此命中集合、分数与排序与改造前完全一致。 */
+  var BITS = (typeof WeakMap === 'function') ? new WeakMap() : null;
+  var BIT_WORDS = 1024;
+  var BIT_MASK = (BIT_WORDS << 5) - 1;
+  var BODY_IDX = new Map();
+  function hbits(s, i, n) {
+    var h = 2166136261;
+    for (var k = 0; k < n; k++) { h ^= s.charCodeAt(i + k); h = (h * 16777619) >>> 0; }
+    return h & BIT_MASK;
+  }
+  function bodyBits(e) {
+    var bits = BITS ? BITS.get(e) : null;
+    if (bits) return bits;
+    bits = new Uint32Array(BIT_WORDS);
+    var x = lc(e).x;
+    for (var i = 0; i < x.length; i++) {
+      var h1 = hbits(x, i, 1);
+      bits[h1 >>> 5] |= (1 << (h1 & 31));
+      if (i + 1 < x.length) { var h2 = hbits(x, i, 2); bits[h2 >>> 5] |= (1 << (h2 & 31)); }
+    }
+    if (BITS) BITS.set(e, bits);
+    return bits;
+  }
+  function bitMayHave(bits, term) {
+    var n = term.length;
+    if (!n) return true;
+    if (n === 1) { var h = hbits(term, 0, 1); return (bits[h >>> 5] & (1 << (h & 31))) !== 0; }
+    for (var i = 0; i + 1 < n; i++) { var hh = hbits(term, i, 2); if ((bits[hh >>> 5] & (1 << (hh & 31))) === 0) return false; }
+    return true;
+  }
+  /** 正文里 term 的首次出现位置；同一查询内跨条目/跨函数复用（含 snippet） */
+  function bodyIndexOf(e, term) {
+    if (!term) return -1;
+    var m = BODY_IDX.get(term);
+    if (!m) { m = new Map(); BODY_IDX.set(term, m); }
+    if (m.has(e)) return m.get(e);
+    var x = lc(e).x;
+    var idx = (!x || !bitMayHave(bodyBits(e), term)) ? -1 : x.indexOf(term);
+    m.set(e, idx);
+    return idx;
+  }
+  function hasBodyAlias(e, al) {
+    for (var i = 0; i < al.length; i++) if (al[i] && bodyIndexOf(e, al[i]) !== -1) return true;
+    return false;
+  }
+  function resetScanCache() { BODY_IDX = new Map(); }
+  /** 索引就绪后分片预热位图，避免首次按键承担 72MB 扫描（每片 <12ms） */
+  function warmBodyBits() {
+    var i = 0;
+    (function step() {
+      var t0 = Date.now();
+      while (i < INDEX.length && Date.now() - t0 < 12) { bodyBits(INDEX[i]); i++; }
+      if (i < INDEX.length) setTimeout(step, 0);
+    })();
+  }
+
   function directScore(e, q) {
     var out = { s: 0, fields: [], body: false, tier: 0 };
-    var title = norm(e.t), sum = norm(e.u);
-    var heads = headingText(e);
-    var cat = norm((e.c || '') + ' ' + (e.cd || ''));
-    var body = norm(e.x);
+    var l = lc(e);
+    var title = l.t, sum = l.u;
+    var heads = l.h;
+    var cat = l.c;
+    var body = l.x;
     var tags = e.kw || [];
     if (title.indexOf(q) === 0) { out.s += 60; out.fields.push('标题'); out.tier = 4; }
     else if (title.indexOf(q) !== -1) { out.s += 30; out.fields.push('标题'); out.tier = 4; }
     for (var i = 0; i < tags.length; i++) {
-      var tg = norm(tags[i]);
+      var tg = l.kw[i];
       if (!tg) continue;
       if (tg === q) { out.s += 32 + Math.max(0, 8 - i * 3); out.fields.push('标签 ' + tags[i]); out.tier = Math.max(out.tier, 2); }
       else if (tg.indexOf(q) !== -1) { out.s += 20 + Math.max(0, 6 - i * 2); out.fields.push('标签 ' + tags[i]); out.tier = Math.max(out.tier, 2); }
@@ -260,7 +350,7 @@
     if (sum.indexOf(q) !== -1) { out.s += 18; out.fields.push('摘要'); out.tier = Math.max(out.tier, 2); }
     if (heads.indexOf(q) !== -1) { out.s += 12; out.fields.push('小节'); out.tier = Math.max(out.tier, 3); }
     if (cat.indexOf(q) !== -1) { out.s += 8; out.fields.push('分类'); out.tier = Math.max(out.tier, 2); }
-    if (body.indexOf(q) !== -1) { out.s += 5; out.body = true; out.fields.push('正文'); out.tier = Math.max(out.tier, 1); }
+    if (bodyIndexOf(e, q) !== -1) { out.s += 5; out.body = true; out.fields.push('正文'); out.tier = Math.max(out.tier, 1); }
     // Latin alias, graded by the field it hits: title > heading > summary/tag/category > body
     var al = ALIASES[q];
     if (al && al.length) {
@@ -271,14 +361,21 @@
       var tok = '';
       if ((tok = has(title))) { out.s += 26; out.fields.push('标题别名 ' + tok); out.tier = 4; }
       else if ((tok = has(heads))) { out.s += 18; out.fields.push('小节别名 ' + tok); out.tier = Math.max(out.tier, 3); }
-      else if ((tok = has(norm([e.u, (e.kw || []).join(' '), e.c, e.cd, e.lt].join(' \u0001 '))))) {
+      else if ((tok = has(l.m))) {
         out.s += 10; out.fields.push('摘要/标签别名 ' + tok); out.tier = Math.max(out.tier, 2);
-      } else if ((tok = has(body))) { out.s += 2; out.body = true; out.tier = Math.max(out.tier, 1); }
+      } else if (hasBodyAlias(e, al)) { out.s += 2; out.body = true; out.tier = Math.max(out.tier, 1); }
     }
     return out;
   }
 
-  /** pure, deterministic ordering: score desc, then tier, order asc, title length, title, id */
+  /** pure, deterministic ordering: score desc, then tier, order asc, title length, title, id
+   *  红队 M3 追加修复（2026-10-21 第二轮）：本函数是按键路径上最后的热点 —— 4x CPU + CDP Profiler
+   *  实测 compareHits 自身耗时 68–78ms/次（每次排序对 60+ 条命中调用 localeCompare(x, locale)，
+   *  每次都要重新解析 locale 串）。改为复用一个 Intl.Collator(locale) 实例：默认选项与
+   *  localeCompare(other, locale) 一致（usage=sort / sensitivity=variant），排序结果逐字节不变
+   *  （probe-render.js 的 htmlSha 对拍：4 个查询的命中数与结果 DOM 哈希全部相同）。 */
+  var ZH_COLL = (typeof Intl !== 'undefined' && Intl.Collator) ? new Intl.Collator('zh-Hans-CN') : null;
+  function zhCompare(x, y) { return ZH_COLL ? ZH_COLL.compare(x, y) : String(x).localeCompare(String(y), 'zh-Hans-CN'); }
   function compareHits(a, b) {
     if (b.s !== a.s) return b.s - a.s;
     if ((b.tier || 0) !== (a.tier || 0)) return (b.tier || 0) - (a.tier || 0);
@@ -287,9 +384,9 @@
     if (ao !== bo) return ao - bo;
     var at = String(a.e.t || ''), bt = String(b.e.t || '');
     if (at.length !== bt.length) return at.length - bt.length;
-    var c = at.localeCompare(bt, 'zh-Hans-CN');
+    var c = zhCompare(at, bt);
     if (c !== 0) return c;
-    return String(a.e.id || '').localeCompare(String(b.e.id || ''));
+    return zhCompare(String(a.e.id || ''), String(b.e.id || ''));
   }
 
   function bigrams(q) {
@@ -305,8 +402,9 @@
     var al = ALIASES[part];
     if (al && al.length) {
       // same tiering as directScore: title 26 > heading 18 > summary/tag/category 10 > body 2
-      var title = norm(e.t), heads = headingText(e), x = norm(e.x);
-      var meta = norm([e.u, (e.kw || []).join(' '), e.c, e.cd, e.lt].join(' \u0001 '));
+      var l = lc(e);
+      var title = l.t, heads = l.h, x = l.x;
+      var meta = l.m;
       var hit = function (hay) {
         for (var i = 0; i < al.length; i++) if (hay.indexOf(al[i]) !== -1) return al[i];
         return '';
@@ -315,7 +413,7 @@
       if ((tok = hit(title))) return { s: 26, fields: ['标题别名 ' + tok], body: false, tier: 4 };
       if ((tok = hit(heads))) return { s: 18, fields: ['小节别名 ' + tok], body: false, tier: 3 };
       if ((tok = hit(meta))) return { s: 10, fields: ['摘要/标签别名 ' + tok], body: false, tier: 2 };
-      if ((tok = hit(x))) return { s: 2, fields: ['正文'], body: true, tier: 1 };
+      for (var bi = 0; bi < al.length; bi++) if (al[bi] && bodyIndexOf(e, al[bi]) !== -1) return { s: 2, fields: ['正文'], body: true, tier: 1 };
     }
     return { s: 0, fields: [], body: false, tier: 0 };
   }
@@ -378,13 +476,16 @@
 
   /** snippet always comes from the field that produced the hit, with the query highlighted */
   function snippet(entry, terms, useBody) {
-    var text = useBody && entry.x ? entry.x : (entry.u || entry.x || '');
+    var l = lc(entry);
+    var byBody = !!(useBody && entry.x);
+    var text = byBody ? entry.x : (entry.u || entry.x || '');
     if (!text) return '';
-    var low = text.toLowerCase();
+    var low = (byBody || !entry.u) ? l.x : l.u;
     var at = -1;
+    var bodyText = (byBody || !entry.u);
     for (var i = 0; i < terms.length; i++) {
       if (!terms[i]) continue;
-      var p = low.indexOf(terms[i]);
+      var p = bodyText ? bodyIndexOf(entry, terms[i]) : low.indexOf(terms[i]);
       if (p !== -1 && (at === -1 || p < at)) at = p;
     }
     var start = at > 60 ? at - 50 : 0;
@@ -397,11 +498,21 @@
   }
 
   var MAX_RESULTS = 40;
+  /* 查询代次：切片的渲染任务用它判断「这一片是否已被新查询取代」（红队 M3 追加修复） */
+  var searchGen = 0;
 
   function runSearch(q) {
+    resetScanCache();
     var query = q.trim().toLowerCase();
     var list = doc.getElementById('search-results');
     if (!list) return;
+    if (!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages)) {
+      list.innerHTML = '';
+      renderEmpty('正在加载搜索索引…');
+      setCount('');
+      ensureIndex(function () { runSearch(q); });
+      return;
+    }
     list.innerHTML = '';
     if (!query) {
       renderEmpty('输入关键词开始检索：中文支持子串与分词近似（如 <b>渲染</b>、<b>命令注册</b>、<b>插件加载</b>），英文支持前缀（如 <b>yaml</b>、<b>anti</b>）。');
@@ -422,8 +533,20 @@
     }
     var root = libraryRoot();
     var max = Math.min(hits.length, MAX_RESULTS);
-    for (var k = 0; k < max; k++) {
-      var hit = hits[k];
+    /* 红队 M3 追加修复（2026-10-21 第二轮）：小写缓存/位图把「打分」降到 ~5–26ms，但 40 行结果
+       一次性插入仍会在 4x CPU 下产生 50–240ms 的长任务（CDP LayoutDuration 实测占主导，非 JS）。
+       这里把渲染切片：每片 ≤6 行且 ≤6ms 实时，片间让出主线程；最终 DOM（顺序/内容/条数/链接）
+       与一次性渲染逐项一致，命中集合与排序也不受影响。首行同步渲染，保证 Enter 立即导航可用。 */
+    var gen = ++searchGen;
+    var rendered = 0;
+    var total = max;
+    function paintCount() {
+      setCount(hits.length > total
+        ? ('显示前 ' + total + ' / 共 ' + hits.length + ' 个结果')
+        : (hits.length + ' 个结果'));
+    }
+    function renderOne(idx) {
+      var hit = hits[idx];
       var e = hit.e;
       var li = doc.createElement('li');
       var a = doc.createElement('a');
@@ -436,15 +559,202 @@
       li.appendChild(a);
       list.appendChild(li);
     }
-    setCount(hits.length > max
-      ? ('显示前 ' + max + ' / 共 ' + hits.length + ' 个结果')
-      : (hits.length + ' 个结果'));
+    if (total > 0) { renderOne(0); rendered = 1; }
+    paintCount();
+    if (rendered < total) {
+      (function step() {
+        if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
+        var t0 = Date.now();
+        var n = 0;
+        while (rendered < total && n < 3 && Date.now() - t0 < 4) { renderOne(rendered); rendered++; n++; }
+        if (rendered < total) setTimeout(step, 0);
+      })();
+    }
   }
 
   function setCount(text) {
     var info = doc.getElementById('search-count');
     if (info) info.textContent = text || '';
   }
+
+  /* ---------- off-canvas 抽屉导航（契约 §2.3：<=1023.98px 抽屉；>=1024px 复位为常驻侧栏） ---------- */
+  function initDrawer() {
+    var toggle = doc.getElementById('nav-toggle');
+    var side = doc.getElementById('sidebar');
+    var scrim = doc.getElementById('nav-scrim') || doc.querySelector('[data-nav-scrim], .nav-scrim, .nav-overlay');
+    if (!toggle || !side) return;
+    var wide = window.matchMedia('(min-width:1024px)');
+    var supportsGutter = !!(window.CSS && window.CSS.supports && window.CSS.supports('scrollbar-gutter', 'stable'));
+    function isWide() { return wide.matches; }
+    function isOpen() { return doc.body.classList.contains('nav-open'); }
+    function setInert(on) {
+      try { side.inert = !!on; } catch (e) {}
+      if (on) side.setAttribute('inert', ''); else side.removeAttribute('inert');
+    }
+    function lockScroll(on) {
+      if (on) {
+        doc.body.style.overflow = 'hidden';
+        if (supportsGutter) html.classList.add('nav-locked');
+        else {
+          var gap = window.innerWidth - html.clientWidth;
+          if (gap > 0) doc.body.style.paddingRight = gap + 'px';
+        }
+      } else {
+        doc.body.style.overflow = '';
+        doc.body.style.paddingRight = '';
+        html.classList.remove('nav-locked');
+      }
+    }
+    function openDrawer() {
+      if (isWide() || isOpen()) return;
+      doc.body.classList.add('nav-open');
+      toggle.setAttribute('aria-expanded', 'true');
+      setInert(false);
+      lockScroll(true);
+      var first = side.querySelector('a[href], button, input, summary');
+      if (first && first.focus) { try { first.focus(); } catch (e) {} }
+    }
+    function closeDrawer(refocus) {
+      var wasOpen = isOpen();
+      doc.body.classList.remove('nav-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      lockScroll(false);
+      if (!isWide()) setInert(true);
+      if (wasOpen && refocus !== false && toggle.focus) { try { toggle.focus(); } catch (e) {} }
+    }
+    toggle.addEventListener('click', function () { if (isOpen()) closeDrawer(); else openDrawer(); });
+    if (scrim) scrim.addEventListener('click', function () { closeDrawer(); });
+    side.addEventListener('click', function (ev) {
+      var t = ev.target;
+      if (t && t.closest && t.closest('a[href]') && !isWide()) closeDrawer(false);
+      else if (t && t.closest && t.closest('input, summary, button') && !isWide()) openDrawer();
+    });
+    doc.addEventListener('keydown', function (ev) {
+      var k = ev.key || '';
+      if ((k === 'Escape' || k === 'Esc') && isOpen()) { ev.preventDefault(); closeDrawer(); }
+    });
+    function applyMode() {
+      if (isWide()) { closeDrawer(false); setInert(false); }
+      else if (!isOpen()) setInert(true);
+    }
+    if (wide.addEventListener) wide.addEventListener('change', applyMode);
+    else if (wide.addListener) wide.addListener(applyMode);
+    applyMode();
+  }
+
+  /* ---------- 代码块 / 表格的横向滚动容器与键盘可达（契约 §2.2 / DoD D1-D3） ---------- */
+  function codeLabel(pre, overflowing) {
+    var code = pre.querySelector('code');
+    var lang = '';
+    if (code && code.className) {
+      var m = String(code.className).match(/language-([A-Za-z0-9_+.#-]+)/);
+      if (m) lang = m[1] === 'text' ? '' : ('（' + m[1] + '）');
+    }
+    var fig = pre.closest ? pre.closest('.code-block') : null;
+    var file = fig ? fig.querySelector('.code-file') : null;
+    var title = file && file.textContent ? ('：' + file.textContent.trim()) : '';
+    return '代码块' + lang + title + (overflowing ? '，可横向滚动（左右方向键）' : '');
+  }
+  function initScrollRegions() {
+    var pres = doc.querySelectorAll('pre');
+    for (var i = 0; i < pres.length; i++) {
+      var pre = pres[i];
+      var host = null;
+      var q = pre.parentElement;
+      for (var k = 0; k < 3 && q && q !== doc.body; k++) {
+        var cs = getComputedStyle(q);
+        if (cs.overflowX === 'auto' || cs.overflowX === 'scroll') { host = q; break; }
+        q = q.parentElement;
+      }
+      if (!host) {
+        host = doc.createElement('div');
+        host.className = 'code-scroll';
+        pre.parentNode.insertBefore(host, pre);
+        host.appendChild(pre);
+      }
+      host.setAttribute('tabindex', '0');
+      host.setAttribute('role', 'region');
+      if (!host.getAttribute('aria-label')) host.setAttribute('aria-label', codeLabel(pre, false));
+    }
+    var tables = doc.querySelectorAll('table');
+    for (var t = 0; t < tables.length; t++) {
+      var tb = tables[t];
+      var wrap = tb.closest ? tb.closest('.table-wrap') : null;
+      if (!wrap) {
+        wrap = doc.createElement('div');
+        wrap.className = 'table-wrap';
+        tb.parentNode.insertBefore(wrap, tb);
+        wrap.appendChild(tb);
+      }
+      wrap.setAttribute('tabindex', '0');
+      wrap.setAttribute('role', 'region');
+      if (!wrap.getAttribute('aria-label')) wrap.setAttribute('aria-label', '数据表格，可用左右方向键横向滚动');
+    }
+    syncScrollRegions();
+  }
+  /** 只有真的溢出时才标记 data-overflowing（契约 v2 §6：避免给不溢出的块加噪音语义） */
+  function syncScrollRegions() {
+    var hosts = doc.querySelectorAll('.code-scroll');
+    for (var i = 0; i < hosts.length; i++) {
+      var host = hosts[i];
+      var pre = host.querySelector('pre');
+      var over = pre ? (pre.scrollWidth > pre.clientWidth + 1 || host.scrollWidth > host.clientWidth + 1) : false;
+      if (over) host.setAttribute('data-overflowing', ''); else host.removeAttribute('data-overflowing');
+      if (pre) host.setAttribute('aria-label', codeLabel(pre, over));
+    }
+    var wraps = doc.querySelectorAll('.table-wrap');
+    for (var w = 0; w < wraps.length; w++) {
+      var el = wraps[w];
+      if (el.scrollWidth > el.clientWidth + 1) el.setAttribute('data-overflowing', ''); else el.removeAttribute('data-overflowing');
+    }
+  }
+
+  /* ---------- 搜索索引按需加载（契约 v2 F1）：首屏不加载 ~800KB 索引 ---------- */
+  var indexState = 'idle';
+  var indexWaiters = [];
+  function applySearchData() {
+    var data = window.__LIBRARY_SEARCH__;
+    INDEX = (data && data.pages) || [];
+    ALIASES = (data && data.aliases) || {};
+    PHRASE_BY_Q = {};
+    ((data && data.phrases) || []).forEach(function (p) { PHRASE_BY_Q[p.q] = p; });
+    try { warmBodyBits(); } catch (e) {}
+  }
+  function loadJsonFallback(done) {
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', libraryRoot() + 'search-index.json', true);
+      xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          try { window.__LIBRARY_SEARCH__ = JSON.parse(xhr.responseText); done(true); return; } catch (e) {}
+        }
+        done(false);
+      };
+      xhr.onerror = function () { done(false); };
+      xhr.send();
+    } catch (e) { done(false); }
+  }
+  function ensureIndex(cb) {
+    if (indexState === 'ready') { if (cb) cb(); return; }
+    if (cb) indexWaiters.push(cb);
+    if (indexState === 'loading' || indexState === 'failed') return;
+    indexState = 'loading';
+    var done = function (ok) {
+      indexState = ok ? 'ready' : 'failed';
+      if (ok) applySearchData();
+      var waiters = indexWaiters.slice();
+      indexWaiters.length = 0;
+      for (var i = 0; i < waiters.length; i++) { try { waiters[i](); } catch (e) {} }
+    };
+    var sc = doc.createElement('script');
+    sc.src = libraryRoot() + 'assets/search-index.js';
+    sc.async = true;
+    sc.onload = function () { done(!!(window.__LIBRARY_SEARCH__ && window.__LIBRARY_SEARCH__.pages)); };
+    sc.onerror = function () { loadJsonFallback(done); };
+    doc.head.appendChild(sc);
+  }
+  function preloadIndex() { if (indexState === 'idle') ensureIndex(null); }
+
 
   function renderEmpty(htmlStr) {
     var list = doc.getElementById('search-results');
@@ -520,12 +830,26 @@
       applyTheme(cur === 'auto' ? 'light' : (cur === 'light' ? 'dark' : 'auto'));
     });
     initSidebar();
+    initDrawer();
+    initScrollRegions();
     initCopy();
     initLightbox();
     initToc();
     initSearch();
     initTableFilter();
   }
+
+  var rsTimer = null;
+  window.addEventListener('resize', function () {
+    if (rsTimer) clearTimeout(rsTimer);
+    rsTimer = setTimeout(syncScrollRegions, 150);
+  });
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      if (window.requestIdleCallback) window.requestIdleCallback(preloadIndex, { timeout: 3000 });
+      else preloadIndex();
+    }, 1200);
+  });
 
   if (doc.readyState === 'loading') doc.addEventListener('DOMContentLoaded', init);
   else init();

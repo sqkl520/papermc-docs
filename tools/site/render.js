@@ -255,8 +255,13 @@ class MarkdownRenderer {
       + (info.title ? '<span class="code-file" title="' + U.attr(info.title) + '">' + U.escapeHtml(info.title) + '</span>' : '<span class="code-file"></span>')
       + '<button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button>'
       + '</figcaption>';
-    const code = '<pre class="code-pre"><code class="hljs language-' + U.attr(info.tag) + '"' + langAttr + '>'
-      + body + '</code></pre>';
+    // 代码块的横向滚动容器（契约 §2.2 / v2 §6）：只有这个容器滚动，文档宽度不受影响；
+    // 容器自身键盘可达（tabindex=0 + role=region + aria-label），鼠标/键盘均可横向查看长行。
+    const scrollLabel = '代码块' + (info.tag && info.tag !== 'text' ? '（' + info.tag + '）' : '')
+      + (info.title ? '：' + info.title : '') + '，可用左右方向键横向滚动';
+    const code = '<div class="code-scroll" tabindex="0" role="region" aria-label="' + U.attr(scrollLabel) + '">'
+      + '<pre class="code-pre"><code class="hljs language-' + U.attr(info.tag) + '"' + langAttr + '>'
+      + body + '</code></pre></div>';
     return '<figure class="code-block' + (info.title ? ' has-title' : '') + '"' + langAttr + '>'
       + caption + code + '</figure>\n';
   }

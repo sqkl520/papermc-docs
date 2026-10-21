@@ -3,7 +3,7 @@
 /**
  * build-site.js — static site generator for the offline PaperMC docs library.
  *
- *   node tools/build-site.js [--self-test] [--quiet]
+ *   node tools/build-site.js [--self-test] [--quiet] [--verify-artifacts]
  *
  * 站点根 = 仓库根（GitHub Pages project pages：https://sqkl520.github.io/papermc-docs/）。
  * 页面产物路径 = rel 直接展开（'index' -> <section>/index.html），故站点 URL 与上游逐段一致。
@@ -1356,6 +1356,18 @@ function runSelfTest(state) {
     state.search.stats.entries + '/' + pages.length);
   push(null, '未修改归档目录', !fs.existsSync(path.join(U.ARCHIVES, 'build-manifest.json')), '');
 
+  // ---- 产物 = 源（红队 F10）----
+  const cssAbs = path.join(U.SITE, 'assets', 'site.css');
+  const jsAbs = path.join(U.SITE, 'assets', 'site.js');
+  const cssDisk = fs.existsSync(cssAbs) ? U.readText(cssAbs) : null;
+  const jsDisk = fs.existsSync(jsAbs) ? U.readText(jsAbs) : null;
+  push(null, '产物 = 源：assets/site.css 与 tools/site/assets.js 的 SITE_CSS 逐字节一致',
+    cssDisk !== null && cssDisk === SITE_CSS,
+    cssDisk === null ? '缺 assets/site.css' : (cssDisk === SITE_CSS ? '' : '不一致 → 先跑 node tools/build-site.js'));
+  push(null, '产物 = 源：assets/site.js 与 tools/site/assets.js 的 SITE_JS 逐字节一致',
+    jsDisk !== null && jsDisk === SITE_JS,
+    jsDisk === null ? '缺 assets/site.js' : (jsDisk === SITE_JS ? '' : '不一致 → 先跑 node tools/build-site.js'));
+
   return {
     sample: sample.map((p) => p.id), checks, totalLocalLinks, totalLocalImages,
     contrastRows, activeContrast, rankResults, docH1Bad, artH1Bad, catChipBad: catChipBad.length,
@@ -1557,6 +1569,17 @@ function main() {
   log('[6/7] 清理旧产物并写入 …');
   cleanOutputs();
   const written = writeEverything(state);
+
+  // 产物 = 源（红队 F10）：构建完立刻自证 assets/ 与 SITE_CSS/SITE_JS 逐字节一致，
+  // 避免“源与产物错代”（改完源忘记重建，或产物被手工改过）静默通过。
+  const cssOnDisk = U.readText(path.join(U.SITE, 'assets', 'site.css'));
+  const jsOnDisk = U.readText(path.join(U.SITE, 'assets', 'site.js'));
+  const artifactMatchesSource = cssOnDisk === SITE_CSS && jsOnDisk === SITE_JS;
+  log('      产物 = 源 校验：' + (artifactMatchesSource
+    ? 'assets/site.css · assets/site.js 与 tools/site/assets.js 的 SITE_CSS/SITE_JS 逐字节一致'
+    : '不一致 ✗ 请先跑 node tools/build-site.js'));
+  if (!artifactMatchesSource) process.exitCode = 1;
+  state.artifactMatchesSource = artifactMatchesSource;
   state.siteTotals = computeSiteTotals(written);
 
   const manifest = {
@@ -1793,13 +1816,44 @@ function main() {
   return manifest;
 }
 
+/**
+ * 产物 = 源（红队 F10 / H2）：**不重建**、只比对。可在任何检查清单或 CI 里单独跑：
+ *   node tools/build-site.js --verify-artifacts
+ * 退出码 0 = 一致；1 = assets/ 落后于 tools/site/assets.js（先跑 node tools/build-site.js）。
+ * 背景：本会话真实踩过“源改了、产物还是上一代（差 40 分钟）”导致两代状态缺陷集不同。
+ */
+function verifyArtifacts() {
+  const same = (a, b) => a !== null && a.replace(/^\uFEFF/, '') === b;
+  const rows = [
+    ['assets/site.css', path.join(U.SITE, 'assets', 'site.css'), SITE_CSS],
+    ['assets/site.js', path.join(U.SITE, 'assets', 'site.js'), SITE_JS],
+    ['assets/favicon.svg', path.join(U.SITE, 'assets', 'favicon.svg'), FAVICON_SVG],
+  ];
+  let bad = 0;
+  for (const [rel, abs, src] of rows) {
+    const disk = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : null;
+    const ok = same(disk, src);
+    if (!ok) bad += 1;
+    console.log((ok ? 'PASS  ' : 'FAIL  ') + rel + (ok
+      ? ' === tools/site/assets.js 中的源'
+      : (disk === null ? ' 缺失' : ' 与 tools/site/assets.js 中的源不一致 → 先跑 node tools/build-site.js')));
+  }
+  console.log(bad ? ('RESULT: FAIL（' + bad + ' 个产物落后于源）') : 'RESULT: PASS（产物 = 源）');
+  if (bad) process.exitCode = 1;
+  return bad === 0;
+}
+
 if (require.main === module) {
-  try {
-    main();
-  } catch (e) {
-    console.error('build failed: ' + (e && e.stack ? e.stack : e));
-    process.exit(1);
+  if (ARGS.includes('--verify-artifacts')) {
+    verifyArtifacts();
+  } else {
+    try {
+      main();
+    } catch (e) {
+      console.error('build failed: ' + (e && e.stack ? e.stack : e));
+      process.exit(1);
+    }
   }
 }
 
-module.exports = { main, Linker, buildSiteModel, loadManifests, loadTaxonomy, renderAllPages, runSelfTest };
+module.exports = { main, Linker, buildSiteModel, loadManifests, loadTaxonomy, renderAllPages, runSelfTest, verifyArtifacts };

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T20:31:21.496Z",
+  "generated_at": "2026-10-21T13:41:54.433Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -385,11 +385,11 @@
     "imgInArticle": 89,
     "imgExternal": 1,
     "imgMissing": 0,
-    "anchorsAll": 39175,
+    "anchorsAll": 40603,
     "anchorsExternal": 1434,
     "anchorsUnmirrored": 25,
-    "anchorsInternalPage": 30739,
-    "anchorsFragmentOnly": 2147,
+    "anchorsInternalPage": 31231,
+    "anchorsFragmentOnly": 3083,
     "anchorsUnresolved": 4,
     "uniqueExternalHrefs": 784
   },
@@ -492,11 +492,11 @@
   "outputs": {
     "index": {
       "output": "index.html",
-      "bytes": 137707
+      "bytes": 138494
     },
     "notFound": {
       "output": "404.html",
-      "bytes": 3089
+      "bytes": 3145
     },
     "robots": {
       "output": "robots.txt",
@@ -509,22 +509,22 @@
     },
     "allPages": {
       "output": "all-pages.html",
-      "bytes": 185170,
+      "bytes": 185957,
       "rows": 141
     },
     "snapshots": {
       "output": "snapshots.html",
-      "bytes": 170809,
+      "bytes": 171614,
       "rows": 141
     },
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 30346
+        "bytes": 43130
       },
       "js": {
         "output": "assets/site.js",
-        "bytes": 23093
+        "bytes": 36963
       },
       "favicon": {
         "output": "assets/favicon.svg",
@@ -544,7 +544,7 @@
     "sectionCount": 3,
     "siteDir": "repo-root (GitHub Pages /papermc-docs/)",
     "pageLayout": "<section>/<rel>.html（rel 直接展开，URL 与上游 docs.papermc.io 逐段一致）",
-    "totalBytes": 16819879
+    "totalBytes": 17123820
   },
   "pages": [
     {
@@ -638,7 +638,7 @@
           "text": "If nothing is logged"
         }
       ],
-      "bytes": 101145,
+      "bytes": 103458,
       "warnings": 0
     },
     {
@@ -686,7 +686,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91534,
+      "bytes": 92382,
       "warnings": 0
     },
     {
@@ -734,7 +734,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91806,
+      "bytes": 92654,
       "warnings": 0
     },
     {
@@ -803,7 +803,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 94291,
+      "bytes": 95694,
       "warnings": 0
     },
     {
@@ -851,7 +851,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91207,
+      "bytes": 92055,
       "warnings": 0
     },
     {
@@ -899,7 +899,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91708,
+      "bytes": 92556,
       "warnings": 0
     },
     {
@@ -973,7 +973,7 @@
           "text": "Transparent huge pages"
         }
       ],
-      "bytes": 103931,
+      "bytes": 105890,
       "warnings": 0
     },
     {
@@ -1047,7 +1047,7 @@
           "text": "FAQ, common pitfalls and support"
         }
       ],
-      "bytes": 124740,
+      "bytes": 127827,
       "warnings": 2
     },
     {
@@ -1206,7 +1206,7 @@
           "text": "Low CPU usage"
         }
       ],
-      "bytes": 120382,
+      "bytes": 123932,
       "warnings": 1
     },
     {
@@ -1275,7 +1275,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 94236,
+      "bytes": 95637,
       "warnings": 0
     },
     {
@@ -1323,7 +1323,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 90057,
+      "bytes": 90899,
       "warnings": 0
     },
     {
@@ -1371,7 +1371,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93758,
+      "bytes": 94618,
       "warnings": 0
     },
     {
@@ -1419,7 +1419,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93586,
+      "bytes": 94446,
       "warnings": 0
     },
     {
@@ -1483,7 +1483,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 95273,
+      "bytes": 96605,
       "warnings": 0
     },
     {
@@ -1531,7 +1531,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92729,
+      "bytes": 93589,
       "warnings": 0
     },
     {
@@ -1579,7 +1579,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92088,
+      "bytes": 92942,
       "warnings": 0
     },
     {
@@ -1627,7 +1627,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91910,
+      "bytes": 92764,
       "warnings": 0
     },
     {
@@ -1675,7 +1675,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91967,
+      "bytes": 92821,
       "warnings": 0
     },
     {
@@ -1723,7 +1723,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93056,
+      "bytes": 93904,
       "warnings": 0
     },
     {
@@ -1771,7 +1771,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91683,
+      "bytes": 92537,
       "warnings": 0
     },
     {
@@ -1819,7 +1819,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91814,
+      "bytes": 92668,
       "warnings": 0
     },
     {
@@ -1898,7 +1898,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 104252,
+      "bytes": 106505,
       "warnings": 0
     },
     {
@@ -2022,7 +2022,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 107619,
+      "bytes": 110496,
       "warnings": 0
     },
     {
@@ -2146,7 +2146,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 108597,
+      "bytes": 111500,
       "warnings": 0
     },
     {
@@ -2285,7 +2285,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 106568,
+      "bytes": 109833,
       "warnings": 0
     },
     {
@@ -2379,7 +2379,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 101528,
+      "bytes": 103719,
       "warnings": 0
     },
     {
@@ -2433,7 +2433,7 @@
           "text": "Quick overview"
         }
       ],
-      "bytes": 103945,
+      "bytes": 105177,
       "warnings": 0
     },
     {
@@ -2572,7 +2572,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 108056,
+      "bytes": 111291,
       "warnings": 0
     },
     {
@@ -2666,7 +2666,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 100575,
+      "bytes": 102780,
       "warnings": 0
     },
     {
@@ -2745,7 +2745,7 @@
           "text": "Registry key types"
         }
       ],
-      "bytes": 107518,
+      "bytes": 109821,
       "warnings": 0
     },
     {
@@ -2829,7 +2829,7 @@
           "text": "Example: Filtering by user input"
         }
       ],
-      "bytes": 110380,
+      "bytes": 112970,
       "warnings": 0
     },
     {
@@ -2923,7 +2923,7 @@
           "text": "Custom arguments"
         }
       ],
-      "bytes": 109264,
+      "bytes": 111598,
       "warnings": 0
     },
     {
@@ -2992,7 +2992,7 @@
           "text": "Chaining ‘then’ method calls together"
         }
       ],
-      "bytes": 113962,
+      "bytes": 117584,
       "warnings": 0
     },
     {
@@ -3081,7 +3081,7 @@
           "text": "Example: Ice-cream argument"
         }
       ],
-      "bytes": 118949,
+      "bytes": 122148,
       "warnings": 0
     },
     {
@@ -3150,7 +3150,7 @@
           "text": "Logic separation"
         }
       ],
-      "bytes": 108295,
+      "bytes": 110349,
       "warnings": 0
     },
     {
@@ -3209,7 +3209,7 @@
           "text": "Additional support"
         }
       ],
-      "bytes": 96003,
+      "bytes": 97292,
       "warnings": 0
     },
     {
@@ -3293,7 +3293,7 @@
           "text": "Further reference"
         }
       ],
-      "bytes": 106431,
+      "bytes": 109268,
       "warnings": 0
     },
     {
@@ -3367,7 +3367,7 @@
           "text": "Restricting your commands"
         }
       ],
-      "bytes": 103092,
+      "bytes": 105460,
       "warnings": 0
     },
     {
@@ -3466,7 +3466,7 @@
           "text": "Final code"
         }
       ],
-      "bytes": 118922,
+      "bytes": 122823,
       "warnings": 0
     },
     {
@@ -3530,7 +3530,7 @@
           "text": "The new Paper way"
         }
       ],
-      "bytes": 102903,
+      "bytes": 104829,
       "warnings": 0
     },
     {
@@ -3599,7 +3599,7 @@
           "text": "Pointers"
         }
       ],
-      "bytes": 97437,
+      "bytes": 99136,
       "warnings": 0
     },
     {
@@ -3668,7 +3668,7 @@
           "text": "ResourceBundle"
         }
       ],
-      "bytes": 97691,
+      "bytes": 99572,
       "warnings": 0
     },
     {
@@ -3767,7 +3767,7 @@
           "text": "LegacyComponentSerializer"
         }
       ],
-      "bytes": 110378,
+      "bytes": 112785,
       "warnings": 0
     },
     {
@@ -3846,7 +3846,7 @@
           "text": "Code"
         }
       ],
-      "bytes": 102778,
+      "bytes": 104630,
       "warnings": 0
     },
     {
@@ -3910,7 +3910,7 @@
           "text": "Implementing cancellation"
         }
       ],
-      "bytes": 104614,
+      "bytes": 106911,
       "warnings": 0
     },
     {
@@ -3984,7 +3984,7 @@
           "text": "Storing data on the holder"
         }
       ],
-      "bytes": 104172,
+      "bytes": 106430,
       "warnings": 0
     },
     {
@@ -4158,7 +4158,7 @@
           "text": "Matching items without certain data components"
         }
       ],
-      "bytes": 113277,
+      "bytes": 117877,
       "warnings": 0
     },
     {
@@ -4247,7 +4247,7 @@
           "text": "Client timeouts"
         }
       ],
-      "bytes": 102115,
+      "bytes": 104572,
       "warnings": 0
     },
     {
@@ -4416,7 +4416,7 @@
           "text": "Reading payloads with adventure-nbt"
         }
       ],
-      "bytes": 140655,
+      "bytes": 145523,
       "warnings": 0
     },
     {
@@ -4525,7 +4525,7 @@
           "text": "Use cases"
         }
       ],
-      "bytes": 113579,
+      "bytes": 116561,
       "warnings": 0
     },
     {
@@ -4589,7 +4589,7 @@
           "text": "Stopping the pathfinding"
         }
       ],
-      "bytes": 97540,
+      "bytes": 99194,
       "warnings": 0
     },
     {
@@ -4658,7 +4658,7 @@
           "text": "Retaining passengers"
         }
       ],
-      "bytes": 97294,
+      "bytes": 99237,
       "warnings": 0
     },
     {
@@ -4737,7 +4737,7 @@
           "text": "Event cancellation"
         }
       ],
-      "bytes": 103008,
+      "bytes": 105506,
       "warnings": 0
     },
     {
@@ -4817,7 +4817,7 @@
           "text": "Entity scheduler"
         }
       ],
-      "bytes": 98812,
+      "bytes": 101143,
       "warnings": 0
     },
     {
@@ -4865,7 +4865,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91626,
+      "bytes": 92474,
       "warnings": 0
     },
     {
@@ -4969,7 +4969,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 113408,
+      "bytes": 116566,
       "warnings": 0
     },
     {
@@ -5028,7 +5028,7 @@
           "text": "Unregistering a listener"
         }
       ],
-      "bytes": 96249,
+      "bytes": 97902,
       "warnings": 0
     },
     {
@@ -5127,7 +5127,7 @@
           "text": "Components"
         }
       ],
-      "bytes": 101886,
+      "bytes": 103671,
       "warnings": 0
     },
     {
@@ -5191,7 +5191,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 94754,
+      "bytes": 96080,
       "warnings": 0
     },
     {
@@ -5265,7 +5265,7 @@
           "text": "Getting the current Minecraft version"
         }
       ],
-      "bytes": 99955,
+      "bytes": 101774,
       "warnings": 2
     },
     {
@@ -5349,7 +5349,7 @@
           "text": "Verifying that the datapack loaded correctly"
         }
       ],
-      "bytes": 107665,
+      "bytes": 110741,
       "warnings": 0
     },
     {
@@ -5433,7 +5433,7 @@
           "text": "Why does this exist?"
         }
       ],
-      "bytes": 104732,
+      "bytes": 107244,
       "warnings": 0
     },
     {
@@ -5507,7 +5507,7 @@
           "text": "Persistent inventory views"
         }
       ],
-      "bytes": 102684,
+      "bytes": 104581,
       "warnings": 0
     },
     {
@@ -5555,7 +5555,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91543,
+      "bytes": 92391,
       "warnings": 0
     },
     {
@@ -5619,7 +5619,7 @@
           "text": "Removing a goal"
         }
       ],
-      "bytes": 103817,
+      "bytes": 105623,
       "warnings": 0
     },
     {
@@ -6083,7 +6083,7 @@
           "text": "Splash particles"
         }
       ],
-      "bytes": 172327,
+      "bytes": 185205,
       "warnings": 0
     },
     {
@@ -6167,7 +6167,7 @@
           "text": "Storing on different objects"
         }
       ],
-      "bytes": 119141,
+      "bytes": 122092,
       "warnings": 0
     },
     {
@@ -6241,7 +6241,7 @@
           "text": "Configurate"
         }
       ],
-      "bytes": 105866,
+      "bytes": 108208,
       "warnings": 0
     },
     {
@@ -6325,7 +6325,7 @@
           "text": "MessageRaw"
         }
       ],
-      "bytes": 114975,
+      "bytes": 117358,
       "warnings": 0
     },
     {
@@ -6489,7 +6489,7 @@
           "text": "provides"
         }
       ],
-      "bytes": 109041,
+      "bytes": 112171,
       "warnings": 0
     },
     {
@@ -6603,7 +6603,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 111187,
+      "bytes": 114115,
       "warnings": 0
     },
     {
@@ -6667,7 +6667,7 @@
           "text": "Omitted stacktraces"
         }
       ],
-      "bytes": 96746,
+      "bytes": 98353,
       "warnings": 0
     },
     {
@@ -6726,7 +6726,7 @@
           "text": "ShapelessRecipe"
         }
       ],
-      "bytes": 98353,
+      "bytes": 100168,
       "warnings": 0
     },
     {
@@ -6805,7 +6805,7 @@
           "text": "Modifying existing entries"
         }
       ],
-      "bytes": 106748,
+      "bytes": 108956,
       "warnings": 0
     },
     {
@@ -6904,7 +6904,7 @@
           "text": "Obsolete API"
         }
       ],
-      "bytes": 99009,
+      "bytes": 101112,
       "warnings": 0
     },
     {
@@ -7008,7 +7008,7 @@
           "text": "Using a delay of 0 ticks"
         }
       ],
-      "bytes": 110497,
+      "bytes": 113814,
       "warnings": 0
     },
     {
@@ -7097,7 +7097,7 @@
           "text": "Compiling to Spigot mappings"
         }
       ],
-      "bytes": 105426,
+      "bytes": 108316,
       "warnings": 0
     },
     {
@@ -7201,7 +7201,7 @@
           "text": "Database tools"
         }
       ],
-      "bytes": 111075,
+      "bytes": 114081,
       "warnings": 0
     },
     {
@@ -7255,7 +7255,7 @@
           "text": "Unsupported Java detected, what do I do?!"
         }
       ],
-      "bytes": 91065,
+      "bytes": 92330,
       "warnings": 0
     },
     {
@@ -7344,7 +7344,7 @@
           "text": "Next steps"
         }
       ],
-      "bytes": 95416,
+      "bytes": 97266,
       "warnings": 0
     },
     {
@@ -7392,7 +7392,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 89491,
+      "bytes": 90327,
       "warnings": 0
     },
     {
@@ -7491,7 +7491,7 @@
           "text": "To CraftBukkit or Spigot"
         }
       ],
-      "bytes": 99284,
+      "bytes": 101167,
       "warnings": 0
     },
     {
@@ -7565,7 +7565,7 @@
           "text": "Afterword"
         }
       ],
-      "bytes": 97709,
+      "bytes": 99850,
       "warnings": 0
     },
     {
@@ -7629,7 +7629,7 @@
           "text": "Configuration"
         }
       ],
-      "bytes": 93587,
+      "bytes": 95211,
       "warnings": 0
     },
     {
@@ -7723,7 +7723,7 @@
           "text": "Troubleshooting"
         }
       ],
-      "bytes": 95744,
+      "bytes": 97462,
       "warnings": 0
     },
     {
@@ -7782,7 +7782,7 @@
           "text": "Timings"
         }
       ],
-      "bytes": 93665,
+      "bytes": 95031,
       "warnings": 0
     },
     {
@@ -7830,7 +7830,7 @@
         "fencePairs": 3
       },
       "headings": [],
-      "bytes": 94631,
+      "bytes": 95860,
       "warnings": 0
     },
     {
@@ -7878,7 +7878,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 100277,
+      "bytes": 101125,
       "warnings": 14
     },
     {
@@ -7926,7 +7926,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 94971,
+      "bytes": 95819,
       "warnings": 0
     },
     {
@@ -7974,7 +7974,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92806,
+      "bytes": 93654,
       "warnings": 0
     },
     {
@@ -8022,7 +8022,7 @@
         "fencePairs": 1
       },
       "headings": [],
-      "bytes": 101158,
+      "bytes": 102133,
       "warnings": 0
     },
     {
@@ -8201,7 +8201,7 @@
           "text": "version"
         }
       ],
-      "bytes": 109974,
+      "bytes": 112928,
       "warnings": 0
     },
     {
@@ -8270,7 +8270,7 @@
           "text": "Inheritance"
         }
       ],
-      "bytes": 101361,
+      "bytes": 103608,
       "warnings": 0
     },
     {
@@ -8318,7 +8318,7 @@
         "fencePairs": 2
       },
       "headings": [],
-      "bytes": 116012,
+      "bytes": 117114,
       "warnings": 0
     },
     {
@@ -8387,7 +8387,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 94305,
+      "bytes": 95781,
       "warnings": 0
     },
     {
@@ -8466,7 +8466,7 @@
           "text": "Paper permissions"
         }
       ],
-      "bytes": 115184,
+      "bytes": 116835,
       "warnings": 0
     },
     {
@@ -8514,7 +8514,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 105342,
+      "bytes": 106190,
       "warnings": 1
     },
     {
@@ -8562,7 +8562,7 @@
         "fencePairs": 3
       },
       "headings": [],
-      "bytes": 121542,
+      "bytes": 122771,
       "warnings": 10
     },
     {
@@ -8851,7 +8851,7 @@
           "text": "MINECRAFT_MANAGEMENT_TLS_KEYSTORE_PASSWORD"
         }
       ],
-      "bytes": 120981,
+      "bytes": 126720,
       "warnings": 3
     },
     {
@@ -8925,7 +8925,7 @@
           "text": "whitelist.json"
         }
       ],
-      "bytes": 98696,
+      "bytes": 100284,
       "warnings": 1
     },
     {
@@ -8973,7 +8973,7 @@
         "fencePairs": 5
       },
       "headings": [],
-      "bytes": 143842,
+      "bytes": 145325,
       "warnings": 14
     },
     {
@@ -9037,7 +9037,7 @@
           "text": "Step 3. Update Paper"
         }
       ],
-      "bytes": 95476,
+      "bytes": 96849,
       "warnings": 0
     },
     {
@@ -9111,7 +9111,7 @@
           "text": "Further considerations"
         }
       ],
-      "bytes": 107237,
+      "bytes": 108880,
       "warnings": 0
     },
     {
@@ -9159,7 +9159,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91564,
+      "bytes": 92412,
       "warnings": 0
     },
     {
@@ -9207,7 +9207,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91290,
+      "bytes": 92138,
       "warnings": 0
     },
     {
@@ -9271,7 +9271,7 @@
           "text": "Reference"
         }
       ],
-      "bytes": 92980,
+      "bytes": 94318,
       "warnings": 0
     },
     {
@@ -9319,7 +9319,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91843,
+      "bytes": 92691,
       "warnings": 0
     },
     {
@@ -9423,7 +9423,7 @@
           "text": "/velocity:callback"
         }
       ],
-      "bytes": 96561,
+      "bytes": 98385,
       "warnings": 0
     },
     {
@@ -9497,7 +9497,7 @@
           "text": "Hypothetical BungeeCord API-based Velocity"
         }
       ],
-      "bytes": 99442,
+      "bytes": 100974,
       "warnings": 0
     },
     {
@@ -9586,7 +9586,7 @@
           "text": "query section"
         }
       ],
-      "bytes": 102678,
+      "bytes": 104331,
       "warnings": 0
     },
     {
@@ -9634,7 +9634,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 97885,
+      "bytes": 98727,
       "warnings": 0
     },
     {
@@ -9703,7 +9703,7 @@
           "text": "Getting your plugin’s directory"
         }
       ],
-      "bytes": 102151,
+      "bytes": 104313,
       "warnings": 0
     },
     {
@@ -9751,7 +9751,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91226,
+      "bytes": 92074,
       "warnings": 0
     },
     {
@@ -9825,7 +9825,7 @@
           "text": "Registering a command"
         }
       ],
-      "bytes": 114934,
+      "bytes": 117036,
       "warnings": 0
     },
     {
@@ -9964,7 +9964,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 115130,
+      "bytes": 118339,
       "warnings": 0
     },
     {
@@ -10028,7 +10028,7 @@
           "text": "External dependencies"
         }
       ],
-      "bytes": 96382,
+      "bytes": 98169,
       "warnings": 0
     },
     {
@@ -10127,7 +10127,7 @@
           "text": "Using ResultedEvent"
         }
       ],
-      "bytes": 115254,
+      "bytes": 118585,
       "warnings": 0
     },
     {
@@ -10175,7 +10175,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91513,
+      "bytes": 92361,
       "warnings": 0
     },
     {
@@ -10223,7 +10223,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91146,
+      "bytes": 91994,
       "warnings": 0
     },
     {
@@ -10287,7 +10287,7 @@
           "text": "API"
         }
       ],
-      "bytes": 92331,
+      "bytes": 93657,
       "warnings": 0
     },
     {
@@ -10346,7 +10346,7 @@
           "text": "Audience operations are not fully supported"
         }
       ],
-      "bytes": 95227,
+      "bytes": 96747,
       "warnings": 0
     },
     {
@@ -10430,7 +10430,7 @@
           "text": "BungeeCord channel compatibility"
         }
       ],
-      "bytes": 106949,
+      "bytes": 109595,
       "warnings": 0
     },
     {
@@ -10494,7 +10494,7 @@
           "text": "New asynchronous event system"
         }
       ],
-      "bytes": 93702,
+      "bytes": 95160,
       "warnings": 0
     },
     {
@@ -10568,7 +10568,7 @@
           "text": "Obtaining tasks from a plugin"
         }
       ],
-      "bytes": 99522,
+      "bytes": 101715,
       "warnings": 0
     },
     {
@@ -10627,7 +10627,7 @@
           "text": "Fields"
         }
       ],
-      "bytes": 102377,
+      "bytes": 104917,
       "warnings": 0
     },
     {
@@ -10731,7 +10731,7 @@
           "text": "Plugins unable to modify messages or commands"
         }
       ],
-      "bytes": 102739,
+      "bytes": 105993,
       "warnings": 0
     },
     {
@@ -10815,7 +10815,7 @@
           "text": "Configuring your servers"
         }
       ],
-      "bytes": 101505,
+      "bytes": 103956,
       "warnings": 0
     },
     {
@@ -10884,7 +10884,7 @@
           "text": "💬 Our Discord"
         }
       ],
-      "bytes": 91460,
+      "bytes": 92861,
       "warnings": 0
     },
     {
@@ -10938,7 +10938,7 @@
           "text": "Migrating from Velocity 1.0.x to Velocity 1.1.0"
         }
       ],
-      "bytes": 91029,
+      "bytes": 92305,
       "warnings": 0
     },
     {
@@ -11032,7 +11032,7 @@
           "text": "Configuring legacy forwarding for Fabric"
         }
       ],
-      "bytes": 100835,
+      "bytes": 103061,
       "warnings": 1
     },
     {
@@ -11186,7 +11186,7 @@
           "text": "VELOCITY_FORWARDING_SECRET"
         }
       ],
-      "bytes": 103768,
+      "bytes": 107108,
       "warnings": 0
     },
     {
@@ -11265,7 +11265,7 @@
           "text": "Other important security advice"
         }
       ],
-      "bytes": 98360,
+      "bytes": 100043,
       "warnings": 0
     },
     {
@@ -11374,7 +11374,7 @@
           "text": "Other implementations"
         }
       ],
-      "bytes": 97876,
+      "bytes": 99926,
       "warnings": 0
     },
     {
@@ -11478,7 +11478,7 @@
           "text": "OpenJ9"
         }
       ],
-      "bytes": 101132,
+      "bytes": 103359,
       "warnings": 0
     },
     {
@@ -11567,7 +11567,7 @@
           "text": "Standards and mod support"
         }
       ],
-      "bytes": 97535,
+      "bytes": 99316,
       "warnings": 0
     },
     {
@@ -11621,7 +11621,7 @@
           "text": "Reference"
         }
       ],
-      "bytes": 90612,
+      "bytes": 91816,
       "warnings": 0
     },
     {
@@ -11669,7 +11669,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91034,
+      "bytes": 91882,
       "warnings": 0
     },
     {
@@ -11738,7 +11738,7 @@
           "text": "What commands does Folia disable?"
         }
       ],
-      "bytes": 93889,
+      "bytes": 95466,
       "warnings": 0
     },
     {
@@ -11786,7 +11786,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 89114,
+      "bytes": 89950,
       "warnings": 0
     },
     {
@@ -11920,7 +11920,7 @@
           "text": "Server shutdown process"
         }
       ],
-      "bytes": 110330,
+      "bytes": 112944,
       "warnings": 0
     },
     {
@@ -12099,7 +12099,7 @@
           "text": "Region tick end (markNotTicking)"
         }
       ],
-      "bytes": 109856,
+      "bytes": 113281,
       "warnings": 0
     }
   ],
@@ -12313,491 +12313,6 @@
     }
   ],
   "timing_ms": {
-    "total": 8254
-  },
-  "selfTest": {
-    "sample": [
-      "paper:anti-xray/index",
-      "paper:aikars-flags/index",
-      "paper:getting-started/index",
-      "paper:dev/command-api/arguments/minecraft/index",
-      "paper:reference/world-configuration/index",
-      "paper:admin/getting-started/index",
-      "velocity:built-in-commands/index",
-      "velocity:dev/creating-your-first-plugin/index",
-      "velocity:index",
-      "paper:index",
-      "paper:dev/mob-goals/index",
-      "velocity:reference/system-properties/index",
-      "paper:dev/scheduler/index",
-      "paper:dev/pdc/index"
-    ],
-    "passed": 226,
-    "failed": 0,
-    "failedChecks": [],
-    "checkedLocalLinks": 2965,
-    "checkedLocalImages": 6,
-    "h1": {
-      "docH1Bad": 0,
-      "artH1Bad": 0,
-      "htmlFiles": 165
-    },
-    "breadcrumbSample": "总览 / Paper / Development / API / Command API / Basics / Introduction",
-    "sourceNavPreorderPages": 141,
-    "pagesUnreachableFromMainNav": 0,
-    "pagerProblems": 0,
-    "allPagesRows": 141,
-    "categoryPagesWithDebugChips": 0,
-    "alertBadgeContrast": [
-      {
-        "name": "note",
-        "light": 5.17,
-        "dark": 7.09
-      },
-      {
-        "name": "tip",
-        "light": 5.41,
-        "dark": 10.25
-      },
-      {
-        "name": "important",
-        "light": 5.7,
-        "dark": 6.8
-      },
-      {
-        "name": "warning",
-        "light": 5.22,
-        "dark": 9.72
-      },
-      {
-        "name": "caution",
-        "light": 5.02,
-        "dark": 8.78
-      },
-      {
-        "name": "danger",
-        "light": 4.83,
-        "dark": 6.53
-      }
-    ],
-    "sidebarActiveContrast": {
-      "light": 5.61,
-      "dark": 6.12
-    },
-    "searchRanking": {
-      "性能": {
-        "hits": 32,
-        "top3": [
-          {
-            "id": "velocity:tuning/index",
-            "title": "Tuning Velocity",
-            "s": 78,
-            "tier": 4,
-            "fields": [
-              "标签 性能调优",
-              "摘要",
-              "分类",
-              "标题别名 tuning"
-            ]
-          },
-          {
-            "id": "velocity:why-velocity/index",
-            "title": "What does Velocity do for me?",
-            "s": 60,
-            "tier": 3,
-            "fields": [
-              "标签 性能调优",
-              "摘要",
-              "小节别名 performance"
-            ]
-          },
-          {
-            "id": "paper:profiling/index",
-            "title": "Profiling",
-            "s": 54,
-            "tier": 2,
-            "fields": [
-              "标签 性能调优",
-              "摘要",
-              "分类"
-            ]
-          }
-        ]
-      },
-      "权限": {
-        "hits": 47,
-        "top3": [
-          {
-            "id": "paper:reference/permissions/index",
-            "title": "Permissions",
-            "s": 92,
-            "tier": 4,
-            "fields": [
-              "标签 权限",
-              "摘要",
-              "分类",
-              "标题别名 permission"
-            ]
-          },
-          {
-            "id": "paper:dev/command-api/basics/requirements/index",
-            "title": "Requirements",
-            "s": 84,
-            "tier": 3,
-            "fields": [
-              "标签 权限",
-              "摘要",
-              "分类",
-              "小节别名 permission"
-            ]
-          },
-          {
-            "id": "paper:reference/bukkit-permissions-configuration/index",
-            "title": "permissions.yml",
-            "s": 81,
-            "tier": 4,
-            "fields": [
-              "标签 权限",
-              "摘要",
-              "标题别名 permission"
-            ]
-          }
-        ]
-      },
-      "代理": {
-        "hits": 33,
-        "top3": [
-          {
-            "id": "velocity:comparisons-to-other-proxies/index",
-            "title": "Comparing with other proxies",
-            "s": 52,
-            "tier": 4,
-            "fields": [
-              "摘要",
-              "分类",
-              "标题别名 proxies"
-            ]
-          },
-          {
-            "id": "velocity:tuning/index",
-            "title": "Tuning Velocity",
-            "s": 44,
-            "tier": 3,
-            "fields": [
-              "摘要",
-              "分类",
-              "小节别名 proxy"
-            ]
-          },
-          {
-            "id": "velocity:admin/getting-started/index",
-            "title": "Getting started（管理入门）",
-            "s": 28,
-            "tier": 2,
-            "fields": [
-              "摘要",
-              "分类"
-            ]
-          }
-        ]
-      },
-      "插件加载": {
-        "hits": 53,
-        "top3": [
-          {
-            "id": "paper:dev/getting-started/paper-plugins/index",
-            "title": "Paper plugins（开发指南）",
-            "s": 83,
-            "tier": 4,
-            "fields": [
-              "标签 插件体系",
-              "标签 插件开发",
-              "摘要",
-              "分类",
-              "标题别名 plugin",
-              "小节别名 load"
-            ]
-          },
-          {
-            "id": "paper:dev/plugin-yml/index",
-            "title": "plugin.yml",
-            "s": 67,
-            "tier": 4,
-            "fields": [
-              "标签 插件体系",
-              "摘要",
-              "分类",
-              "标题别名 plugin",
-              "小节别名 load"
-            ]
-          },
-          {
-            "id": "velocity:dev/api-basics/index",
-            "title": "Velocity plugin basics",
-            "s": 62,
-            "tier": 4,
-            "fields": [
-              "标签 插件体系",
-              "标签 插件开发",
-              "摘要",
-              "分类",
-              "标题别名 plugin"
-            ]
-          }
-        ]
-      },
-      "命令注册": {
-        "hits": 26,
-        "top3": [
-          {
-            "id": "paper:dev/command-api/basics/registration/index",
-            "title": "Registration",
-            "s": 77,
-            "tier": 4,
-            "fields": [
-              "标签 命令",
-              "摘要",
-              "分类",
-              "小节别名 command",
-              "标题别名 registration"
-            ]
-          },
-          {
-            "id": "paper:dev/command-api/misc/basic-command/index",
-            "title": "Basic commands",
-            "s": 77,
-            "tier": 4,
-            "fields": [
-              "标签 命令",
-              "摘要",
-              "分类",
-              "标题别名 command",
-              "小节别名 register"
-            ]
-          },
-          {
-            "id": "paper:dev/command-api/misc/comparison-bukkit-brigadier/index",
-            "title": "Comparison",
-            "s": 72,
-            "tier": 3,
-            "fields": [
-              "标签 命令",
-              "摘要",
-              "分类",
-              "小节别名 command",
-              "小节别名 register"
-            ]
-          }
-        ]
-      },
-      "配置文件": {
-        "hits": 67,
-        "top3": [
-          {
-            "id": "paper:anti-xray/index",
-            "title": "Configuring Anti-Xray",
-            "s": 62,
-            "tier": 4,
-            "fields": [
-              "标签 世界配置",
-              "标签 配置",
-              "摘要",
-              "标题别名 config"
-            ]
-          },
-          {
-            "id": "velocity:configuration/index",
-            "title": "Configuring Velocity",
-            "s": 53,
-            "tier": 4,
-            "fields": [
-              "标签 配置",
-              "摘要",
-              "分类",
-              "标题别名 config"
-            ]
-          },
-          {
-            "id": "velocity:player-information-forwarding/index",
-            "title": "Configuring player information forwarding",
-            "s": 49,
-            "tier": 4,
-            "fields": [
-              "标签 配置",
-              "摘要",
-              "标题别名 config"
-            ]
-          }
-        ]
-      },
-      "事件": {
-        "hits": 74,
-        "top3": [
-          {
-            "id": "velocity:dev/event-api/index",
-            "title": "Working with events",
-            "s": 78,
-            "tier": 4,
-            "fields": [
-              "标签 事件 API",
-              "摘要",
-              "分类",
-              "标题别名 event"
-            ]
-          },
-          {
-            "id": "paper:dev/custom-events/index",
-            "title": "Custom events",
-            "s": 78,
-            "tier": 4,
-            "fields": [
-              "标签 事件 API",
-              "摘要",
-              "分类",
-              "标题别名 event"
-            ]
-          },
-          {
-            "id": "paper:dev/api/event-api/index",
-            "title": "Event API",
-            "s": 76,
-            "tier": 4,
-            "fields": [
-              "标签 事件 API",
-              "摘要",
-              "分类",
-              "标题别名 event"
-            ]
-          }
-        ]
-      },
-      "优化": {
-        "hits": 1,
-        "top3": [
-          {
-            "id": "paper:next-steps/index",
-            "title": "Next steps",
-            "s": 18,
-            "tier": 2,
-            "fields": [
-              "摘要"
-            ]
-          }
-        ]
-      },
-      "渲染": {
-        "hits": 6,
-        "top3": [
-          {
-            "id": "paper:dev/chat-events/index",
-            "title": "Chat events",
-            "s": 26,
-            "tier": 2,
-            "fields": [
-              "摘要",
-              "分类"
-            ]
-          },
-          {
-            "id": "paper:dev/api/component-api/index",
-            "title": "Component API",
-            "s": 8,
-            "tier": 2,
-            "fields": [
-              "分类"
-            ]
-          },
-          {
-            "id": "paper:dev/component-api/introduction/index",
-            "title": "Introduction（组件 API）",
-            "s": 8,
-            "tier": 2,
-            "fields": [
-              "分类"
-            ]
-          }
-        ]
-      },
-      "命令": {
-        "hits": 79,
-        "top3": [
-          {
-            "id": "paper:dev/command-api/basics/introduction/index",
-            "title": "Introduction（命令 API）",
-            "s": 106,
-            "tier": 4,
-            "fields": [
-              "标题",
-              "标签 命令",
-              "摘要",
-              "分类",
-              "摘要/标签别名 command"
-            ]
-          },
-          {
-            "id": "paper:dev/api/command-api/misc/index",
-            "title": "Miscellaneous（命令杂项）",
-            "s": 103,
-            "tier": 4,
-            "fields": [
-              "标题",
-              "标签 命令",
-              "摘要",
-              "分类",
-              "摘要/标签别名 command"
-            ]
-          },
-          {
-            "id": "velocity:dev/command-api/index",
-            "title": "Command API",
-            "s": 92,
-            "tier": 4,
-            "fields": [
-              "标签 命令",
-              "摘要",
-              "分类",
-              "标题别名 command"
-            ]
-          }
-        ]
-      },
-      "依赖": {
-        "hits": 42,
-        "top3": [
-          {
-            "id": "velocity:dev/dependency-management/index",
-            "title": "Dependency management",
-            "s": 52,
-            "tier": 4,
-            "fields": [
-              "摘要",
-              "分类",
-              "标题别名 depend"
-            ]
-          },
-          {
-            "id": "velocity:dev/creating-your-first-plugin/index",
-            "title": "Creating your first plugin",
-            "s": 44,
-            "tier": 3,
-            "fields": [
-              "摘要",
-              "分类",
-              "小节别名 depend"
-            ]
-          },
-          {
-            "id": "paper:dev/project-setup/index",
-            "title": "Project setup",
-            "s": 36,
-            "tier": 3,
-            "fields": [
-              "摘要",
-              "小节别名 depend"
-            ]
-          }
-        ]
-      }
-    }
+    "total": 5841
   }
 }

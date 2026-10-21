@@ -60,9 +60,10 @@ function pageHref(prefix, sectionId, rel) {
  */
 function topbar(prefix, pageTitle, opts) {
   const o = opts || {};
-  let parts = '<button class="tbtn sidebar-toggle" id="nav-toggle" type="button" aria-label="切换侧栏">☰</button>'
+  let parts = '<button class="tbtn sidebar-toggle" id="nav-toggle" type="button" aria-label="切换侧栏导航"'
+    + ' aria-controls="sidebar" aria-expanded="false">☰</button>'
     + '<a class="brand" href="' + libUrl(prefix, 'index.html') + '">'
-    + '<span class="brand-dot" aria-hidden="true"></span><span>' + U.escapeHtml(SITE_TITLE) + '</span></a>';
+    + '<span class="brand-dot" aria-hidden="true"></span><span class="brand-name">' + U.escapeHtml(SITE_TITLE) + '</span></a>';
   const secs = o.sections || [];
   if (secs.length) {
     parts += '<nav class="sec-switch" aria-label="分区切换">'
@@ -79,12 +80,13 @@ function topbar(prefix, pageTitle, opts) {
     }
     const src = (o.page.snapshotLinks || {}).source || (o.page.snapshotLinks || {}).markdown;
     if (src) {
-      parts += '<a class="tbtn" href="' + U.attr(src) + '" title="页面源 Markdown">页面源 Markdown</a>';
+      parts += '<a class="tbtn page-source" href="' + U.attr(src) + '" title="页面源 Markdown">页面源 Markdown</a>';
     }
   }
   parts += '<button class="tbtn" type="button" data-open-search title="搜索全部页面">'
-    + '<span aria-hidden="true">🔍</span><span>搜索</span><kbd>Ctrl</kbd><kbd>K</kbd></button>'
-    + '<button class="tbtn" id="theme-toggle" type="button" title="切换主题">跟随系统</button>';
+    + '<span aria-hidden="true">🔍</span><span class="lbl">搜索</span><kbd>Ctrl</kbd><kbd>K</kbd></button>'
+    + '<button class="tbtn" id="theme-toggle" type="button" title="切换主题" aria-label="切换主题：跟随系统">'
+    + '<span aria-hidden="true" class="theme-icon">🖥</span><span class="lbl">跟随系统</span></button>';
   return '<header class="topbar">' + parts + '</header>';
 }
 
@@ -174,14 +176,25 @@ function sideGroupHtml(g, prefix, sec, ctx) {
   return html;
 }
 
-/** left sidebar: 源结构树（Paper / Velocity 并列）+ 底部「按主题浏览（自定义）」 */
-function sidebarHtml(site, prefix, active) {
+/** left sidebar: 源结构树（Paper / Velocity 并列）+ 抽屉内「本页目录」+ 底部「按主题浏览（自定义）」 */
+function sidebarHtml(site, prefix, active, toc) {
   const a = active || {};
   const nav = site.sourceNav;
-  let html = '<nav class="sidebar" id="sidebar" aria-label="文档导航">'
+  let html = '<nav class="sidebar" id="sidebar" data-nav-drawer aria-label="文档导航">'
     + '<label class="visually-hidden" for="side-filter" hidden>过滤页面</label>'
     + '<input class="side-filter" id="side-filter" type="search" placeholder="过滤：标题 / 摘要 / 源结构路径…" autocomplete="off">'
     + '<div class="side-legend">主导航 = 上游 docs.papermc.io 侧栏结构</div>';
+  // 分区切换：≤1023.98px 顶栏那份隐藏，这里放进抽屉（契约 v2 §3）；data-search 保证侧栏过滤可命中
+  if (nav && nav.sections.length) {
+    html += '<div class="side-secs" role="group" aria-label="分区切换">'
+      + nav.sections.map((s) => '<a href="' + U.attr(prefix + s.id + '/index.html') + '"'
+        + (a.sectionId === s.id ? ' class="on" aria-current="true"' : '')
+        + ' data-search="' + U.attr([s.title, '分区切换', '分区入口'].join(' ')) + '">'
+        + U.escapeHtml(s.title) + '</a>').join('')
+      + '</div>';
+  }
+  // 抽屉内「本页目录」（红队 F3：<1024px 也要有真目录；与右栏同一 toc 数组）
+  html += drawerTocHtml(toc);
   if (nav && nav.sections.length) {
     for (const sec of nav.sections) {
       const open = !a.sectionId || a.sectionId === sec.id;
@@ -240,14 +253,29 @@ function sidebarHtml(site, prefix, active) {
   return html;
 }
 
-/** right-hand "本页目录"; returns '' when the page has no h2-h4 headings */
+/** right-hand "本页目录"; returns '' when the page has no h2-h4 headings.
+ *  <details> 形态：≥1025px 与改前一致地作为常驻右栏（标题行看起来就是原来的 toc-title），
+ *  <1025px 由 CSS 提到正文顶部成为可折叠的「本页目录」（红队 F3 / 契约 A4：移动端要有真目录）。 */
 function tocHtml(toc) {
   if (!toc || !toc.length) return '';
-  let html = '<aside class="toc-side" aria-label="本页目录"><div class="toc-title">本页目录</div><ol>';
+  let html = '<aside class="toc-side" id="page-toc" data-page-toc aria-label="本页目录">'
+    + '<details class="toc-fold" open><summary class="toc-title">本页目录<span class="toc-count">' + toc.length + '</span></summary><ol>';
   for (const h of toc) {
     html += '<li class="lvl-' + h.level + '"><a href="#' + U.attr(h.id) + '">' + U.escapeHtml(h.text) + '</a></li>';
   }
-  html += '</ol></aside>';
+  html += '</ol></details></aside>';
+  return html;
+}
+
+/** 抽屉内的「本页目录」（同一 toc 数组；≤1024px 显示，默认折叠以免撑长抽屉） */
+function drawerTocHtml(toc) {
+  if (!toc || !toc.length) return '';
+  let html = '<details class="side-toc page-toc" id="drawer-toc" data-page-toc data-toc data-drawer-toc>'
+    + '<summary class="side-toc-title">本页目录<span class="side-count">' + toc.length + '</span></summary><ol>';
+  for (const h of toc) {
+    html += '<li class="lvl-' + h.level + '"><a href="#' + U.attr(h.id) + '">' + U.escapeHtml(h.text) + '</a></li>';
+  }
+  html += '</ol></details>';
   return html;
 }
 
@@ -307,7 +335,9 @@ function licenseHref(page) {
 function head(prefix, title, description, canonical) {
   return '<!DOCTYPE html>\n<html lang="zh-CN" data-theme="auto">\n<head>\n'
     + '<meta charset="utf-8">\n'
-    + '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">\n'
+    + '<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">\n'
+    + '<meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)">\n'
     + '<title>' + U.escapeText(title) + '</title>\n'
     + (description ? '<meta name="description" content="' + U.attr(description) + '">\n' : '')
     + (canonical ? '<link rel="canonical" href="' + U.attr(canonical) + '">\n' : '')
@@ -315,7 +345,7 @@ function head(prefix, title, description, canonical) {
     + '<link rel="icon" href="' + libUrl(prefix, 'assets/favicon.svg') + '" type="image/svg+xml">\n'
     + '<link rel="stylesheet" href="' + libUrl(prefix, 'assets/site.css') + '">\n'
     + '<script>(function(){try{var t=localStorage.getItem("lcb-theme")||"auto";document.documentElement.setAttribute("data-theme",t);}catch(e){}})();</script>\n'
-    + '<script src="' + libUrl(prefix, 'assets/search-index.js') + '" defer></script>\n'
+    // 搜索索引（~800 KB）首屏不加载：assets/site.js 在首次触发搜索或空闲时才注入（契约 v2 F1）
     + '<script src="' + libUrl(prefix, 'assets/site.js') + '" defer></script>\n'
     + '</head>\n<body>\n'
     + '<a class="skip" href="#main">跳到正文</a>\n';
@@ -338,8 +368,9 @@ function shell(opts) {
     : (site.sections || []).map((s) => ({ id: s.id, title: s.title }));
   return head(prefix, title, description, opts.canonical)
     + topbar(prefix, title, { sections: secsList, activeSectionId: a.sectionId, page })
+    + '<div class="nav-scrim" id="nav-scrim" data-nav-scrim aria-hidden="true"></div>'
     + '<div class="layout' + (hasTocEntries ? ' has-toc' : '') + '">'
-    + sidebarHtml(site, prefix, active)
+    + sidebarHtml(site, prefix, active, toc)
     + '<main id="main" class="content">' + crumbs + content + (pager || '') + (page ? footerHtml(page) : '') + '</main>'
     + (hasTocEntries ? tocHtml(toc) : '')
     + '</div>\n'
@@ -652,7 +683,7 @@ function snapshotsPage(site, rows, opts) {
     + '页面源 Markdown（<code>archive/&lt;section&gt;/source/</code>）是站点作者原稿，保留 <code>&lt;PageCards /&gt;</code> 等未展开的组件标签；'
     + '转换后的 Markdown 在 <code>archive/&lt;section&gt;/markdown/</code>。'
     + '本站渲染页才做了代码高亮、告警、表格与内链的离线化处理。</div>';
-  content += '<div class="table-wrap"><table><thead><tr>'
+  content += '<div class="table-wrap"><table class="snapshots"><thead><tr>'
     + '<th>#</th><th>页面</th><th>分区 / 源结构路径</th><th>rel</th>'
     + '<th>本地渲染页</th><th>原始 HTML 快照</th><th>上游 index.md</th><th>线上原文</th>'
     + '</tr></thead><tbody>';
@@ -718,7 +749,7 @@ function notFoundPage(opts) {
   const pageCount = Number.isFinite(o.pageCount) ? o.pageCount : null;
   return '<!DOCTYPE html>\n<html lang="zh-CN" data-theme="auto">\n<head>\n'
     + '<meta charset="utf-8">\n'
-    + '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">\n'
     + '<meta name="robots" content="noindex">\n'
     + '<title>404 · 页面不存在 · ' + U.escapeText(SITE_TITLE) + '</title>\n'
     + '<meta name="generator" content="papermc-docs offline library">\n'
