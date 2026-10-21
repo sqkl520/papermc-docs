@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-21T15:38:11.667Z",
+  "generated_at": "2026-10-21T16:10:24.228Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
@@ -442,42 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-21T13:44:51.162Z",
-      "files": 755,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 129,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-21T13:55:11.815Z",
-      "files": 755,
-      "must_fix": 1,
-      "public_url": 326,
-      "loopback_ok": 129,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-21T13:56:02.881Z",
-      "files": 755,
-      "must_fix": 1,
-      "public_url": 326,
-      "loopback_ok": 129,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-21T13:56:39.412Z",
-      "files": 755,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 129,
-      "upstream": 86,
-      "clean": true
-    },
-    {
       "at": "2026-10-21T13:57:02.620Z",
       "files": 755,
       "must_fix": 0,
@@ -524,6 +488,42 @@
     },
     {
       "at": "2026-10-21T15:38:11.667Z",
+      "files": 756,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 132,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T15:56:04.466Z",
+      "files": 756,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 132,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T16:06:43.920Z",
+      "files": 756,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 132,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T16:07:18.254Z",
+      "files": 756,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 132,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T16:10:24.228Z",
       "files": 756,
       "must_fix": 0,
       "public_url": 326,
