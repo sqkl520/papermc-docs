@@ -250,6 +250,36 @@ const IS_HOST = () => {
   };
 };
 
+/* ── 归属证明：容器在「渲染态」下必须真实可 Tab 到 ── */
+const FIRST_HOST_TAB = () => {
+  const desc = (el) => {
+    let s = el.tagName.toLowerCase();
+    const cls = (el.className || '').toString().trim().split(/\s+/).filter(Boolean).slice(0, 2).join('.');
+    if (cls) s += '.' + cls;
+    return s;
+  };
+  const hosts = Array.prototype.slice.call(document.querySelectorAll('.code-scroll, .table-wrap'));
+  const host = hosts[0];
+  if (!host) return { host: null, reason: 'no-host' };
+  const fl = Array.prototype.slice.call(document.querySelectorAll('a[href],button,input,select,textarea,summary,[tabindex]:not([tabindex="-1"])'))
+    .filter((el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && r.height > 0 && cs.display !== 'none' && cs.visibility !== 'hidden'; });
+  const i = fl.indexOf(host);
+  const closedDetails = (() => { let d = host.closest('details'); return d ? (d.open ? 'open' : 'closed') : null; })();
+  const res = { host: desc(host), hostOver: host.scrollWidth > host.clientWidth + 1, idx: i, closedDetails, prevSel: i > 0 ? desc(fl[i - 1]) : null, ran: false, reached: null };
+  if (i > 0) {
+    fl[i - 1].focus();
+    res.prevFocusApplied = document.activeElement === fl[i - 1];
+    if (res.prevFocusApplied) { res.ran = true; res.pending = true; }
+  } else if (i === -1) { res.reason = 'host-not-in-tab-order'; } else { res.reason = 'no-predecessor'; }
+  window.__fh = host;
+  return res;
+};
+const OPEN_ALL_DETAILS = () => {
+  let n = 0;
+  for (const d of document.querySelectorAll('details')) { if (!d.open) { d.open = true; n++; } }
+  return n;
+};
+
 /* ── 诊断：为什么某个「前一个可聚焦元素」focus() 不生效 ── */
 const DIAG_PREV = (page_) => {
   const CS = (el) => getComputedStyle(el);

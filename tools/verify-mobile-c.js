@@ -341,7 +341,7 @@ async function check2() {
     files_touched_in_repo_during_window: recent,
     gates: results, failed: fails.map((f) => f.id),
     duration_s: Math.round((Date.now() - t0) / 1000),
-    repro: '复制仓库到 %TEMP% 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
+    repro: '复制仓库到 <tmp> 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
     conclusion: fails.length
       ? '门禁未全绿：' + fails.map((f) => f.id + '(exit ' + f.exit_code + ')').join('、')
       : '5/5 门禁全绿（exit 0）；这些门禁会写的 4 个仓库文件跑前跑后 sha256 完全一致 → 本次复跑没有覆盖仓库既有 reports/**、data/**',
