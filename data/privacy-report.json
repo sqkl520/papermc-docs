@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-21T20:29:42.405Z",
+  "generated_at": "2026-10-21T20:51:45.481Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
@@ -442,15 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-21T16:07:18.254Z",
-      "files": 756,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 132,
-      "upstream": 86,
-      "clean": true
-    },
-    {
       "at": "2026-10-21T16:10:24.228Z",
       "files": 756,
       "must_fix": 0,
@@ -524,6 +515,15 @@
     },
     {
       "at": "2026-10-21T20:29:42.405Z",
+      "files": 758,
+      "must_fix": 0,
+      "public_url": 326,
+      "loopback_ok": 138,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-21T20:51:45.481Z",
       "files": 758,
       "must_fix": 0,
       "public_url": 326,
