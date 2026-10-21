@@ -1276,8 +1276,8 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
        然后只要 JS 预算没用完就继续加行，超预算立刻 appendChild 并 setTimeout(0) 让出主线程。
        行的构建顺序、每行的 innerHTML、DocumentFragment 整片追加、结果 DOM 的最终内容与顺序
        全部与固定分片一致 —— 改的只是「一片里放几行」这个调度参数。 */
-    var RENDER_BUDGET_MS = 4;     /* 每片的 JS 预算（真实毫秒；4× CPU 下约合 3–5 行） */
-    var RENDER_CHUNK_MAX = 40;    /* 单片行数上限，与旧的 RENDER_CHUNK 同值，防止一帧吃太多 */
+    var RENDER_BUDGET_MS = 2;     /* 单片 JS 预算（真实毫秒；4× CPU 下约合 6–8 行） */
+    var RENDER_CHUNK_MAX = 8;     /* 单片行数上限：官方仪器 A/B 最优（cpu4x 174→62ms / 叠加档 205→108ms vs 单批 40 行） */
     var nowMs = (typeof performance !== 'undefined' && performance.now)
       ? function () { return performance.now(); }
       : function () { return Date.now(); };
@@ -1300,6 +1300,19 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
       li.appendChild(a);
       host.appendChild(li);
     }
+    /* 片间调度：**按帧让出**（一帧一片）。CDP trace 归因显示：Layout+Paint 发生在「帧」上而不是
+       「任务」上 —— setTimeout(step, 0) 的多个切片会在同一个帧间隔内跑完，浏览器最后只做**一次**
+       覆盖全部新行的 Layout+Paint，于是「任务级分片」对长任务毫无帮助（A/B 实测 4ms 预算 / 3–4 片，
+       40 行仍是 150–216ms 长任务）。改为一帧渲染一片，Layout+Paint 被真正切到多帧。
+       后台标签 rAF 不触发 → 用 setTimeout 兜底（fire 幂等，两条路径只会推进一次）。 */
+    var stepPending = false;
+    function scheduleStep() {
+      if (stepPending) return;
+      stepPending = true;
+      var fire = function () { if (!stepPending) return; stepPending = false; step(); };
+      searchRaf(fire);
+      setTimeout(fire, 250);
+    }
     function step() {
       if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
       var frag = doc.createDocumentFragment();
@@ -1310,7 +1323,7 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         renderOne(frag, rendered); rendered++; n++;
       }
       list.appendChild(frag);
-      if (rendered < total) setTimeout(step, 0);
+      if (rendered < total) scheduleStep();
     }
     searchRaf(function () {
       if (gen !== searchGen) return;

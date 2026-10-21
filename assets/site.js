@@ -674,13 +674,24 @@
     var gen = searchGen;
     var rendered = 0;
     var total = max;
-    /* 分片粒度（2026-10-21 第四轮，本次修复）：红队 M3 的「3 行/片 + 每片一个 setTimeout」在 4× CPU 下
+    /* 分片粒度（2026-10-21 第四轮）：红队 M3 的「3 行/片 + 每片一个 setTimeout」在 4× CPU 下
        实测是最大的成本放大器 —— 每一片都要重新做一次「结果面板 + ::backdrop」的 Layout/Paint，
        14 片 ≈ 14 次固定开销（CDP trace 实测 Layout 459ms / Paint 619ms，而同口径下不渲染行只有 22/151ms）。
        改为「一次建进 DocumentFragment 再整片 appendChild」：DOM 结构与顺序逐条不变（同一个 li/a、
-       同一顺序、同一 innerHTML），但每次 appendChild 只触发一轮 Layout/Paint；分片仍保留（避免单任务超长），
-       粒度由 RENDER_CHUNK 控制。 */
-    var RENDER_CHUNK = 40;
+       同一顺序、同一 innerHTML），但每次 appendChild 只触发一轮 Layout/Paint；分片仍保留（避免单任务超长）。
+
+       分片粒度（2026-10-21 第五轮，本次修复）：固定「40 行/片」= 整批一次性追加，4× CPU 下实测仍是
+       100–400ms 的单帧长任务（CDP trace 归因：JS FunctionCall 46ms + Layout 57ms + Paint 53ms，
+       且成本随行数线性增长 ≈3ms/行/4× CPU；Paint 的裁剪矩形仍是整篇文档 390×8844）。
+       因此把「片」的定义从「固定行数」改成「JS 时间预算」：每片至少渲染 1 行保证推进，
+       然后只要 JS 预算没用完就继续加行，超预算立刻 appendChild 并 setTimeout(0) 让出主线程。
+       行的构建顺序、每行的 innerHTML、DocumentFragment 整片追加、结果 DOM 的最终内容与顺序
+       全部与固定分片一致 —— 改的只是「一片里放几行」这个调度参数。 */
+    var RENDER_BUDGET_MS = 2;     /* 单片 JS 预算（真实毫秒；4× CPU 下约合 6–8 行） */
+    var RENDER_CHUNK_MAX = 8;     /* 单片行数上限：官方仪器 A/B 最优（cpu4x 174→62ms / 叠加档 205→108ms vs 单批 40 行） */
+    var nowMs = (typeof performance !== 'undefined' && performance.now)
+      ? function () { return performance.now(); }
+      : function () { return Date.now(); };
     function paintCount() {
       setCount(hits.length > total
         ? ('显示前 ' + total + ' / 共 ' + hits.length + ' 个结果')
@@ -700,13 +711,30 @@
       li.appendChild(a);
       host.appendChild(li);
     }
+    /* 片间调度：**按帧让出**（一帧一片）。CDP trace 归因显示：Layout+Paint 发生在「帧」上而不是
+       「任务」上 —— setTimeout(step, 0) 的多个切片会在同一个帧间隔内跑完，浏览器最后只做**一次**
+       覆盖全部新行的 Layout+Paint，于是「任务级分片」对长任务毫无帮助（A/B 实测 4ms 预算 / 3–4 片，
+       40 行仍是 150–216ms 长任务）。改为一帧渲染一片，Layout+Paint 被真正切到多帧。
+       后台标签 rAF 不触发 → 用 setTimeout 兜底（fire 幂等，两条路径只会推进一次）。 */
+    var stepPending = false;
+    function scheduleStep() {
+      if (stepPending) return;
+      stepPending = true;
+      var fire = function () { if (!stepPending) return; stepPending = false; step(); };
+      searchRaf(fire);
+      setTimeout(fire, 250);
+    }
     function step() {
       if (gen !== searchGen) return;           /* 已有新查询 → 丢弃本次剩余切片 */
       var frag = doc.createDocumentFragment();
       var n = 0;
-      while (rendered < total && n < RENDER_CHUNK) { renderOne(frag, rendered); rendered++; n++; }
+      var t0 = nowMs();
+      /* 至少 1 行（保证推进，永不空转）→ 之后按 JS 时间预算继续加行 */
+      while (rendered < total && n < RENDER_CHUNK_MAX && (n === 0 || (nowMs() - t0) < RENDER_BUDGET_MS)) {
+        renderOne(frag, rendered); rendered++; n++;
+      }
       list.appendChild(frag);
-      if (rendered < total) setTimeout(step, 0);
+      if (rendered < total) scheduleStep();
     }
     searchRaf(function () {
       if (gen !== searchGen) return;
