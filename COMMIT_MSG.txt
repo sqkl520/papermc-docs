@@ -1,45 +1,31 @@
-docs(ui): 多 Agent 锐评文档界面 + 对标成熟 wiki（6 份报告 + owner 裁决）
+docs(ui): 补齐排版锐评终稿（1040 行）与 owner 裁决补充
 
-派出 6 个 Agent（对标检索 / 桌面锐评 / 移动锐评 / 排版锐评 / 红队对抗 / 收敛裁决），
-其中 2 个被环境中断，按规则全量重跑。产出 6 份报告 + 1 份 owner 裁决，合计约 422 KB。
+1. 排版锐评终稿（reports/critique-typography.md，72KB / 1040 行）
+   4 条 H 级全部带实测验证：
+   a) auto 主题下 hljs 30/30 token 全失败（keyword 2.85:1）—— site.css:436-442 只写
+      html[data-theme=dark]，永不匹配 auto（默认路径）；补丁实测 7/7 失败 -> 0/7 通过，
+      dark 路径零变化
+   b) 正文行宽 98.4-110ch，唯一约束是 .hero p{max-width:76ch}
+   c) 6 个键值配置参考页 h2/h3/h4 全为 0（world-configuration 36260 字符，前 5 页合计
+      90299 字符 = 全站 12.5%）；cli-arguments 31 个标题全在 h5（15.2px/5.98:1 vs
+      正文 16px/16.49:1，比正文更小更淡）-> 构建层映射缺失，CSS 修不了
+   d) 1025-1199 断崖：正文 693 -> 434px（50.3ch，-37%），max-width 在 1025 下无效
+   
+   实测过的 max-width 方案：只封行文块不封代码/表格
+   .article > :is(p,ul,ol,blockquote,dl){max-width:40rem}（74.2ch = 40 全角）
+   + TOC 断点上移 1200；结果 >=768 全部 74.2ch、1440 代码滚动 5/13 不变、
+   1025 由 50.3 -> 74.2ch、390/320 零回归；代价 1440 右空 484px
 
-owner（主 Agent）自己完成：
-1. 建立共享证据基座 tools/ui-shots.js（5 视口 x 6 页 = 30 组截图 + 结构化度量），
-   让 6 个 Agent 看同一批图、同一套口径，否则多份锐评无法互比
-2. 修掉被红队证明有系统性错误的量尺（已在 b57646c 提交）：旧版
-   measureCh = 容器宽/(字号 x 0.5) 是拉丁近似，且正文基准取了每页第一个 p
-   （54/54 组里都是 .page-meta/.hero-tag 前缀段落），红队指出的 8 条误读全部源于此。
-   新尺用 Range.getClientRects() + canvas 实测 0 的 advance，区分 ch 与 chText。
+2. owner 裁决补充（我亲自复测裁决的争议点）
+   - 断词真正发生在 td（表格单元格）而非段落：320px dialogs 9 处（9/10 在 td）、
+     arguments-and-literals 10/10 全在 td；390px 同样 10/10；1440 段落 0 处
+     -> 修法应是 .table-wrap td{overflow-wrap:break-word}，
+        不要动 .article{overflow-wrap:anywhere}（防溢出安全网）
+   - ch 不能跨站比较：1ch=8.63px 但平均字符宽 7.0-7.4px -> ch 高估 17-23%；
+     98.4ch 实际约 115 字符
 
-权威度量（修正后 30 组）：
-| 视口 | 内容页容量 ch | 实际最长行 | 全角字/行 | 字号 | 行高 |
-| 1440 | 98-110 | 73-108 | 53-59 | 16px | 27.2 (1.7) |
-| 1280 | 80-109 | 73-108 | 43-59 | 16px | 27.2 |
-| 768  | 79-83  | 72-83   | 43-45   | 16px | 27.2 |
-| 390  | 38-42  | 37-41   | 20-22   | 16px | 27.2 |
-| 320  | 29-33  | 29-33   | 16-18   | 16px | 27.2 |
+3. 修正隐私命中：tools/critique-mobile-probe.js 的 %TEMP% -> <tmp>，privacy ① 归零
 
-三方独立收敛（已采纳为 P0）：移动 TOC 首屏占满（390 档高 1172px 大于 844，H1 在 y=1317）；
-抽屉开合静默丢阅读位置（每次 428px）；auto+系统深色下代码高亮 10/10 不达标
-（暗色 token 漏了 auto 分支）；两处 21px 命中区违反 WCAG AA；图片 0/19 无尺寸
-（+3098px、CLS 0.08）；.src-item 218 行 77% 死区；1024 到 1025 断崖（693 降 434px，-37%）；
-world-configuration 的 h2-h6 全为 0。
-
-被证伪并封口：正文 12.48px / 三档字号（真正文 16px 全站统一）；141ch（真值 98-110ch）；
-44rem 达标（实为 86ch）；代码 16px 等于正文同号（实为 13.6px）；遮罩是唯一出口；
-h5 零收益（实际 46 处，cli-arguments 里是唯一小节层级且 15.2px 小于正文）；
-23 种字号（四份材料查无出处）；Pagefind 适合我们（file:// 下 CORS 拦，上游用的就是它）。
-
-owner 书面重裁：
-- TOC 断崖改判乙方（>=1280 常驻 + 1025-1279 吸顶条）：-37% 内容塌陷是可测排版缺陷，
-  零回归是为避免视觉退化而非冻结缺陷；红队 A6 已证明与上游一致不站在现状一边
-- 列宽取 736px（弃 30-32rem 会让 1440 右侧空 >900px），删掉 78ch 二次保险（会静默压窄）
-
-报告（均 UTF-8 无 BOM）：
-- reports/ui-benchmark.md 129KB/880 行/194 出处/16 站点 18 实现
-- reports/critique-desktop.md 32KB/337 行
-- reports/critique-mobile.md 59KB/532 行
-- reports/critique-typography.md 53KB/459 行
-- reports/critique-redteam.md 72KB/579 行（51 条主张判决）
-- reports/ui-improve-plan.md 67KB/695 行（12 组冲突裁决/16 条改造/3 批实施）
-- reports/ui-ruling.md 10KB/85 行（owner 裁决 + 封口清单）
+7 份报告总计 442KB / 4173 行，全部 UTF-8 无 BOM、无乱码。
+门禁：check-site PASS / verify-site 15/15 / url-parity PASS / privacy 0 /
+build-site --verify-artifacts PASS（产物 = 源）

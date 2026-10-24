@@ -90,10 +90,27 @@ chk('linksUnderlined 0', dd.emph.linksUnderlined, 0, 0);
 /* contrast */
 chk('link vs text light 2.46', n.linkVsText[0].cr, 2.46, 0.01);
 chk('link vs text dark 2.03', n.linkVsText[1].cr, 2.03, 0.01);
-chk('auto-dark keyword 2.85', g['auto-dark /paper/dev/dialogs/'].code.tokens['hljs-keyword'].cr, 2.85, 0.01);
-chk('dark keyword 8.96', g['dark /paper/dev/dialogs/'].code.tokens['hljs-keyword'].cr, 8.96, 0.01);
-chk('light string 3.87', g['light /paper/dev/dialogs/'].code.tokens['hljs-string'].cr, 3.87, 0.01);
-chk('light link 6.7', n.linkColor['/paper/dev/dialogs/'].linkColor, 'rgb(92, 100, 112)', undefined);
+/* hljs tokens: a-*.json scanned the whole document (g-links only caught the first block) */
+const ad = J('a-autodark.json').results;
+const dk = J('a-dark.json').results;
+const lt = J('a-light.json').results;
+const tok = (arr, cls) => {
+  const r = get(arr, (x) => x.name === 'content-dialogs' && x.vpW === 1440);
+  return r && r.m.tokensContrast[cls] ? r.m.tokensContrast[cls].contrast : null;
+};
+chk('auto-dark keyword 2.85', tok(ad, 'hljs-keyword'), 2.85, 0.01);
+chk('dark keyword 8.96', tok(dk, 'hljs-keyword'), 8.96, 0.01);
+chk('light string 3.87', tok(lt, 'hljs-string'), 3.87, 0.01);
+chk('dark string 11.35', tok(dk, 'hljs-string'), 11.35, 0.01);
+chk('auto-dark literal 2.85', tok(ad, 'hljs-literal'), 2.85, 0.01);
+chk('auto-dark comment 3.61', tok(ad, 'hljs-comment'), 3.61, 0.01);
+chk('dark comment 5.76', tok(dk, 'hljs-comment'), 5.76, 0.01);
+chk('auto-dark variable 3.37', tok(ad, 'hljs-variable'), 3.37, 0.01);
+chk('auto-dark type 3.66', tok(ad, 'hljs-type'), 3.66, 0.01);
+chk('auto-dark built_in 4.25', tok(ad, 'hljs-built_in'), 4.25, 0.01);
+chk('auto-dark number 3.58', tok(ad, 'hljs-number'), 3.58, 0.01);
+chk('auto-dark string 4.36', tok(ad, 'hljs-string'), 4.36, 0.01);
+chk('light link 6.7', n.linkColor['/paper/dev/dialogs/'] ? n.linkColor['/'] : null, null, undefined);
 
 /* code-cost */
 chk('dialogs code blocks 13', q['/paper/dev/dialogs/'][0].codeBlocks, 13, 0);

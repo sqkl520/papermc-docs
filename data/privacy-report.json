@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-21T20:51:45.481Z",
+  "generated_at": "2026-10-24T09:02:05.751Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 758,
-    "scanned_text_files": 685,
+    "files": 853,
+    "scanned_text_files": 780,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -16,12 +16,12 @@
   },
   "summary": {
     "must_fix": 0,
-    "public_url": 326,
-    "loopback_ok": 138,
+    "public_url": 327,
+    "loopback_ok": 219,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 550
+    "total_hits": 632
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -69,9 +69,9 @@
     {
       "id": "owner-handle",
       "note": "账号 / 仓库所有者标识（出现在公网地址里属正当信息）",
-      "total": 326,
+      "total": 327,
       "must_fix": 0,
-      "public_url": 326,
+      "public_url": 327,
       "loopback_ok": 0,
       "upstream": 0
     },
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 224,
+      "total": 305,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 138,
+      "loopback_ok": 219,
       "upstream": 86
     },
     {
@@ -275,6 +275,14 @@
       "upstream": 4
     },
     {
+      "file": "tools/critique-red-probe4.js",
+      "total": 4,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
       "file": "tools/mobile-fixprobe.js",
       "total": 4,
       "must_fix": 0,
@@ -320,6 +328,38 @@
       "must_fix": 0,
       "public_url": 0,
       "loopback_ok": 4,
+      "upstream": 0
+    },
+    {
+      "file": "tools/critique-red-probe3.js",
+      "total": 3,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 3,
+      "upstream": 0
+    },
+    {
+      "file": "tools/critique-red-probe5.js",
+      "total": 3,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 3,
+      "upstream": 0
+    },
+    {
+      "file": "tools/critique-typo-doc/01.part.md",
+      "total": 3,
+      "must_fix": 0,
+      "public_url": 1,
+      "loopback_ok": 2,
+      "upstream": 0
+    },
+    {
+      "file": "tools/critique-typo-p11.js",
+      "total": 3,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 3,
       "upstream": 0
     },
     {
@@ -379,7 +419,7 @@
       "upstream": 0
     },
     {
-      "file": "tools/f6-probe.js",
+      "file": "tools/critique-desktop-typography.js",
       "total": 2,
       "must_fix": 0,
       "public_url": 0,
@@ -387,51 +427,11 @@
       "upstream": 0
     },
     {
-      "file": "tools/mobile-closeout.js",
+      "file": "tools/critique-red-probe.js",
       "total": 2,
       "must_fix": 0,
       "public_url": 0,
       "loopback_ok": 2,
-      "upstream": 0
-    },
-    {
-      "file": "tools/mobile-measure.js",
-      "total": 2,
-      "must_fix": 0,
-      "public_url": 0,
-      "loopback_ok": 2,
-      "upstream": 0
-    },
-    {
-      "file": "tools/site/layout.js",
-      "total": 2,
-      "must_fix": 0,
-      "public_url": 2,
-      "loopback_ok": 0,
-      "upstream": 0
-    },
-    {
-      "file": "tools/url-parity.js",
-      "total": 2,
-      "must_fix": 0,
-      "public_url": 2,
-      "loopback_ok": 0,
-      "upstream": 0
-    },
-    {
-      "file": "velocity/configuration/index.html",
-      "total": 2,
-      "must_fix": 0,
-      "public_url": 1,
-      "loopback_ok": 1,
-      "upstream": 0
-    },
-    {
-      "file": "velocity/faq/index.html",
-      "total": 2,
-      "must_fix": 0,
-      "public_url": 1,
-      "loopback_ok": 1,
       "upstream": 0
     }
   ],
@@ -441,33 +441,6 @@
     "statement": "通过：仓库中不存在必须修复的本机痕迹。"
   },
   "history": [
-    {
-      "at": "2026-10-21T16:10:24.228Z",
-      "files": 756,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 132,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-21T16:28:46.787Z",
-      "files": 756,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 132,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-21T18:55:52.212Z",
-      "files": 757,
-      "must_fix": 0,
-      "public_url": 326,
-      "loopback_ok": 136,
-      "upstream": 86,
-      "clean": true
-    },
     {
       "at": "2026-10-21T19:23:59.111Z",
       "files": 758,
@@ -528,6 +501,33 @@
       "must_fix": 0,
       "public_url": 326,
       "loopback_ok": 138,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-24T09:01:21.769Z",
+      "files": 852,
+      "must_fix": 1,
+      "public_url": 327,
+      "loopback_ok": 219,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-24T09:01:46.107Z",
+      "files": 853,
+      "must_fix": 1,
+      "public_url": 327,
+      "loopback_ok": 219,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-24T09:02:05.751Z",
+      "files": 853,
+      "must_fix": 0,
+      "public_url": 327,
+      "loopback_ok": 219,
       "upstream": 86,
       "clean": true
     }
