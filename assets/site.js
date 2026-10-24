@@ -805,8 +805,12 @@
           } catch (e) {}
         }
       }
-      var first = side.querySelector('a[href], button, input, summary');
-      if (first && first.focus) { try { first.focus({ preventScroll: true }); } catch (e) { try { first.focus(); } catch (e2) {} } }
+      /* 焦点与居中必须是**同一元素**（b1r2 P0-2 实测）：之前把 .active 居中、却把焦点给了
+         抽屉第一个可聚焦元素（#side-filter），320px 下两者相差 881px → 焦点落在视口外
+         focusTop=-337（WCAG 2.4.7 失败）。现在优先把焦点给 .active 本身。 */
+      var focusTarget = active;
+      if (!focusTarget || !focusTarget.focus) focusTarget = side.querySelector('#side-filter, a[href], button, input, summary');
+      if (focusTarget && focusTarget.focus) { try { focusTarget.focus({ preventScroll: true }); } catch (e) { try { focusTarget.focus(); } catch (e2) {} } }
       if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
     }
     function closeDrawer(refocus) {
@@ -853,7 +857,27 @@
         for (var i = 0; i < folds.length; i++) {
           if (isWide) folds[i].open = true;
           else folds[i].removeAttribute('open');
+          /* b1r2 P1-1：给 .toc-side 同步 toc-open class —— 展开态的 position:static
+             不能只押在 :has() 上（Firefox<=120 / Safari<15.4 会丢弃整条规则，
+             遮挡回归 3–10 块、落点 57–79%）。 */
+          var host = folds[i].parentElement;
+          if (host && host.classList) {
+            if (folds[i].open) host.classList.add('toc-open'); else host.classList.remove('toc-open');
+          }
         }
+      }
+      /* 用户手动开合时也要同步 class（否则 :has 缺失的浏览器里遮挡会回来）。
+         toggle 事件是异步派发的，快速连点时在回调里读 open 可能拿到更晚的状态 →
+         统一延迟到任务末尾再读，保证 class 与 DOM 状态一致。 */
+      var tocHost = doc.querySelector('.toc-side');
+      if (tocHost) {
+        tocHost.addEventListener('toggle', function () {
+          setTimeout(function () {
+            var f = tocHost.querySelector('.toc-fold');
+            if (!f) return;
+            if (f.open) tocHost.classList.add('toc-open'); else tocHost.classList.remove('toc-open');
+          }, 0);
+        }, true);
       }
       function syncToc() {
         var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1025;
@@ -875,6 +899,44 @@
        只在 TOC 吸顶时计（>=1025 它是右栏，不遮挡正文）。
        D1 之后：展开态 .toc-side 不再是 sticky（改 static + 内部 ol 滚动），
        所以偏移量只在**折叠条**状态计入 —— 这也正是锚点跳转会被盖住的唯一情形。 */
+
+    /* b1r2 P1-2：smooth 滚动 + scroll-padding 的锚点落点系统性偏短（实测点第 41 项后
+       实际 scrollY=15242，应为 16699，短 1457px，标题完全在视口外）。红队隔离证明：
+       scroll-behavior:auto 时短落点归 0。这里在平滑滚动结束后做**一次**精确校正，
+       既保留平滑手感，又保证最终落点准确。 */
+    (function () {
+      /* 固定 420ms 不够：深度锚点的平滑滚动会持续 1s+（实测第 23 项仍差 1536px）。
+         改成轮询「滚动位置连续 3 帧不变」再校正，兼顾快慢两种距离。 */
+      function correctAfterSmooth() {
+        if (!location.hash || location.hash.length < 2) return;
+        var id;
+        try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+        var el = doc.getElementById(id);
+        if (!el) return;
+        var lastY = -1, still = 0, ticks = 0;
+        function tick() {
+          ticks++;
+          var y = Math.round(window.pageYOffset);
+          if (y === lastY) still++; else still = 0;
+          lastY = y;
+          if (still < 3 && ticks < 40) { window.requestAnimationFrame(tick); return; }
+          var top = Math.round(el.getBoundingClientRect().top);
+          var want = parseFloat(window.getComputedStyle(doc.documentElement).scrollPaddingTop) || 0;
+          var delta = top - want;
+          if (Math.abs(delta) > 2) {
+            try { window.scrollTo({ top: window.pageYOffset + delta, behavior: 'auto' }); }
+            catch (e) { window.scrollTo(0, window.pageYOffset + delta); }
+          }
+        }
+        window.requestAnimationFrame(tick);
+      }
+      window.addEventListener('hashchange', correctAfterSmooth);
+      doc.addEventListener('click', function (ev) {
+        var a = ev.target && ev.target.closest ? ev.target.closest('a[href^="#"]') : null;
+        if (a) correctAfterSmooth();
+      }, false);
+      if (location.hash) correctAfterSmooth();
+    })();
     (function () {
       function syncTocOffset() {
         var toc = doc.querySelector('.toc-side');

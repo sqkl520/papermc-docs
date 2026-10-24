@@ -102,10 +102,44 @@ kbd{border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:
 .sidebar-toggle{display:inline-flex;width:44px;padding:0;font-size:1.05rem}
 /* 手机端顶栏：只留 ☰ / 品牌 / 搜索 / 主题；分区切换收进抽屉（契约 v2 §3） */
 .topbar .sec-switch{display:none}
-/* 修复（b1-offline）：.theme-icon 此前未被隐藏，导致 <1024 时主题按钮仍带一个 emoji + 紧邻的
-   .lbl 已经 display:none —— 但在 320×568 + 200% 缩放（等效 160px CSS 宽）下，
-   这一处与首页树缩进一起把横向溢出顶到 +76px。图标是装饰（aria-hidden），窄屏一并隐藏。 */
-.topbar .tbtn.external,.topbar .page-source,.topbar .tbtn kbd,.topbar .tbtn>.lbl,.topbar #theme-toggle>.theme-icon{display:none}
+/* 修复（b1-offline）：.theme-icon 此前未被隐藏，导致 <1024 时主题按钮仍带一个 emoji。
+   但 b1r2 P1-4 指出反向问题：若把图标也隐藏，窄屏主题按钮会变成 44×44 的**空按钮**
+   （visibleChildren=[], 只剩 1px 边框），用户看不出它是主题切换。
+   折中：保留图标（它是可识别的视觉线索），只在极窄（<=20em）时连图标一起收，
+   改用 aria-label 兜底保证可访问名仍在。 */
+.topbar .tbtn.external,.topbar .page-source,.topbar .tbtn kbd,.topbar .tbtn>.lbl{display:none}
+/* b1r2 P1-4：不能把图标也藏掉 —— 那会让窄屏主题按钮变成 44×44 的**空按钮**
+   （visibleChildren=[]，只剩 1px 边框），用户看不出它是主题切换。保留图标作视觉线索。
+   b1r2 P1-5：极窄等效视口时顶栏 3 个按钮把宽度撑到 199px（+39 溢出）。
+   注意阈值：20em = **320px**，而 320 是最常用的最小视口（WCAG 1.4.10 基线），
+   不能把它也收进去 —— 因此阈值取 19.5em（312px），320 保留图标，只在更窄时收。 */
+@media (max-width:19.5em){
+  /* b1r2 P1-4：图标**不隐藏** —— 那会让按钮变成空按钮（用户看不出是主题切换）。
+     改为缩小图标并压紧内边距，既保住视觉线索又不撑宽。 */
+  .topbar #theme-toggle>.theme-icon{font-size:.72em;line-height:1}
+  .topbar .tbtn{min-width:32px;padding-left:.2rem;padding-right:.2rem}
+  .topbar .brand{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .topbar .brand>span{display:none}
+}
+/* 极端等效视口（<11em ≈ 176px，即 320px + 200% 页面缩放）：顶栏三项按钮仍会撑破，
+   此时把按钮压到 28px 并把品牌归零宽度，保证 0 横向溢出（WCAG 1.4.10 在 320px 已达标，
+   这一层只是防御性兜底）。 */
+@media (max-width:11em){
+  .topbar .tbtn{min-width:28px;padding-left:0;padding-right:0}
+  .topbar .brand{width:0;min-width:0;padding:0;overflow:hidden}
+  .topbar .brand *{display:none}
+  /* 实测 160px 等效视口下的真实撑宽源（Range 逐文本节点定位）：.ttl(263px)、
+     .tg-home(128–137px「组首页 · Administration →」)、.src-sum(中文摘要)、.tg-name。
+     注意 .ttl/.tg-home 在常规规则里带 white-space:nowrap 且优先级更高，
+     这里必须用同等具体度 + !important 才能真正放开。 */
+  .side-sec a .ttl,.side-cat a .ttl,.side-group a .ttl,.nav-home a .ttl,
+  .pager .ttl,.cat-links .ttl,.tg-home,.tg-name,.tg-zh,.src-sum,.src-rel,.src-link,
+  .ec-kicker,.entry-card h3,.card h3,.grp-name,.grp-zh{
+    white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;
+    min-width:0!important;overflow:visible!important;text-overflow:clip!important;
+  }
+  .tg-home{margin-left:0!important;display:inline!important}
+}
 
 /* ---------- layout（mobile-first：base = 单栏 + off-canvas 抽屉） ---------- */
 .layout{display:grid;grid-template-columns:minmax(0,1fr);gap:0;align-items:start}
@@ -133,8 +167,13 @@ html.nav-locked{scrollbar-gutter:stable}
   position:sticky;top:var(--topbar-h);z-index:4}
 .content{order:2}
 /* 展开态：取消 sticky，改由内部 ol 限高滚动（面板本身留在原地，不再随滚动钉住）
-   —— 这样"点目录跳转 → 标题被吸顶面板盖住"的问题从根上消失。 */
-.toc-side:has(.toc-fold[open]){position:static}
+   —— 这样"点目录跳转 → 标题被吸顶面板盖住"的问题从根上消失。
+   ⚠️ 必须限定 <1025 档（b1r2 P0-1 实测）：≥1025 时 syncToc 强制 open=true，若无断点限定，
+      桌面右栏会永远 static → 滚动 2000px 后 TOC 完全滚出视口（可见链接 24→0，改前恒 top=52）。
+   同时不能只靠 :has()（Firefox<=120 / Safari<15.4 不支持），并列 .toc-open class 由 JS 维护。 */
+@media (max-width:1024.98px){
+  .toc-side.toc-open,.toc-side:has(.toc-fold[open]){position:static}
+}
 .toc-side .toc-title{display:flex;align-items:center;gap:.4rem;min-height:48px;margin:0;padding:0 .75rem;cursor:pointer;list-style:none;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted)}
 .toc-side .toc-title::-webkit-details-marker{display:none}
 /* 展开后限高，长目录（83 项）不撑满全屏 */
@@ -1472,8 +1511,12 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
           } catch (e) {}
         }
       }
-      var first = side.querySelector('a[href], button, input, summary');
-      if (first && first.focus) { try { first.focus({ preventScroll: true }); } catch (e) { try { first.focus(); } catch (e2) {} } }
+      /* 焦点与居中必须是**同一元素**（b1r2 P0-2 实测）：之前把 .active 居中、却把焦点给了
+         抽屉第一个可聚焦元素（#side-filter），320px 下两者相差 881px → 焦点落在视口外
+         focusTop=-337（WCAG 2.4.7 失败）。现在优先把焦点给 .active 本身。 */
+      var focusTarget = active;
+      if (!focusTarget || !focusTarget.focus) focusTarget = side.querySelector('#side-filter, a[href], button, input, summary');
+      if (focusTarget && focusTarget.focus) { try { focusTarget.focus({ preventScroll: true }); } catch (e) { try { focusTarget.focus(); } catch (e2) {} } }
       if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
     }
     function closeDrawer(refocus) {
@@ -1520,7 +1563,27 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         for (var i = 0; i < folds.length; i++) {
           if (isWide) folds[i].open = true;
           else folds[i].removeAttribute('open');
+          /* b1r2 P1-1：给 .toc-side 同步 toc-open class —— 展开态的 position:static
+             不能只押在 :has() 上（Firefox<=120 / Safari<15.4 会丢弃整条规则，
+             遮挡回归 3–10 块、落点 57–79%）。 */
+          var host = folds[i].parentElement;
+          if (host && host.classList) {
+            if (folds[i].open) host.classList.add('toc-open'); else host.classList.remove('toc-open');
+          }
         }
+      }
+      /* 用户手动开合时也要同步 class（否则 :has 缺失的浏览器里遮挡会回来）。
+         toggle 事件是异步派发的，快速连点时在回调里读 open 可能拿到更晚的状态 →
+         统一延迟到任务末尾再读，保证 class 与 DOM 状态一致。 */
+      var tocHost = doc.querySelector('.toc-side');
+      if (tocHost) {
+        tocHost.addEventListener('toggle', function () {
+          setTimeout(function () {
+            var f = tocHost.querySelector('.toc-fold');
+            if (!f) return;
+            if (f.open) tocHost.classList.add('toc-open'); else tocHost.classList.remove('toc-open');
+          }, 0);
+        }, true);
       }
       function syncToc() {
         var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1025;
@@ -1542,6 +1605,44 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
        只在 TOC 吸顶时计（>=1025 它是右栏，不遮挡正文）。
        D1 之后：展开态 .toc-side 不再是 sticky（改 static + 内部 ol 滚动），
        所以偏移量只在**折叠条**状态计入 —— 这也正是锚点跳转会被盖住的唯一情形。 */
+
+    /* b1r2 P1-2：smooth 滚动 + scroll-padding 的锚点落点系统性偏短（实测点第 41 项后
+       实际 scrollY=15242，应为 16699，短 1457px，标题完全在视口外）。红队隔离证明：
+       scroll-behavior:auto 时短落点归 0。这里在平滑滚动结束后做**一次**精确校正，
+       既保留平滑手感，又保证最终落点准确。 */
+    (function () {
+      /* 固定 420ms 不够：深度锚点的平滑滚动会持续 1s+（实测第 23 项仍差 1536px）。
+         改成轮询「滚动位置连续 3 帧不变」再校正，兼顾快慢两种距离。 */
+      function correctAfterSmooth() {
+        if (!location.hash || location.hash.length < 2) return;
+        var id;
+        try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
+        var el = doc.getElementById(id);
+        if (!el) return;
+        var lastY = -1, still = 0, ticks = 0;
+        function tick() {
+          ticks++;
+          var y = Math.round(window.pageYOffset);
+          if (y === lastY) still++; else still = 0;
+          lastY = y;
+          if (still < 3 && ticks < 40) { window.requestAnimationFrame(tick); return; }
+          var top = Math.round(el.getBoundingClientRect().top);
+          var want = parseFloat(window.getComputedStyle(doc.documentElement).scrollPaddingTop) || 0;
+          var delta = top - want;
+          if (Math.abs(delta) > 2) {
+            try { window.scrollTo({ top: window.pageYOffset + delta, behavior: 'auto' }); }
+            catch (e) { window.scrollTo(0, window.pageYOffset + delta); }
+          }
+        }
+        window.requestAnimationFrame(tick);
+      }
+      window.addEventListener('hashchange', correctAfterSmooth);
+      doc.addEventListener('click', function (ev) {
+        var a = ev.target && ev.target.closest ? ev.target.closest('a[href^="#"]') : null;
+        if (a) correctAfterSmooth();
+      }, false);
+      if (location.hash) correctAfterSmooth();
+    })();
     (function () {
       function syncTocOffset() {
         var toc = doc.querySelector('.toc-side');

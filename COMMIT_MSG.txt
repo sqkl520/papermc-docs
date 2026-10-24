@@ -1,63 +1,54 @@
-feat(ui): 批 1 外壳修复（7 项）+ 5 个回归缺陷修正（多 Agent 验证后）
+fix(ui): 批 1 修复轮 —— 红队两实例报告的 2 个 P0 + 4 个 P1
 
-## 批 1 原始改动（7 项）
-1. P0-1 移动端「本页目录」默认折叠 + 吸顶 48px（layout.js 去掉硬编码 open；CSS sticky + 限高）
-2. P0-2 抽屉关闭时 focus({preventScroll:true})，不再因焦点回顶栏而滚动
-3. P0-3 两处 21px 命中区补到 24/28px（.side-home ×29、.code-copy ×13），达 WCAG 2.5.8 AA
-4. P0-4 .src-item 整行可点（拉伸链接），109 行 × 77% 死区 → 0
-5. P1-2 抽屉打开时把当前项滚到可见（只滚抽屉自身，不用 scrollIntoView）
-6. P1-3 [data-overflowing] 加渐隐 + 文字提示（原 JS 设属性但 CSS 零消费）
-7. P1-5 .alert-title font-weight 650→600
+红队 b1r2 抓到我"修 D1 时引入的新回归"（P0-1），以及 5 个未修项。逐条修复并复验：
 
-## 深色/打印修复（typography H1-1）
-hljs token 颜色改为 CSS 变量（--hl-*），在 :root / html[data-theme=dark] /
-@media(prefers-color-scheme:dark) html[data-theme=auto] 三处赋值。
-修前 auto（默认路径）+ 系统深色下 30/30 token 不达 AA（keyword 仅 2.85:1），
-因原代码只写了 html[data-theme="dark"]，永远匹配不到 auto。
-修后：dark 5.76–11.35:1、light 5.12–6.75:1、print 5.29–6.97:1。
+## P0-1 桌面右栏 TOC 永不吸顶（我引入的回归）
+.toc-side:has(.toc-fold[open]){position:static} 没有断点限定，而 syncToc 在 >=1025
+强制 open=true -> 桌面永远命中 -> 滚动 2000px 后 TOC 完全滚出视口
+（可见链接 24 降到 0；改前恒 top=52 且 30/30 可见）。
+修法：限定 @media (max-width:1024.98px)。
+复验：1440/1280 在 scrollY=0/2000/6000 三档 top 恒 52、可见链接恒 24 OK
 
-## 5 个回归缺陷修正（5 个 Agent 独立验证后由红队/裁决发现）
-D1【P0】批 1 首版的 sticky 把展开态 TOC 永久钉住：768 档占视口 80.8%、812×375 横屏
-  正文只剩 43px、12 个正文块被吞；点目录跳转后标题落点在视口 88–92% 处，横屏标题底边被裁。
-  修法：只有**折叠条** sticky，展开态 .toc-side:has(.toc-fold[open]){position:static}
-  + ol 限高 min(45vh, 100vh-topbar-96px)。验证：4 个视口被吞块 0、标题被盖 0%。
-D2/M1【P0】抽屉打开时因 lockScroll 的 scrollbar-gutter 漂移（与深度成正比，0.95 屏 +490px），
-  批 0 在关闭时自愈（净 0），但批 1 首版在 closeDrawer 里 scrollTo(savedY) 把自愈抵消 →
-  净漂移永久累积。修法：在 openDrawer 前后各记一次并就地校正，closeDrawer 不再干预。
-  验证：390/320 × 0.5/0.95 深度四组，开合 3 次净位移全部 0px。
-D5【P1】无 JS 时桌面右栏空白（83 条链接高度全 0）。修法：HTML 保留 open 作无 JS 降级，
-  由 JS 在窄屏首帧移除（syncToc 用 null 哨兵保证首帧执行）。
-  验证：1440 无 JS 仍可见 24 条链接。
-D6【P1】打印态 token 对比度净回归（6/6 不达 4.5:1，最差 1.54，比改前 2/6 更差）——
-  变量化漏了 @media print 这条路径。修法：print 下强制回浅色板。验证 5.29–6.97:1。
-D7【P1】溢出文字提示依赖 :has()，Firefox<=120/Safari<15.4 不支持 →
-  提示 13/13→0。修法：JS 同步给 .code-block 加 is-overflowing class，CSS 双通道。
-D9【P1】.src-item:has(:focus-visible){outline} + .src-link:focus-visible{outline:none}
-  成对存在 → :has() 不支持时键盘焦点完全不可见（WCAG 2.4.7）。
-  修法：默认给链接自身焦点环，用 @supports selector(:has(*)) 才提升为整行描边。
+## P0-2 抽屉打开后焦点不可见（SC 2.4.7）
+390/320 下 .active 被居中，但焦点给了抽屉第一个可聚焦元素 #side-filter，
+两者相差 881-1171px -> 320px 下 focusTop=-337（视口外）。
+修法：焦点与居中改为同一元素（优先 .active 本身）。
+复验：390 focusTop 69 到 696、320 -337 到 290，均在视口内 OK
 
-## a11y 修复（b1-a11y 报告 F-1/F-2/F-6）
-F-1【SC 3.2.5/2.2.2】syncToc 挂在 resize 且无条件赋值 → 用户手动折叠被 1px 视口变化撤销。
-  修法：记 lastIsWide，只在真正跨断点时动手。
-F-2【SC 2.4.11】吸顶目录盖住锚点落点（coveredPct=100）。修法：JS 把 TOC 实际高度写入
-  --toc-offset，html{scroll-padding-top:calc(topbar+12px+var(--toc-offset))}。
-F-6【SC 4.1.2】::before{content:"▸"} 进可访问名（AX 树读作「▸ 本页目录 5」）。
-  修法：改用 border 画的三角 + prefers-reduced-motion 降级。
+## P1-1 :has() 单点承重
+展开态遮挡修复全押在 :has() 上；不支持时遮挡回归 3-10 块、落点 57-79%。
+修法：JS 同步维护 .toc-open class（applyToc + toggle 监听），CSS 里与 :has() 并列。
+复验：390/1440 手动开合，class 与 open 状态三态完全同步 OK
 
-## 验证
-- 6 门禁全绿：check-site PASS / verify-site 15/15 / url-parity 141/141 /
-  privacy ①=0 / gh-pages-smoke 19/19 / build-site --verify-artifacts PASS（产物=源）
-- verify-mobile --check=4 PASS、--check=5 PASS
-- 5 个独立验证 Agent：b1-verify（7 项逐项）/ b1-geometry（84 组 3444 字段）/
-  b1-a11y（WCAG 审查）/ b1-offline（门禁+file://+极端视口）/ b1-redteam（11 条真缺陷）/
-  b1-ruling（三方基线裁决）
-- b1-ruling 引入 b0（HEAD=仅批 0）作为第三基线，切分了批 0 与批 1 的归因：
-  article.w +12.81、1025 档 -247、all-pages 卡片化均为批 0 遗留；批 1 对列宽贡献 0。
-- 批 1 真实收益：相对批 0 省 1115px ≈1.32 屏（390 档 H1 从 1317→202）。
-  注意：1317 是批 0 的默认展开态，不是 commit 前的 102.55 —— 对外表述不能写「相对改前上移」。
-- file:// 下 5/5 页零错误，批 1 四项全部正常，搜索 10/10 与 http 等价。
+## P1-2 锚点落点系统性偏短（SC 2.4.11）
+smooth 滚动 + scroll-padding 使点深度目录项时落点短 845-1457px，标题在视口外。
+红队隔离证明 scroll-behavior:auto 时短落点归 0。
+修法：保留平滑手感，滚动静止后（连续 3 帧位置不变）做一次精确校正。
+注意：固定延时不够 —— 深度锚点的平滑滚动要 2-3 秒，必须轮询。
+复验：390/320 三个深度全部偏差 0px 且可见；1440 从 1536px 降到 153px OK
 
-## 已知残留（记录，不在本批修）
-- .src-sum 仍不可选中（整行可点 vs 文本可选的硬冲突，四方案实测无两全解；.src-rel 已恢复可选）
-- --toc-offset 随 TOC 内容动态变化不重算（本站 TOC 是构建期静态，不构成实际缺陷）
-- 侧栏 34 处 ▸ 仍是 content 字符（存量，非本批引入）
+## P1-4 窄屏主题按钮空按钮化
+若隐藏 .theme-icon，<1024 时按钮变成 44x44 空盒（visibleChildren=[]）。
+且首版阈值 20em=320px 恰好把最常用的 320 视口也收进去。
+修法：图标一律保留（缩小到 .72em 而非隐藏）；阈值改 19.5em。
+复验：390/320/240/200 四档全部保留图标 OK
+
+## P1-5 极窄等效视口溢出（WCAG 1.4.10 相关）
+320px+200% 缩放（等效 160px）时溢出 +39px。
+用 Range 逐文本节点定位真实撑宽源：.ttl(263px)、.tg-home(128-137px)、
+.src-sum(中文摘要)、.tg-name；其中 .ttl/.tg-home 带 white-space:nowrap 且优先级更高。
+修法：新增 @media (max-width:11em)，用同等具体度 + !important 放开断行，
+并把品牌宽度归零、按钮压到 28px。
+复验：320/240/200/160 四档溢出全部 0px（160 从 39 降到 0）OK
+
+## 门禁
+check-site PASS / verify-site 15/15 / url-parity 141/141 / privacy =0 /
+gh-pages-smoke 19/19 / build-site --verify-artifacts PASS（产物=源）/
+verify-mobile --check=4 PASS、--check=5 PASS
+
+## 方法记录
+b1r2 指出批 1 未做版本冻结 —— 它测量期间产物被重建两次，早期测到的 5 条
+（遮挡 12 块 / 落点 88-91% / 打印 6/6 失败 / 焦点环消失 / skip 被推走）在新构建上
+已被修掉，它如实降级为"已修"不计缺陷。后续批次应先 freeze 再验证。
+另：本轮两次"修复看似无效"实为测试脚本读态问题（固定 900ms 等不到 2-3 秒的
+平滑滚动、toggle 事件异步派发），已改为轮询滚动静止 + 延迟读态。
