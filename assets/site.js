@@ -779,12 +779,35 @@
     }
     function openDrawer() {
       if (isWide() || isOpen()) return;
+      /* M1（b1-ruling 裁决）：打开抽屉时 lockScroll 会因 scrollbar-gutter 让滚动位置漂移
+         （与滚动深度成正比：0.5 屏 +299、0.95 屏 +490）。批 0 在关闭时会自愈（净 0），
+         但批 1 原先在 closeDrawer 里 scrollTo(savedY) 反而把自愈抵消 → 净漂移永久累积。
+         正确做法：在 open 前后各记一次，把这**一次**引入的漂移就地校正回去；close 不再干预。 */
+      var beforeY = window.pageYOffset;
       doc.body.classList.add('nav-open');
       toggle.setAttribute('aria-expanded', 'true');
       setInert(false);
       lockScroll(true);
+      if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
+      /* P1-2：抽屉里的侧栏是整站导航（190 链接，2 屏多高）。打开时若用户当前页在
+         抽屉可视区之外，他看到的是一堆无关条目、找不到"我在哪"——实测 3/4 页如此。
+         注意：必须只滚抽屉自身（side.scrollTop），不能用 scrollIntoView ——
+         后者会连 document 一起滚，把刚校正好的页面位置again 打乱（红队 D2 实测 -459px）。 */
+      var active = side.querySelector('a.active, [aria-current="page"]');
+      if (active) {
+        var sb = side.getBoundingClientRect();
+        var ab = active.getBoundingClientRect();
+        var outOfView = ab.top < sb.top + 8 || ab.bottom > sb.bottom - 8;
+        if (outOfView) {
+          try {
+            var target = active.offsetTop - Math.round(side.clientHeight / 2) + Math.round(active.offsetHeight / 2);
+            side.scrollTop = Math.max(0, target);
+          } catch (e) {}
+        }
+      }
       var first = side.querySelector('a[href], button, input, summary');
-      if (first && first.focus) { try { first.focus(); } catch (e) {} }
+      if (first && first.focus) { try { first.focus({ preventScroll: true }); } catch (e) { try { first.focus(); } catch (e2) {} } }
+      if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
     }
     function closeDrawer(refocus) {
       var wasOpen = isOpen();
@@ -792,7 +815,9 @@
       toggle.setAttribute('aria-expanded', 'false');
       lockScroll(false);
       if (!isWide()) setInert(true);
-      if (wasOpen && refocus !== false && toggle.focus) { try { toggle.focus(); } catch (e) {} }
+      /* focus({preventScroll:true}) 让焦点回到 ☰ 而不滚动（Safari<15 会静默忽略，此时
+         仍会滚一下，但那属于浏览器能力缺失，不再用 scrollTo 强行拉回——见 M1）。 */
+      if (wasOpen && refocus !== false && toggle.focus) { try { toggle.focus({ preventScroll: true }); } catch (e) { try { toggle.focus(); } catch (e2) {} } }
     }
     toggle.addEventListener('click', function () { if (isOpen()) closeDrawer(); else openDrawer(); });
     if (scrim) scrim.addEventListener('click', function () { closeDrawer(); });
@@ -811,6 +836,63 @@
     }
     if (wide.addEventListener) wide.addEventListener('change', applyMode);
     else if (wide.addListener) wide.addListener(applyMode);
+    /* P0-1 配套：<1025 时 TOC 是折叠的面板（layout.js 不再输出 open）；
+       >=1025 时它变成常驻右栏，必须强制展开，否则桌面右栏会是空的。
+
+       a11y 修复（b1-a11y F-1 / SC 3.2.5 + 2.2.2）：**只在跨断点时才动手**。
+       第一版把 syncToc 挂在 resize 上并无条件赋值，导致用户在 1440 手动收起后
+       视口变化 1px 就被强行展开；在 390 展开后地址栏一收（高 844→780）就自动折叠 ——
+       用户的选择被非请求事件静默撤销。现在记住上一次的「宽窄」状态，只有它真变了才同步。 */
+    (function () {
+      var tocWide = window.matchMedia ? window.matchMedia('(min-width:1025px)') : null;
+      /* D5（红队）：HTML 保留 open 作无 JS 降级，所以首帧必须由 JS 在窄屏主动收起。
+         用 null 作哨兵，保证首帧一定执行一次，之后只在真正跨断点时动手。 */
+      var lastIsWide = null;
+      function applyToc(isWide) {
+        var folds = doc.querySelectorAll('.toc-side .toc-fold');
+        for (var i = 0; i < folds.length; i++) {
+          if (isWide) folds[i].open = true;
+          else folds[i].removeAttribute('open');
+        }
+      }
+      function syncToc() {
+        var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1025;
+        if (isWide === lastIsWide) return;   /* 同档内不干预用户手动折叠（a11y F-1） */
+        lastIsWide = isWide;
+        applyToc(isWide);
+      }
+      syncToc();
+      if (tocWide) {
+        if (tocWide.addEventListener) tocWide.addEventListener('change', syncToc);
+        else if (tocWide.addListener) tocWide.addListener(syncToc);
+      }
+    })();
+
+    /* a11y 修复（b1-a11y F-2 / SC 2.4.11）：<1025 时 TOC 是吸顶的 48px 条，
+       而 html{scroll-padding-top:calc(var(--topbar-h) + 12px)} 只算了顶栏 ——
+       锚点跳转后目标标题会被目录条整条盖住（实测 coveredPct=100）。
+       这里按 TOC 的实际高度把偏移量写进 --toc-offset，CSS 里 scroll-padding-top 叠加它。
+       只在 TOC 吸顶时计（>=1025 它是右栏，不遮挡正文）。
+       D1 之后：展开态 .toc-side 不再是 sticky（改 static + 内部 ol 滚动），
+       所以偏移量只在**折叠条**状态计入 —— 这也正是锚点跳转会被盖住的唯一情形。 */
+    (function () {
+      function syncTocOffset() {
+        var toc = doc.querySelector('.toc-side');
+        var h = 0;
+        if (toc && window.innerWidth < 1025) {
+          var pos = window.getComputedStyle(toc).position;
+          var b = toc.getBoundingClientRect();
+          if ((pos === 'sticky' || pos === 'fixed') && b.height > 0) h = Math.round(b.height);
+        }
+        doc.documentElement.style.setProperty('--toc-offset', h + 'px');
+      }
+      syncTocOffset();
+      window.addEventListener('resize', syncTocOffset);
+      var td = doc.querySelector('.toc-side');
+      if (td) {
+        td.addEventListener('toggle', function () { setTimeout(syncTocOffset, 0); }, true);
+      }
+    })();
     applyMode();
   }
 
@@ -872,6 +954,11 @@
       var pre = host.querySelector('pre');
       var over = pre ? (pre.scrollWidth > pre.clientWidth + 1 || host.scrollWidth > host.clientWidth + 1) : false;
       if (over) host.setAttribute('data-overflowing', ''); else host.removeAttribute('data-overflowing');
+      /* D7（红队）：文字提示原用 :has() 选取，Firefox<=120 / Safari<15.4 不支持 → 提示全丢。
+         这里给祖先 .code-block 同步一个 class，CSS 侧与 :has() 并列，任一条命中即可。 */
+      var blk = host.parentElement;
+      while (blk && blk.className && String(blk.className).indexOf('code-block') < 0) blk = blk.parentElement;
+      if (blk && blk.classList) { if (over) blk.classList.add('is-overflowing'); else blk.classList.remove('is-overflowing'); }
       if (pre) host.setAttribute('aria-label', codeLabel(pre, over));
     }
     var wraps = doc.querySelectorAll('.table-wrap');

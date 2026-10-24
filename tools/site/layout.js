@@ -255,7 +255,13 @@ function sidebarHtml(site, prefix, active, toc) {
 
 /** right-hand "本页目录"; returns '' when the page has no h2-h4 headings.
  *  <details> 形态：≥1025px 与改前一致地作为常驻右栏（标题行看起来就是原来的 toc-title），
- *  <1025px 由 CSS 提到正文顶部成为可折叠的「本页目录」（红队 F3 / 契约 A4：移动端要有真目录）。 */
+ *  <1025px 由 CSS 提到正文顶部成为可折叠的「本页目录」（红队 F3 / 契约 A4：移动端要有真目录）。
+ *  默认【折叠】（P0-1）：390 档 24 项目录展开时高 1173px > 视口 844，H1 被推到 y=1317（1.56 屏）。
+ *  折叠后 H1 ≈202。桌面档由 site.js 的 matchMedia('(min-width:1025px)') 强制展开，右栏不受影响。
+ *
+ *  D5（红队）：HTML 里**保留 open** 作无 JS 降级 —— 否则禁用 JS 时桌面右栏是空白（实测
+ *  83 条链接高度全为 0）。真正的"默认折叠"由 site.js 在窄屏首帧移除 open 实现；
+ *  无 JS 的窄屏用户会看到展开列表，但那仍比"什么都没有"更可用。 */
 function tocHtml(toc) {
   if (!toc || !toc.length) return '';
   let html = '<aside class="toc-side" id="page-toc" data-page-toc aria-label="本页目录">'
