@@ -1,31 +1,27 @@
-docs(ui): 补齐排版锐评终稿（1040 行）与 owner 裁决补充
+docs(ui): owner 第二轮复核 —— 代码行距 strut 真缺陷 + 断词终值 + max-width 最终采信
 
-1. 排版锐评终稿（reports/critique-typography.md，72KB / 1040 行）
-   4 条 H 级全部带实测验证：
-   a) auto 主题下 hljs 30/30 token 全失败（keyword 2.85:1）—— site.css:436-442 只写
-      html[data-theme=dark]，永不匹配 auto（默认路径）；补丁实测 7/7 失败 -> 0/7 通过，
-      dark 路径零变化
-   b) 正文行宽 98.4-110ch，唯一约束是 .hero p{max-width:76ch}
-   c) 6 个键值配置参考页 h2/h3/h4 全为 0（world-configuration 36260 字符，前 5 页合计
-      90299 字符 = 全站 12.5%）；cli-arguments 31 个标题全在 h5（15.2px/5.98:1 vs
-      正文 16px/16.49:1，比正文更小更淡）-> 构建层映射缺失，CSS 修不了
-   d) 1025-1199 断崖：正文 693 -> 434px（50.3ch，-37%），max-width 在 1025 下无效
-   
-   实测过的 max-width 方案：只封行文块不封代码/表格
-   .article > :is(p,ul,ol,blockquote,dl){max-width:40rem}（74.2ch = 40 全角）
-   + TOC 断点上移 1200；结果 >=768 全部 74.2ch、1440 代码滚动 5/13 不变、
-   1025 由 50.3 -> 74.2ch、390/320 零回归；代价 1440 右空 484px
+两项争议由 owner 亲测裁定：
 
-2. owner 裁决补充（我亲自复测裁决的争议点）
-   - 断词真正发生在 td（表格单元格）而非段落：320px dialogs 9 处（9/10 在 td）、
-     arguments-and-literals 10/10 全在 td；390px 同样 10/10；1440 段落 0 处
-     -> 修法应是 .table-wrap td{overflow-wrap:break-word}，
-        不要动 .article{overflow-wrap:anywhere}（防溢出安全网）
-   - ch 不能跨站比较：1ch=8.63px 但平均字符宽 7.0-7.4px -> ch 高估 17-23%；
-     98.4ch 实际约 115 字符
+A. 代码行距 strut（并发实例发现，双方此前都未抓到）—— 真缺陷，晋升 P0
+   pre 保留 16px/1.55 = 24.8px 的 strut，压过内层 code 的 13.6px/21.08px，
+   浏览器按行盒最大行高排版 -> 实际行推进 25px = 1.84 倍代码字号
+   （6 个代码块样本全部如此，5-96 行）；dialogs 243 行代码多占约 900px 页高。
+   修法：.code-pre{font-size:.875rem}（1 行 CSS）
 
-3. 修正隐私命中：tools/critique-mobile-probe.js 的 %TEMP% -> <tmp>，privacy ① 归零
+B. 断词数量 —— 双方各对一半，owner 4 页 x 3 视口复测终值：
+   320px 19 处（td 16 / span 1 / strong 2）、390px 13 处（td 全部）、1440px 5 处（td）
+   - 并发实例报的 320px 19 处与我完全一致；390px 12 处接近我实测 13 处
+   - 我先前报的 9 处 / 4 处低估（只抽 2 页）
+   - 归因不变：绝大多数在 td（overflow-wrap 继承自 .article）；
+     修法针对表格与行内元素，不动 .article{overflow-wrap:anywhere}
 
-7 份报告总计 442KB / 4173 行，全部 UTF-8 无 BOM、无乱码。
-门禁：check-site PASS / verify-site 15/15 / url-parity PASS / privacy 0 /
-build-site --verify-artifacts PASS（产物 = 源）
+C. P0 清单调整：新增 P0-7（代码 strut）+ 表格断行由 P1 晋升 P0 -> P0 共 8 条，约 2.7 人日
+
+D. max-width 最终采信 min(40rem, 90ch) = 640px（修正我先前给的 736px）：
+   排版实例用代码块横滚数做约束实测 —— 整体 42rem 横滚 7/15、44rem 5/15、
+   散文限宽 5/15 且左边缘 delta 0px、严格 33rem 会让横滚涨到 11/15；
+   640px 让 1025 档从 50.3ch 恢复到 74.2ch（消除断崖）且 1440 代码块不退化；
+   TOC 断点 1025 改为 1200（1200-290-250=660 > 640）
+
+报告终态：critique-typography.md 78KB / 1078 行；ui-ruling.md 15KB / 159 行
+7 份报告合计约 449KB，全部 UTF-8 无 BOM、无乱码。
