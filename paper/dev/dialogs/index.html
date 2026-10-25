@@ -20,7 +20,7 @@
 <h2 id="what-is-a-dialog" class="heading heading-2">What is a dialog?<a class="heading-anchor" href="#what-is-a-dialog" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>Dialogs are a way for servers to send custom in-game menus to clients. They allow for displaying various information or provide an easy way to gather user input.</p>
 <p>Dialogs can be shown to players during the configuration phase or normal gameplay, which makes them a very versatile tool. A simple dialog might look like this:</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/confirmation-dialog.qlIGNgwP_Z1NgQsM.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="A dialog sent during the configuration phase"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/confirmation-dialog.qlIGNgwP_Z1NgQsM.webp" class="content-img" width="2560" height="1440" data-zoom="1" loading="lazy" decoding="async" alt="A dialog sent during the configuration phase"></p>
 <p>The dialog shown here is a <strong>confirmation</strong>-type dialog, which just means it always contains two buttons, one meant for confirmation and one meant for refusal.</p>
 <h2 id="showing-dialogs" class="heading heading-2">Showing dialogs<a class="heading-anchor" href="#showing-dialogs" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>Dialogs can be shown in-game using the <code>/dialog show &lt;players&gt; &lt;dialog&gt;</code> command. Alternatively, you can show them using the API by using <a href="https://jd.papermc.io/adventure/net.kyori.adventure.api/net/kyori/adventure/audience/Audience.html#showDialog(net.kyori.adventure.dialog.DialogLike)" class="external" target="_blank" rel="noopener"><code>Audience#showDialog(DialogLike)</code></a>. You can get built-in dialogs statically from the <a href="https://jd.papermc.io/paper/io/papermc/paper/dialog/Dialog.html" class="external" target="_blank" rel="noopener"><code>Dialog</code></a> interface. New dialogs can be created dynamically using <a href="https://jd.papermc.io/paper/io/papermc/paper/dialog/Dialog.html#create(java.util.function.Consumer)" class="external" target="_blank" rel="noopener"><code>Dialog#create</code></a> or, if registered during the bootstrap phase, retrieved from the dialog registry with <code>RegistryAccess.registryAccess().getRegistry(RegistryKey.DIALOG).get(Key)</code>.</p>
@@ -37,7 +37,7 @@
 <p>You can build a <a href="https://jd.papermc.io/paper/io/papermc/paper/dialog/Dialog.html" class="external" target="_blank" rel="noopener"><code>Dialog</code></a> object using the <a href="https://jd.papermc.io/paper/io/papermc/paper/dialog/Dialog.html#create(java.util.function.Consumer)" class="external" target="_blank" rel="noopener"><code>Dialog#create</code></a> method. The consumer parameter allows you to build the dialog. <strong>A dialog always requires a base and a type</strong>, which can be declared in the builder. You can either create a new dialog or alternatively use an existing <a href="#registering-dialogs-in-the-registry">registry-registered</a> dialog as a base instead.</p>
 <p>For reference, a very simple (notice-type) dialog can be constructed and shown to a player with the following code:</p>
 <details class="details-block">
-<summary class="details-summary">In-game preview</summary><p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/notice-dialog.DaeSpFd2_ZY4Awx.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="A dialog with only a title and an ok button"></p>
+<summary class="details-summary">In-game preview</summary><p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/notice-dialog.DaeSpFd2_ZY4Awx.webp" class="content-img" width="2560" height="1440" data-zoom="1" loading="lazy" decoding="async" alt="A dialog with only a title and an ok button"></p>
 </details><figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java"><span class="hljs-type">Dialog</span> <span class="hljs-variable">dialog</span> <span class="hljs-operator">=</span> Dialog.create(builder -&gt; builder.empty()
     .base(DialogBase.builder(text(<span class="hljs-string">&quot;Title&quot;</span>)).build())
     .type(DialogType.notice())
@@ -53,19 +53,19 @@ player.showDialog(dialog);</code></pre></div></figure>
 <ul>
 <li><p><a href="https://jd.papermc.io/paper/io/papermc/paper/registry/data/dialog/input/DialogInput.html#bool(java.lang.String,net.kyori.adventure.text.Component)" class="external" target="_blank" rel="noopener"><code>DialogInput.bool</code></a></p>
 <p>A simple tick box representing a true or false state</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-boolean.Cpo3o710_Z2upaKt.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-boolean.Cpo3o710_Z2upaKt.webp"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-boolean.Cpo3o710_Z2upaKt.webp" class="content-img" width="1560" height="150" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-boolean.Cpo3o710_Z2upaKt.webp"></p>
 </li>
 <li><p><a href="https://jd.papermc.io/paper/io/papermc/paper/registry/data/dialog/input/DialogInput.html#singleOption(java.lang.String,net.kyori.adventure.text.Component,java.util.List)" class="external" target="_blank" rel="noopener"><code>DialogInput.singleOption</code></a></p>
 <p>A multiple-choice button</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-multi-options.CgHkNz2V_1AV5eM.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-multi-options.CgHkNz2V_1AV5eM.webp"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-multi-options.CgHkNz2V_1AV5eM.webp" class="content-img" width="1560" height="150" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-multi-options.CgHkNz2V_1AV5eM.webp"></p>
 </li>
 <li><p><a href="https://jd.papermc.io/paper/io/papermc/paper/registry/data/dialog/input/DialogInput.html#text(java.lang.String,net.kyori.adventure.text.Component)" class="external" target="_blank" rel="noopener"><code>DialogInput.text</code></a></p>
 <p>A simple string input field</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-text.CJMeHKdP_Z1I9iUj.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-text.CJMeHKdP_Z1I9iUj.webp"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-text.CJMeHKdP_Z1I9iUj.webp" class="content-img" width="1560" height="200" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-text.CJMeHKdP_Z1I9iUj.webp"></p>
 </li>
 <li><p><a href="https://jd.papermc.io/paper/io/papermc/paper/registry/data/dialog/input/DialogInput.html#numberRange(java.lang.String,net.kyori.adventure.text.Component,float,float)" class="external" target="_blank" rel="noopener"><code>DialogInput.numberRange</code></a></p>
 <p>A slider for number input</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-number-range.DuG-Gl9K_Z2lj6gz.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-number-range.DuG-Gl9K_Z2lj6gz.webp"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/input-number-range.DuG-Gl9K_Z2lj6gz.webp" class="content-img" width="1560" height="200" data-zoom="1" loading="lazy" decoding="async" alt="插图：input-number-range.DuG-Gl9K_Z2lj6gz.webp"></p>
 </li>
 </ul>
 <h3 id="dialog-type" class="heading heading-3">Dialog type<a class="heading-anchor" href="#dialog-type" aria-label="本节链接" title="本节链接">#</a></h3>

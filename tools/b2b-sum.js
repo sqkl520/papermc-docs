@@ -1,11 +1,11 @@
 'use strict';
 /**
- * b2b-sum.js — 把 a.json / b.json / c.json / d.json / e.json 汇总成 markdown 片段（只读，写 %TEMP%）
+ * b2b-sum.js — 把 a.json / b.json / c.json / d.json / e.json 汇总成 markdown 片段（只读，写 TMPDIR）
  * 用法：node tools/b2b-sum.js [a|b|c|d|e]
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b');
 const load = (n) => JSON.parse(fs.readFileSync(path.join(TMP, n + '.json'), 'utf8'));
 const n0 = (v) => (v == null ? '—' : Math.round(v));
 const n1 = (v) => (v == null ? '—' : Math.round(v * 10) / 10);

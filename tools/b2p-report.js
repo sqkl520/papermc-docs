@@ -5,7 +5,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2p');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2p');
 const raw = JSON.parse(fs.readFileSync(path.join(TMP, 'probe.json'), 'utf8'));
 const rows = raw.rows;
 

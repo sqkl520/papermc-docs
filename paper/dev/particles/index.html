@@ -70,7 +70,7 @@
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-1" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-1" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.CRIT, someLocation, <span class="hljs-number">6</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.6</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/random-direction-crit.v2ZiLlgQ_sYtR2.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Crit particles going in random directions"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/random-direction-crit.v2ZiLlgQ_sYtR2.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Crit particles going in random directions"></p>
 <h3 id="specified-direction" class="heading heading-3">Specified direction<a class="heading-anchor" href="#specified-direction" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>To specify the velocity’s direction, set the <code>count</code> argument to <code>0</code> and use the offset arguments as the direction vector. See <a href="#count-argument-behavior-important"><code>count</code> argument behavior</a> for more details.</p>
 <p>An example of a repeating task spawning campfire smoke that slowly goes “up” (positive Y axis):</p>
@@ -89,7 +89,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     someWorld.spawnParticle(Particle.CAMPFIRE_SIGNAL_SMOKE, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0.1</span>);
 }, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/smoke-going-up.Dc_KEGOA_16XR7M.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Campfire signal smoke going up"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/smoke-going-up.Dc_KEGOA_16XR7M.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Campfire signal smoke going up"></p>
 <p>We could also make the smoke go down if we wanted to:</p>
 <h4 id="particlebuilder-3" class="heading heading-4">ParticleBuilder<a class="heading-anchor" href="#particlebuilder-3" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java"><span class="hljs-type">ParticleBuilder</span> <span class="hljs-variable">particleBuilder</span> <span class="hljs-operator">=</span> Particle.CAMPFIRE_SIGNAL_SMOKE.builder()
@@ -171,7 +171,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-4" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-4" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.ENTITY_EFFECT, someLocation, <span class="hljs-number">10</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, Color.fromARGB(<span class="hljs-number">200</span>, <span class="hljs-number">255</span>, <span class="hljs-number">128</span>, <span class="hljs-number">0</span>));</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/orange-spell-particles.CI9ISSWI_Zab1bp.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Colored potion effect particles"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/orange-spell-particles.CI9ISSWI_Zab1bp.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Colored potion effect particles"></p>
 <aside class="alert alert-note" role="note" data-alert-type="note"><p class="alert-title">Note</p><div class="alert-body"><p>Only the <code>ENTITY_EFFECT</code> particle supports the alpha channel, which is used to create translucent particles.</p>
 </div></aside>
 <aside class="alert alert-caution" role="note" data-alert-type="caution"><p class="alert-title">Caution</p><div class="alert-body"><p>While <code>FLASH</code> and <code>TINTED_LEAVES</code> particles take an ARGB color, the alpha channel is ignored.</p>
@@ -199,7 +199,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
         <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.DustOptions(Color.BLUE, <span class="hljs-number">2.0F</span>)
     );
 }</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/blue-dust-particles-in-line.C6ZDFGxY_Y1Bgq.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Blue dust particles in a vertical line"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/blue-dust-particles-in-line.C6ZDFGxY_Y1Bgq.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Blue dust particles in a vertical line"></p>
 <aside class="alert alert-note" role="note" data-alert-type="note"><p class="alert-title">Note</p><div class="alert-body"><p>Here, adding a size argument would control the dust particle’s lifetime, in ticks. By default, the value is a random integer between 8 and 40, which is multiplied by the particle’s scale, to get the final lifetime (with a minimum of 1).</p>
 </div></aside>
 <h3 id="dust-transition" class="heading heading-3">Dust transition<a class="heading-anchor" href="#dust-transition" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -221,7 +221,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     <span class="hljs-number">0.5</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>,
     <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.DustTransition(Color.RED, Color.BLUE, <span class="hljs-number">1.0F</span>)
 );</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/dust-transition-particles.WjyCcjPJ_Z2tqHL6.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Dust transition particles in a line"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/dust-transition-particles.WjyCcjPJ_Z2tqHL6.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Dust transition particles in a line"></p>
 <h3 id="note" class="heading heading-3">Note<a class="heading-anchor" href="#note" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>The note particles will use the <code>offsetX</code> argument in a custom function to determine the color, see <a href="#note-particle-color-picker">Note particle color picker</a> for more details. <code>offsetY</code> and <code>offsetZ</code> are ignored in this case.</p>
 <p>Example:</p>
@@ -234,10 +234,10 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-7" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-7" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.NOTE, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0.4F</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/note-particle.CcQH9Bz1_Zm8g5u.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Note particle"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/note-particle.CcQH9Bz1_Zm8g5u.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Note particle"></p>
 <h4 id="note-particle-color-picker" class="heading heading-4">Note particle color picker<a class="heading-anchor" href="#note-particle-color-picker" aria-label="本节链接" title="本节链接">#</a></h4>
 <p>This tool allows you to pick a color for the note particle by adjusting the <code>offsetX</code> value. It only allows you to choose <code>offsetX</code> values between <code>-1.0</code> and <code>1.0</code>; values outside this range will repeat the color pattern.</p>
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAQAAABuBnYAAAAALElEQVR42mOAgc3/J/0H0UgCGahCm4GcQGQBiCzRAp//A41EFsj4H/gfZiAAXXUYtS3tm1IAAAAASUVORK5CYII=" class="content-img" data-zoom="1" alt="Note particle"></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAQAAABuBnYAAAAALElEQVR42mOAgc3/J/0H0UgCGahCm4GcQGQBiCzRAp//A41EFsj4H/gfZiAAXXUYtS3tm1IAAAAASUVORK5CYII=" class="content-img" width="8" height="8" data-zoom="1" alt="Note particle"></p>
 <p>offsetX = 0</p>
 <aside class="alert alert-tip" role="note" data-alert-type="tip"><p class="alert-title">Tip</p><div class="alert-body"><p>To achieve the Vanilla note particle colors you must set the offsetX to a fraction of 24.</p>
 <p>Example:</p>
@@ -270,7 +270,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>,
     <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.Trail(someLocation.clone().add(-<span class="hljs-number">4</span>, <span class="hljs-number">0</span>, <span class="hljs-number">4</span>), Color.YELLOW, <span class="hljs-number">40</span>)
 );</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/trail-particles.B0CRsMRO_SdcOe.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Yellow trail particles floating towards the right side of the screen"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/trail-particles.B0CRsMRO_SdcOe.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Yellow trail particles floating towards the right side of the screen"></p>
 <h2 id="converging-particles" class="heading heading-2">Converging particles<a class="heading-anchor" href="#converging-particles" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>As the name implies, this type of particle converges to a single point (location), which in this case is the supplied location. Offset arguments are used to determine the relative spawn location of the particle. The particle will then travel from this relative location to the supplied location.</p>
 <p>An example where an enchantment particle will spawn at <code>someLocation.clone().add(-2, 0, 2)</code> and travel to <code>someLocation</code>:</p>
@@ -283,7 +283,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-10" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-10" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.ENCHANT, someLocation, <span class="hljs-number">0</span>, -<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/converging-enchant-particle.C3ZWc8Zd_2izh9l.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Enchant particle going towards the center of the screen"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/converging-enchant-particle.C3ZWc8Zd_2izh9l.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Enchant particle going towards the center of the screen"></p>
 <aside class="alert alert-note" role="note" data-alert-type="note"><p class="alert-title">Note</p><div class="alert-body"><p>There are two types of converging particles:</p>
 <ul>
 <li><strong>Curving</strong>: Particles that follow a curved path to the specified location.</li>
@@ -347,7 +347,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-13" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-13" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.SCULK_CHARGE, someLocation, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, (<span class="hljs-type">float</span>) Math.toRadians(<span class="hljs-number">45</span>));</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/sculk-charge.DhF0cvGv_28UPO3.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Sculk charge particle at 45°"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/sculk-charge.DhF0cvGv_28UPO3.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Sculk charge particle at 45°"></p>
 <aside class="alert alert-tip" role="note" data-alert-type="tip"><p class="alert-title">Tip</p><div class="alert-body"><p>The <code>SCULK_CHARGE</code> particle is a <a href="#directional-particles">directional particle</a>.</p>
 </div></aside>
 <h3 id="shriek" class="heading heading-3">Shriek<a class="heading-anchor" href="#shriek" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -362,7 +362,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-14" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-14" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.SHRIEK, someLocation, <span class="hljs-number">1</span>, <span class="hljs-number">20</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/shriek.rOQSE48g_1Nicbn.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Shriek particle"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/shriek.rOQSE48g_1Nicbn.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Shriek particle"></p>
 <h3 id="vibration" class="heading heading-3">Vibration<a class="heading-anchor" href="#vibration" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>Vibration particles require you to pass a <a href="https://jd.papermc.io/paper/org/bukkit/Vibration.html" class="external" target="_blank" rel="noopener"><code>Vibration</code></a> object as <code>data</code>, where you can choose between a location (<a href="https://jd.papermc.io/paper/org/bukkit/Vibration.Destination.BlockDestination.html" class="external" target="_blank" rel="noopener"><code>Vibration.Destination.BlockDestination</code></a>) or an entity target (<a href="https://jd.papermc.io/paper/org/bukkit/Vibration.Destination.EntityDestination.html" class="external" target="_blank" rel="noopener"><code>Vibration.Destination.EntityDestination</code></a>). The constructor’s second argument is the travel time in <strong>ticks</strong>.</p>
 <p>An example where a vibration particle will spawn at <code>someLocation</code> and travel to <code>otherLocation</code> in 40 ticks:</p>
@@ -379,7 +379,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     <span class="hljs-number">1</span>,
     <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vibration</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Vibration</span>.Destination.BlockDestination(otherLocation), <span class="hljs-number">40</span>)
 );</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/vibration.CMBu2C4q_Z1RmmAw.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Vibration particle going to the left side of the screen"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/vibration.CMBu2C4q_Z1RmmAw.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Vibration particle going to the left side of the screen"></p>
 <h2 id="rising-particles" class="heading heading-2">Rising particles<a class="heading-anchor" href="#rising-particles" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>These particles will use <code>offsetY</code> as the particle’s y-axis velocity.</p>
 <p>If you set <code>offsetX</code> AND <code>offsetZ</code> to <code>0</code>, the particle will have almost no x or z-axis velocity, but will still have a y-axis velocity set by the <code>offsetY</code> argument. In both cases, <code>offsetX</code> and <code>offsetZ</code> are not used in the velocity vector.</p>
@@ -395,7 +395,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, () -&gt; {
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-16" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-16" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.GLOW, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">2</span>, <span class="hljs-number">0</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/rising-glow-particle.QaTGa-06_Z5lNbl.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Glow particle going up"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/rising-glow-particle.QaTGa-06_Z5lNbl.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Glow particle going up"></p>
 <aside class="alert alert-note" role="note" data-alert-type="note"><p class="alert-title">Note</p><div class="alert-body"><p>These particles rise up, meaning that the initial velocity will be used only briefly, and the particle will start to travel up after a short time. Therefore, negative vertical velocity will only stop the particle from rising temporarily, while a positive vertical velocity will make the particle rise immediately.</p>
 </div></aside>
 <h3 id="list-of-rising-particles" class="heading heading-3">List of rising particles<a class="heading-anchor" href="#list-of-rising-particles" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -435,7 +435,7 @@ Bukkit.getScheduler().runTaskLater(plugin, () -&gt; {
 Bukkit.getScheduler().runTaskLater(plugin, () -&gt; {
     someWorld.spawnParticle(Particle.SWEEP_ATTACK, someLocation, <span class="hljs-number">0</span>, -<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
 }, <span class="hljs-number">10</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/sweep-attack.DBDkSQHB_Z2snRG5.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Sweep attack particle scale comparison"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/sweep-attack.DBDkSQHB_Z2snRG5.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Sweep attack particle scale comparison"></p>
 <h3 id="explosion" class="heading heading-3">Explosion<a class="heading-anchor" href="#explosion" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>The <code>EXPLOSION</code> particle’s scale is calculated as <code>2.0 * (1.0 - offsetX * 0.5)</code>.</p>
 <p>An example where two explosion particles will spawn at <code>someLocation</code>. First one with a scale of <code>1.0</code> and the second one with a scale of <code>4.0</code> right after:</p>
@@ -458,7 +458,7 @@ Bukkit.getScheduler().runTaskLater(plugin, () -&gt; {
 Bukkit.getScheduler().runTaskLater(plugin, () -&gt; {
     someWorld.spawnParticle(Particle.EXPLOSION, someLocation, <span class="hljs-number">0</span>, -<span class="hljs-number">2</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>);
 }, <span class="hljs-number">10</span>);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/explosion.tBoNBCF__26cooj.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Explosion particle scale comparison"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/explosion.tBoNBCF__26cooj.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Explosion particle scale comparison"></p>
 <h2 id="geyser-particles" class="heading heading-2">Geyser particles<a class="heading-anchor" href="#geyser-particles" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>There are four geyser particles: <code>GEYSER_BASE</code>, <code>GEYSER_POOF</code>, <code>GEYSER_PLUME</code> and <code>GEYSER</code>.</p>
 <h3 id="base-and-poof" class="heading heading-3">Base and poof<a class="heading-anchor" href="#base-and-poof" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -491,7 +491,7 @@ yd = abs(yd);</code></pre></div></figure>
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-19" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-19" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.GEYSER_BASE, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.GeyserBase(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>));</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser-base.c6Jg-q-K_Z1uJ0JR.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Geyser base particle example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser-base.c6Jg-q-K_Z1uJ0JR.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Geyser base particle example"></p>
 <h3 id="plume" class="heading heading-3">Plume<a class="heading-anchor" href="#plume" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>The <code>GEYSER_PLUME</code> particle uses <a href="https://jd.papermc.io/paper/org/bukkit/Particle.Geyser.html" class="external" target="_blank" rel="noopener"><code>Particle.Geyser</code></a> as its data.</p>
 <p>While technically a <a href="#directional-particles">directional particle</a>, the vertical velocity of this particle is set to <code>0</code> and the horizontal velocity is applied only on the first tick.</p>
@@ -508,7 +508,7 @@ yd = abs(yd);</code></pre></div></figure>
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-20" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-20" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.GEYSER_PLUME, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.Geyser(<span class="hljs-number">1</span>));</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser-plume.D2mhY-19_1psDWE.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Geyser plume particle example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser-plume.D2mhY-19_1psDWE.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Geyser plume particle example"></p>
 <h3 id="emitter" class="heading heading-3">Emitter<a class="heading-anchor" href="#emitter" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>The <code>GEYSER</code> particle is an emitter particle, meaning it spawns other particles. In this case, it spawns all the previously mentioned geyser particles. The provided velocity vector is passed to the spawned particles and used as described above.</p>
 <p>This particle uses <a href="https://jd.papermc.io/paper/org/bukkit/Particle.Geyser.html" class="external" target="_blank" rel="noopener"><code>Particle.Geyser</code></a> as its data.</p>
@@ -523,7 +523,7 @@ yd = abs(yd);</code></pre></div></figure>
     .spawn();</code></pre></div></figure>
 <h4 id="spawnparticle-21" class="heading heading-4">spawnParticle<a class="heading-anchor" href="#spawnparticle-21" aria-label="本节链接" title="本节链接">#</a></h4>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">someWorld.spawnParticle(Particle.GEYSER, someLocation, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Particle</span>.Geyser(<span class="hljs-number">1</span>));</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser.BaAcPwhX_Z1EbTno.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Geyser particle example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/geyser.BaAcPwhX_Z1EbTno.webp" class="content-img" width="1280" height="720" data-zoom="1" loading="lazy" decoding="async" alt="Geyser particle example"></p>
 <h2 id="miscellaneous-behaviors" class="heading heading-2">Miscellaneous behaviors<a class="heading-anchor" href="#miscellaneous-behaviors" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>This chapter covers particles that have unique behaviors when spawning.</p>
 <h3 id="angry-villager-particles" class="heading heading-3">Angry villager particles<a class="heading-anchor" href="#angry-villager-particles" aria-label="本节链接" title="本节链接">#</a></h3>

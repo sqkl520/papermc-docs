@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '', 'b2p');
+const TMP = path.join(require("os").tmpdir() || '', 'b2p');
 fs.mkdirSync(TMP, { recursive: true });
 
 const EXE = [

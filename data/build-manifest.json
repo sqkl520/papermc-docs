@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T21:06:32.047Z",
+  "generated_at": "2026-10-25T08:23:22.391Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -345,6 +345,8 @@
     "imagesLocalized": 0,
     "imagesExternal": 1,
     "imagesMissing": 0,
+    "imagesWithIntrinsicSize": 88,
+    "imagesIntrinsicSkipped": 0,
     "inDocH1NonUnique": 141,
     "categoryPageDebugChips": 0,
     "sourceNavGroups": 31,
@@ -373,6 +375,8 @@
     "fragmentsRecovered": "按配置键路径从嵌套列表键补回的锚点 id 数",
     "imagesLocal": "本地相对路径图片（已校验文件存在）",
     "imagesExternal": "第三方外链图片（保持在线，加 visible 提示）",
+    "imagesWithIntrinsicSize": "正文图片中已写入 intrinsic width/height 的条数（构建期读图片头，消除懒加载 CLS）",
+    "imagesIntrinsicSkipped": "正文图片中未写入宽高的条数（data: URI / 外链 / 文件缺失 / 格式不支持，逐项见 image-size-* 告警）",
     "footnotesResolved": "已补 id 的脚注锚点数",
     "sourceNavGroups": "源侧栏（source-nav.json）分组总数：paper 20 + velocity 9 + folia 2 = 31",
     "sourceNavPagesInNav": "上游侧栏 <a> 导航项总数：paper 83 + velocity 23 + folia 3 = 109",
@@ -518,7 +522,7 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 52661
+        "bytes": 52679
       },
       "js": {
         "output": "assets/site.js",
@@ -542,7 +546,7 @@
     "sectionCount": 3,
     "siteDir": "repo-root (GitHub Pages /papermc-docs/)",
     "pageLayout": "<section>/<rel>.html（rel 直接展开，URL 与上游 docs.papermc.io 逐段一致）",
-    "totalBytes": 17123820
+    "totalBytes": 17126077
   },
   "pages": [
     {
@@ -1045,7 +1049,7 @@
           "text": "FAQ, common pitfalls and support"
         }
       ],
-      "bytes": 127827,
+      "bytes": 127881,
       "warnings": 2
     },
     {
@@ -1896,7 +1900,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 106505,
+      "bytes": 106529,
       "warnings": 0
     },
     {
@@ -2827,7 +2831,7 @@
           "text": "Example: Filtering by user input"
         }
       ],
-      "bytes": 112970,
+      "bytes": 112995,
       "warnings": 0
     },
     {
@@ -2921,7 +2925,7 @@
           "text": "Custom arguments"
         }
       ],
-      "bytes": 111598,
+      "bytes": 111699,
       "warnings": 0
     },
     {
@@ -2990,7 +2994,7 @@
           "text": "Chaining ‘then’ method calls together"
         }
       ],
-      "bytes": 117584,
+      "bytes": 117813,
       "warnings": 0
     },
     {
@@ -3079,7 +3083,7 @@
           "text": "Example: Ice-cream argument"
         }
       ],
-      "bytes": 122148,
+      "bytes": 122200,
       "warnings": 0
     },
     {
@@ -3148,7 +3152,7 @@
           "text": "Logic separation"
         }
       ],
-      "bytes": 110349,
+      "bytes": 110424,
       "warnings": 0
     },
     {
@@ -3365,7 +3369,7 @@
           "text": "Restricting your commands"
         }
       ],
-      "bytes": 105460,
+      "bytes": 105538,
       "warnings": 0
     },
     {
@@ -3464,7 +3468,7 @@
           "text": "Final code"
         }
       ],
-      "bytes": 122823,
+      "bytes": 122927,
       "warnings": 0
     },
     {
@@ -3528,7 +3532,7 @@
           "text": "The new Paper way"
         }
       ],
-      "bytes": 104829,
+      "bytes": 104879,
       "warnings": 0
     },
     {
@@ -3844,7 +3848,7 @@
           "text": "Code"
         }
       ],
-      "bytes": 104630,
+      "bytes": 104656,
       "warnings": 0
     },
     {
@@ -4156,7 +4160,7 @@
           "text": "Matching items without certain data components"
         }
       ],
-      "bytes": 117877,
+      "bytes": 117904,
       "warnings": 0
     },
     {
@@ -4245,7 +4249,7 @@
           "text": "Client timeouts"
         }
       ],
-      "bytes": 104572,
+      "bytes": 104698,
       "warnings": 0
     },
     {
@@ -4414,7 +4418,7 @@
           "text": "Reading payloads with adventure-nbt"
         }
       ],
-      "bytes": 145523,
+      "bytes": 145681,
       "warnings": 0
     },
     {
@@ -4523,7 +4527,7 @@
           "text": "Use cases"
         }
       ],
-      "bytes": 116561,
+      "bytes": 116692,
       "warnings": 0
     },
     {
@@ -4815,7 +4819,7 @@
           "text": "Entity scheduler"
         }
       ],
-      "bytes": 101143,
+      "bytes": 101169,
       "warnings": 0
     },
     {
@@ -4967,7 +4971,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 116566,
+      "bytes": 116591,
       "warnings": 0
     },
     {
@@ -6081,7 +6085,7 @@
           "text": "Splash particles"
         }
       ],
-      "bytes": 185205,
+      "bytes": 185668,
       "warnings": 0
     },
     {
@@ -6487,7 +6491,7 @@
           "text": "provides"
         }
       ],
-      "bytes": 112171,
+      "bytes": 112196,
       "warnings": 0
     },
     {
@@ -6601,7 +6605,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 114115,
+      "bytes": 114217,
       "warnings": 0
     },
     {
@@ -7721,7 +7725,7 @@
           "text": "Troubleshooting"
         }
       ],
-      "bytes": 97462,
+      "bytes": 97489,
       "warnings": 0
     },
     {
@@ -8199,7 +8203,7 @@
           "text": "version"
         }
       ],
-      "bytes": 112928,
+      "bytes": 113005,
       "warnings": 0
     },
     {
@@ -8385,7 +8389,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 95781,
+      "bytes": 95806,
       "warnings": 0
     },
     {
@@ -9962,7 +9966,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 118339,
+      "bytes": 118441,
       "warnings": 0
     },
     {
@@ -10428,7 +10432,7 @@
           "text": "BungeeCord channel compatibility"
         }
       ],
-      "bytes": 109595,
+      "bytes": 109720,
       "warnings": 0
     },
     {
@@ -12316,6 +12320,6 @@
     }
   ],
   "timing_ms": {
-    "total": 3290
+    "total": 6057
   }
 }

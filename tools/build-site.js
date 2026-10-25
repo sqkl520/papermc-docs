@@ -209,6 +209,200 @@ function renderAllPages(pages) {
 }
 
 // ---------------------------------------------------------------------------
+// 3b. intrinsic image size → build-time width/height (P1-1, zero CLS)
+// ---------------------------------------------------------------------------
+
+/**
+ * 正文图片在 HTML 里写死 intrinsic `width`/`height`，浏览器才能在**布局前**预留占位，
+ * 从而消除懒加载图片带来的累积布局偏移（CLS）。运行期 JS 回填无效：回填时首次位移已发生。
+ * CSS 仍是 `img.content-img{max-width:100%;height:auto}`，宽高属性只提供宽高比，
+ * 显示尺寸不变（渲染几何逐像素不变，见 tools/c4-geom.js）。
+ *
+ * 只读图片头，不引入任何依赖：PNG(IHDR) / JPEG(SOFn) / GIF / WebP(VP8/VP8L/VP8X) / SVG(viewBox)。
+ * 灯箱占位 `<img alt="">` 没有 class="content-img"，因此不会被匹配到（它们不该有尺寸）。
+ */
+
+const IMG_SIZE_CACHE = new Map();
+const IMG_SIZE_STATS = {
+  written: 0, candidates: 0, skippedDataUri: 0, skippedExternal: 0,
+  skippedMissingFile: 0, skippedUnsupported: 0, alreadySized: 0, dataUriSized: 0, failures: [],
+};
+
+/** parse PNG / JPEG / GIF / WebP / SVG pixel size from a header buffer; null = unknown */
+function readImageSize(buf) {
+  if (!buf || buf.length < 12) return null;
+  // PNG: IHDR width/height are BE32 at offset 16 / 20
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) {
+    if (buf.length < 24) return null;
+    const w = buf.readUInt32BE(16);
+    const h = buf.readUInt32BE(20);
+    return w > 0 && h > 0 ? { w, h, format: 'png' } : null;
+  }
+  // GIF: logical screen width/height are LE16 at offset 6 / 8
+  if (buf[0] === 0x47 && buf[1] === 0x49 && buf[2] === 0x46) {
+    if (buf.length < 10) return null;
+    const w = buf.readUInt16LE(6);
+    const h = buf.readUInt16LE(8);
+    return w > 0 && h > 0 ? { w, h, format: 'gif' } : null;
+  }
+  // WebP: RIFF....WEBP
+  if (buf.length >= 30 && buf.toString('latin1', 0, 4) === 'RIFF' && buf.toString('latin1', 8, 12) === 'WEBP') {
+    return readWebpSize(buf);
+  }
+  // JPEG: walk the marker chain to the first SOF0/SOF1/SOF2/… frame header
+  if (buf[0] === 0xff && buf[1] === 0xd8) return readJpegSize(buf);
+  // SVG: text, take width/height, else viewBox (scaled by whichever single axis was given)
+  const head = buf.toString('utf8', 0, Math.min(buf.length, 4096));
+  if (/<svg[\s>]/i.test(head)) return readSvgSize(head);
+  return null;
+}
+
+/** VP8X canvas size (authoritative) or the VP8 / VP8L frame size */
+function readWebpSize(buf) {
+  let off = 12;
+  let canvas = null;
+  while (off + 8 <= buf.length) {
+    const fourcc = buf.toString('latin1', off, off + 4);
+    const size = buf.readUInt32LE(off + 4);
+    const body = off + 8;
+    if (fourcc === 'VP8X' && body + 10 <= buf.length) {
+      const w = 1 + (buf[body + 4] | (buf[body + 5] << 8) | (buf[body + 6] << 16));
+      const h = 1 + (buf[body + 7] | (buf[body + 8] << 8) | (buf[body + 9] << 16));
+      canvas = { w, h, format: 'webp' };
+    } else if (fourcc === 'VP8 ' && body + 10 <= buf.length) {
+      // 3-byte frame tag, then the 0x9D 0x01 0x2A start code
+      if (buf[body + 3] === 0x9d && buf[body + 4] === 0x01 && buf[body + 5] === 0x2a) {
+        const w = buf.readUInt16LE(body + 6) & 0x3fff;
+        const h = buf.readUInt16LE(body + 8) & 0x3fff;
+        if (w > 0 && h > 0) return { w, h, format: 'webp' };
+      }
+    } else if (fourcc === 'VP8L' && body + 5 <= buf.length) {
+      if (buf[body] === 0x2f) {
+        const bits = buf.readUInt32LE(body + 1);
+        const w = 1 + (bits & 0x3fff);
+        const h = 1 + ((bits >>> 14) & 0x3fff);
+        if (w > 0 && h > 0) return { w, h, format: 'webp' };
+      }
+    }
+    off = body + size + (size % 2); // RIFF chunks are word aligned
+  }
+  return canvas;
+}
+
+function readJpegSize(buf) {
+  let i = 2;
+  while (i + 9 < buf.length) {
+    if (buf[i] !== 0xff) { i += 1; continue; }
+    let marker = buf[i + 1];
+    while (marker === 0xff) { i += 1; marker = buf[i + 1]; } // fill bytes
+    if (marker === 0xd8 || marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) { i += 2; continue; }
+    const len = buf.readUInt16BE(i + 2);
+    const isSof = marker >= 0xc0 && marker <= 0xcf
+      && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc; // DHT/JPG/DAC are not frames
+    if (isSof) {
+      const h = buf.readUInt16BE(i + 5);
+      const w = buf.readUInt16BE(i + 7);
+      return w > 0 && h > 0 ? { w, h, format: 'jpeg' } : null;
+    }
+    i += 2 + len;
+  }
+  return null;
+}
+
+function readSvgSize(head) {
+  const svg = head.match(/<svg\b[^>]*>/i);
+  if (!svg) return null;
+  const tag = svg[0];
+  const attrOf = (name) => {
+    const m = tag.match(new RegExp('\\s' + name + '\\s*=\\s*"([^"]*)"', 'i'))
+      || tag.match(new RegExp("\\s" + name + "\\s*=\\s*'([^']*)'", 'i'));
+    return m ? m[1] : '';
+  };
+  const px = (v) => {
+    const m = String(v || '').trim().match(/^(-?[\d.]+)(?:px)?$/);
+    return m ? parseFloat(m[1]) : null;
+  };
+  const vb = attrOf('viewBox').split(/[\s,]+/).filter(Boolean).map(Number);
+  const hasVb = vb.length === 4 && vb[2] > 0 && vb[3] > 0;
+  const aw = px(attrOf('width'));
+  const ah = px(attrOf('height'));
+  if (aw && ah) return { w: Math.round(aw), h: Math.round(ah), format: 'svg' };
+  if (hasVb && aw) return { w: Math.round(aw), h: Math.round(aw * vb[3] / vb[2]), format: 'svg' };
+  if (hasVb && ah) return { w: Math.round(ah * vb[2] / vb[3]), h: Math.round(ah), format: 'svg' };
+  if (hasVb) return { w: Math.round(vb[2]), h: Math.round(vb[3]), format: 'svg' };
+  return null;
+}
+
+/** absolute path of a site-relative image URL → intrinsic size (cached, null when unreadable) */
+function intrinsicImageSize(abs, outAbs) {
+  if (IMG_SIZE_CACHE.has(abs)) return IMG_SIZE_CACHE.get(abs);
+  let size = null;
+  try {
+    if (fs.existsSync(abs) && fs.statSync(abs).isFile()) {
+      const st = fs.statSync(abs);
+      const fd = fs.openSync(abs, 'r');
+      try {
+        const buf = Buffer.alloc(Math.min(st.size, 65536));
+        const read = fs.readSync(fd, buf, 0, buf.length, 0);
+        size = readImageSize(read === buf.length ? buf : buf.subarray(0, read));
+      } finally { fs.closeSync(fd); }
+    }
+  } catch (e) {
+    size = null;
+  }
+  IMG_SIZE_CACHE.set(abs, size);
+  if (!size) IMG_SIZE_STATS.failures.push(U.posix(path.relative(U.ROOT, abs)));
+  return size;
+}
+
+/**
+ * Write intrinsic width/height onto every `class="content-img"` <img> of one finished page.
+ * Lightbox placeholders (`<img alt="">`, no src, no content-img class) are left untouched.
+ */
+function addIntrinsicImageSizes(html, outAbs) {
+  const dir = path.dirname(outAbs);
+  return String(html).replace(/<img\b[^>]*>/g, (tag) => {
+    if (!/class="[^"]*\bcontent-img\b[^"]*"/.test(tag)) return tag;
+    if (!/\ssrc="[^"]*"/.test(tag)) return tag;
+    IMG_SIZE_STATS.candidates += 1;
+    if (/\swidth="\d+"/.test(tag) || /\sheight="\d+"/.test(tag)) { IMG_SIZE_STATS.alreadySized += 1; return tag; }
+    const raw = U.decodeEntities((tag.match(/\ssrc="([^"]*)"/) || [])[1] || '');
+    // data: URI 的图片头同样可读（内联 PNG/JPEG/GIF/WebP），解析失败就跳过而不是猜
+    if (/^data:/i.test(raw)) {
+      const dm = raw.match(/^data:([^;,]*)(;base64)?,([\s\S]*)$/i);
+      let size = null;
+      if (dm) {
+        try {
+          const buf = dm[2] ? Buffer.from(dm[3], 'base64') : Buffer.from(decodeURIComponent(dm[3]), 'latin1');
+          size = readImageSize(buf);
+        } catch (e) { size = null; }
+      }
+      if (!size) { IMG_SIZE_STATS.skippedDataUri += 1; return tag; }
+      IMG_SIZE_STATS.written += 1;
+      IMG_SIZE_STATS.dataUriSized += 1;
+      return tag.replace(/(class="[^"]*\bcontent-img\b[^"]*")/,
+        '$1 width="' + size.w + '" height="' + size.h + '"');
+    }
+    if (/^(?:https?:)?\/\//i.test(raw)) { IMG_SIZE_STATS.skippedExternal += 1; return tag; }
+    const clean = raw.split('#')[0].split('?')[0];
+    let abs = path.resolve(dir, clean);
+    if (!fs.existsSync(abs)) {
+      try {
+        const dec = path.resolve(dir, decodeURIComponent(clean));
+        if (fs.existsSync(dec)) abs = dec;
+      } catch (e) { /* malformed %-escape: keep the raw path */ }
+    }
+    if (!fs.existsSync(abs)) { IMG_SIZE_STATS.skippedMissingFile += 1; return tag; }
+    const size = intrinsicImageSize(abs, outAbs);
+    if (!size) { IMG_SIZE_STATS.skippedUnsupported += 1; return tag; }
+    IMG_SIZE_STATS.written += 1;
+    // insert right after the class attribute so the tag stays readable
+    return tag.replace(/(class="[^"]*\bcontent-img\b[^"]*")/,
+      '$1 width="' + size.w + '" height="' + size.h + '"');
+  });
+}
+
+// ---------------------------------------------------------------------------
 // 4. link + asset resolution (pass 2)
 // ---------------------------------------------------------------------------
 
@@ -1467,10 +1661,35 @@ function main() {
     p.html = R.finalizeHtml(p.html, p, linker);
   }
 
+  // 图片 intrinsic 宽高（P1-1）：必须在链接/图片地址最终落定之后、写盘之前插入，
+  // 这样 `src` 已经是相对输出目录的路径，可直接解析到磁盘上的真实文件。
+  for (const p of pages) {
+    if (p.html === undefined) continue;
+    p.html = addIntrinsicImageSizes(p.html, p.outAbs);
+  }
+
   // anchors that no heading provides (Starlight config-leaf ids lost in conversion) are
   // recovered from the list-key nesting path; whatever stays missing is marked visibly.
   const anchorFix = resolveAnchors(pages, warnings);
   log('      锚点回收 ' + anchorFix.recovered + ' / 仍缺失 ' + anchorFix.unresolved.length + '（已加可见标记）');
+
+  // 宽高注入的自证：逐项记录未能写入的图片，绝不猜测尺寸
+  if (IMG_SIZE_STATS.skippedDataUri) {
+    warn('image-size-data-uri', IMG_SIZE_STATS.skippedDataUri + ' 张 data: URI 图片头无法解析，未写 width/height（不猜尺寸）');
+  }
+  if (IMG_SIZE_STATS.skippedMissingFile) {
+    warn('image-size-file-missing', IMG_SIZE_STATS.skippedMissingFile + ' 张正文图片的 src 无法解析到磁盘文件，未写 width/height');
+  }
+  if (IMG_SIZE_STATS.skippedUnsupported) {
+    warn('image-size-unreadable', IMG_SIZE_STATS.skippedUnsupported + ' 张正文图片头无法解析，未写 width/height：'
+      + IMG_SIZE_STATS.failures.join(', '));
+  }
+  log('      图片 intrinsic 宽高 ' + IMG_SIZE_STATS.written + ' / ' + IMG_SIZE_STATS.candidates
+    + ' 写入（含 data:URI ' + IMG_SIZE_STATS.dataUriSized
+    + '；跳过 data:URI 头不可读 ' + IMG_SIZE_STATS.skippedDataUri
+    + ' / 外链 ' + IMG_SIZE_STATS.skippedExternal
+    + ' / 缺文件 ' + IMG_SIZE_STATS.skippedMissingFile
+    + ' / 头不可读 ' + IMG_SIZE_STATS.skippedUnsupported + '）');
 
   for (const p of pages) {
     if (p.html === undefined) continue;
@@ -1520,6 +1739,8 @@ function main() {
     imagesLocalized: linker.stats.imagesAbsoluteLocalized,
     imagesExternal: linker.stats.imagesExternal,
     imagesMissing: linker.stats.imagesMissing,
+    imagesWithIntrinsicSize: IMG_SIZE_STATS.written,
+    imagesIntrinsicSkipped: IMG_SIZE_STATS.candidates - IMG_SIZE_STATS.written,
     inDocH1NonUnique: pages.filter((p) => p.articleH1 !== 1).length,
     categoryPageDebugChips: 0,
     sourceNavGroups: nav.present ? nav.sections.reduce((n, s) => n + s.groupCount, 0) : 0,
@@ -1671,6 +1892,8 @@ function main() {
       fragmentsRecovered: '按配置键路径从嵌套列表键补回的锚点 id 数',
       imagesLocal: '本地相对路径图片（已校验文件存在）',
       imagesExternal: '第三方外链图片（保持在线，加 visible 提示）',
+      imagesWithIntrinsicSize: '正文图片中已写入 intrinsic width/height 的条数（构建期读图片头，消除懒加载 CLS）',
+      imagesIntrinsicSkipped: '正文图片中未写入宽高的条数（data: URI / 外链 / 文件缺失 / 格式不支持，逐项见 image-size-* 告警）',
       footnotesResolved: '已补 id 的脚注锚点数',
       sourceNavGroups: '源侧栏（source-nav.json）分组总数：' + nav.sections.map((s) => s.id + ' ' + s.groupCount).join(' + ')
         + ' = ' + stats.sourceNavGroups,
@@ -1856,4 +2079,7 @@ if (require.main === module) {
   }
 }
 
-module.exports = { main, Linker, buildSiteModel, loadManifests, loadTaxonomy, renderAllPages, runSelfTest, verifyArtifacts };
+module.exports = {
+  main, Linker, buildSiteModel, loadManifests, loadTaxonomy, renderAllPages, runSelfTest,
+  verifyArtifacts, readImageSize, addIntrinsicImageSizes, IMG_SIZE_STATS,
+};

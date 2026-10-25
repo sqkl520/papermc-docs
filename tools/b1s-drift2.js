@@ -12,14 +12,14 @@
  *   b0         = HEAD css/js + 批 1 的折叠 HTML
  *   b0-open    = HEAD css/js + 把 .toc-fold 补回 open（批 0 原始 HTML）
  * 每组测：浅滚(0.1) / 中滚(0.5) / 深滚(0.95) 三个深度，真实鼠标点击。
- * 只读站点；写 <tmp>\b1s\drift2.json。
+ * 只读站点；写 TMPDIR\b1s\drift2.json。
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
 const ROOT = path.join(__dirname, '..');
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

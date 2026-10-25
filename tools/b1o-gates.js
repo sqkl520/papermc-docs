@@ -28,7 +28,7 @@ const opt = (n, d) => {
   return hit ? hit.slice(p.length) : d;
 };
 
-const TMPROOT = path.join(process.env.TEMP || process.env.TMP || '.', 'b1o');
+const TMPROOT = path.join(require("os").tmpdir() || require("os").tmpdir() || '.', 'b1o');
 const SHADOW = path.resolve(opt('shadow', path.join(TMPROOT, 'shadow')));
 const OUT_JSON = path.resolve(opt('json', path.join(TMPROOT, 'gates.json')));
 const ONLY = (opt('only', '') || '').split(/[,\s]+/).filter(Boolean).map(Number);

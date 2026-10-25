@@ -9,7 +9,7 @@
  *         ⇒ 只有批 0。page.route 内存注入，不落仓库。
  *   old = http://127.0.0.1:8788                     ..\_pre-mobile @ a19a6c2（批 0 之前）
  *
- * b0 的 assets 副本另存 %TEMP%\b2b0\ 供人工核对（不写入仓库）。
+ * b0 的 assets 副本另存 TMPDIR\b2b0\ 供人工核对（不写入仓库）。
  */
 const fs = require('fs');
 const path = require('path');
@@ -17,8 +17,8 @@ const { execFileSync } = require('child_process');
 const { chromium } = require('playwright-core');
 
 const ROOT = path.join(__dirname, '..');
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
-const B0_DIR = path.join(process.env.TEMP || '.', 'b2b0');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
+const B0_DIR = path.join(require("os").tmpdir() || '.', 'b2b0');
 fs.mkdirSync(TMP, { recursive: true });
 fs.mkdirSync(B0_DIR, { recursive: true });
 
@@ -54,7 +54,7 @@ for (const f of changedSinceB0()) {
   B0_FILES.set('/' + f.replace(/\\/g, '/'), { file: f, type });
 }
 
-/** 把 b0 的 assets 副本落 %TEMP%\b2b0\ 备查（任务书要求的 b0 口径，落点改到 temp） */
+/** 把 b0 的 assets 副本落 TMPDIR\b2b0\ 备查（任务书要求的 b0 口径，落点改到 temp） */
 function dumpB0() {
   const done = [];
   for (const key of ['assets/site.css', 'assets/site.js']) {

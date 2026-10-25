@@ -68,7 +68,7 @@ return out;
 }
 
 const out = scan();
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
 fs.mkdirSync(TMP, { recursive: true });
 fs.writeFileSync(path.join(TMP, 'imgscan.json'), JSON.stringify(out, null, 1), 'utf8');
 process.stdout.write(JSON.stringify(out, null, 1) + '\n');

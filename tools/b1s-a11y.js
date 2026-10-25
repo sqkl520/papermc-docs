@@ -10,13 +10,13 @@
  *                   + 新增怀疑：--toc-offset 在展开态是否更新；展开后锚点是否仍被盖
  *   F-6  SC 4.1.2 : summary 的 AX 名是否还含 "▸"
  *   + 回归：lastIsWide 在 bfcache 恢复（pageshow persisted）时是否错乱
- * 只读站点；写 <tmp>\b1s\a11y.json。用法: node tools/b1s-a11y.js
+ * 只读站点；写 TMPDIR\b1s\a11y.json。用法: node tools/b1s-a11y.js
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

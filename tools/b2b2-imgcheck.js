@@ -34,5 +34,5 @@ for (const f of htmls) {
 }
 
 const out = { htmlFiles: htmls.length, withSrc, contentImg: content, externalImage: ext, srcOtherClass: other, extList, otherList };
-fs.writeFileSync(path.join(process.env.TEMP || '.', 'b2b2', 'imgcheck.json'), JSON.stringify(out, null, 1), 'utf8');
+fs.writeFileSync(path.join(require("os").tmpdir() || '.', 'b2b2', 'imgcheck.json'), JSON.stringify(out, null, 1), 'utf8');
 process.stdout.write(JSON.stringify(out, null, 1) + '\n');

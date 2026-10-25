@@ -1,0 +1,36 @@
+{
+  "generated_at": "2026-10-25T08:00:01.545Z",
+  "anchor": "3d47519c9dc8f28a",
+  "files": {
+    "assets/site.css": {
+      "bytes": 52661,
+      "sha256": "d78df393a4a49032793ef2c4a30bcd4b80aac2ae50992b5f4bbfd2a7978587b6",
+      "sha12": "d78df393a4a4"
+    },
+    "assets/site.js": {
+      "bytes": 59516,
+      "sha256": "528621370d710757cae99b8c52d8a72c3c7d7fe818debd866aa00e16624021be",
+      "sha12": "528621370d71"
+    },
+    "assets/search-index.js": {
+      "bytes": 824071,
+      "sha256": "b0fd74058ac09597a5fa204619bf3706b794da9c361940e50b1178ba9698ef44",
+      "sha12": "b0fd74058ac0"
+    },
+    "assets/favicon.svg": {
+      "bytes": 298,
+      "sha256": "572c17c1c70078b314d99c0a9851c8a0a62668551df0cf93637630465fd75974",
+      "sha12": "572c17c1c700"
+    },
+    "search-index.json": {
+      "bytes": 823963,
+      "sha256": "e0fe9b75e272933918c4f58ea9d48161d199b848a15f2de29a90e79536dd4f2d",
+      "sha12": "e0fe9b75e272"
+    },
+    "data/build-manifest.json": {
+      "bytes": 358160,
+      "sha256": "f490226d4a8754bce74c3234a76d4093aff390995b099978e8f2a0258ae6a47a",
+      "sha12": "f490226d4a87"
+    }
+  }
+}

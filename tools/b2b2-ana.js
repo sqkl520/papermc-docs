@@ -5,7 +5,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
 const rd = (n) => JSON.parse(fs.readFileSync(path.join(TMP, n), 'utf8'));
 
 const which = process.argv[2] || 'a';

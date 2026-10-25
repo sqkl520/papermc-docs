@@ -9,7 +9,7 @@
  *   3. 注入模拟：JS 给所有 img 写 width/height = naturalWidth/naturalHeight 后重测 CLS
  *
  * 用法：node tools/b2b-d.js
- * 产出：<tmp>\b2b\d.json
+ * 产出：TMPDIR\b2b\d.json
  */
 const fs = require('fs');
 const path = require('path');

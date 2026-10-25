@@ -9,13 +9,13 @@
  *   D. 右键目标（contextmenu 时 elementFromPoint 的 tag/class）
  *   E. 键盘：Tab 到 .src-link 是否出现焦点环（:has(:focus-visible)）
  * 对照：8788（old）同位置同样操作。
- * 只读站点；写 <tmp>\b1s\stretch.json。用法: node tools/b1s-stretch.js
+ * 只读站点；写 TMPDIR\b1s\stretch.json。用法: node tools/b1s-stretch.js
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

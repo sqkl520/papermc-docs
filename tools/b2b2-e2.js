@@ -14,7 +14,7 @@
  *   C = B + `.article > ul{max-width:...}`（保证 worldcfg 的 ul 容器本身被限宽）
  *
  * 用法：node tools/b2b2-e2.js
- * 产出：%TEMP%\b2b2\e2.json
+ * 产出：TMPDIR\b2b2\e2.json
  */
 const L = require('./b2b2-lib');
 

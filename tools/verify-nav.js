@@ -1550,7 +1550,7 @@ function renderMarkdown(rep) {
   L.push('被 spawn 的既有工具的写入面：');
   L.push('- `tools/check-site.js`：只读，无写入。');
   L.push('- `tools/verify-site.js`：按自身设计无条件覆写 `reports/verification.json`（`--json-only` 时不写 `.md`）；本工具运行后已按原字节还原两个文件（第 6 项指标 `json=true md=true`），因此上一轮独立验证的基线未被改动。');
-  L.push('- `tools/gh-pages-smoke.js`：结果 JSON 被重定向到系统临时目录（`<tmp>/nav-verify-gh-pages-smoke.json`），`reports/gh-pages-smoke.json` 保持原字节（`generatedAt` 仍为 2026-10-19T21:51:52.501Z）。');
+  L.push('- `tools/gh-pages-smoke.js`：结果 JSON 被重定向到系统临时目录（`TMPDIR/nav-verify-gh-pages-smoke.json`），`reports/gh-pages-smoke.json` 保持原字节（`generatedAt` 仍为 2026-10-19T21:51:52.501Z）。');
   L.push('');
   L.push(`- 第 10 项的「git 将跟踪」统计包含本报告的 JSON/MD 自身；不含这 2 个文件时为 717 个文件（体积差 ≈ 141 KiB）。`);
   L.push('- 本工具不执行任何 `git add` / `git commit` / `git push`。（注：会话期间有其它 Agent 提交过仓库，`HEAD` 提交信息含本报告标题；本次验证运行本身无提交动作。）');

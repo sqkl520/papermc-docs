@@ -9,7 +9,7 @@
  *      逐格比对 overflow / hasMenuButton / navRowMin / tocVisible / headerH /
  *      sidebar.{display,width} / tocSide.{display,width}，输出 diff 表。
  *   #2 E3 既有门禁：check-site / verify-site / url-parity / privacy-scan / gh-pages-smoke
- *      都在 <tmp> 影子副本里跑（不覆盖仓库既有报告）。
+ *      都在 TMPDIR 影子副本里跑（不覆盖仓库既有报告）。
  *   #3 E5 file://：390×844 直开 index.html 与正文页，量自定义属性、相对路径、
  *      requestfailed、overflow。
  *   #4 性能（红队加严）：4× CPU 节流 + 4G 网络下 FCP < 2000ms、DCL 前可交互，
@@ -338,9 +338,9 @@ async function check2() {
   const shaOf = (rel) => { try { return require('crypto').createHash('sha256').update(fs.readFileSync(path.join(REPO, rel))).digest('hex').slice(0, 16); } catch { return null; } };
   const before = {};
   for (const rel of declared) before[rel] = shaOf(rel);
-  console.log('  影子副本：' + '<tmp> 下复制仓库（含 .git，node_modules 用 junction，不覆盖仓库既有报告）…');
+  console.log('  影子副本：' + 'TMPDIR 下复制仓库（含 .git，node_modules 用 junction，不覆盖仓库既有报告）…');
   const shadow = copyShadow();
-  const shadowLabel = '<tmp>/' + path.basename(shadow);
+  const shadowLabel = 'TMPDIR/' + path.basename(shadow);
   console.log('  shadow = ' + shadowLabel);
   const gates = [
     { id: 'check-site', args: ['tools/check-site.js'], writes: [] },
@@ -390,7 +390,7 @@ async function check2() {
     files_touched_in_repo_during_window: recent,
     gates: results, failed: fails.map((f) => f.id),
     duration_s: Math.round((Date.now() - t0) / 1000),
-    repro: '复制仓库到 <tmp> 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
+    repro: '复制仓库到 TMPDIR 后在副本里：node tools/check-site.js && node tools/verify-site.js && node tools/url-parity.js && node tools/privacy-scan.js && node tools/gh-pages-smoke.js',
     conclusion: fails.length
       ? '门禁未全绿：' + fails.map((f) => f.id + '(exit ' + f.exit_code + ')').join('、')
       : '5/5 门禁全绿（exit 0）；这些门禁会写的 4 个仓库文件跑前跑后 sha256 完全一致 → 本次复跑没有覆盖仓库既有 reports/**、data/**',
@@ -824,7 +824,7 @@ async function check5() {
     repo_file: main,
     non_repo_copies: siblings,
     privacy_scan: psSummary,
-    self_scan_note: '本脚本自身也必须是 ① 类干净的：跑门禁时 privacy-scan 会连 tools/verify-mobile-c.js 一起扫（曾经命中过 tools/verify-mobile-c.js 的 temp-path 规则，已改成 <tmp> 写法）',
+    self_scan_note: '本脚本自身也必须是 ① 类干净的：跑门禁时 privacy-scan 会连 tools/verify-mobile-c.js 一起扫（曾经命中过 tools/verify-mobile-c.js 的 temp-path 规则，已改成 TMPDIR 写法）',
     applied_fix: {
       target: '非仓库副本 _shadow-verify/tools/verify-mobile.js（前任验证器的遗留影子副本；仓库内同名文件当时已是 env 拼路径）',
       what: '把 1 处盘符字面量的浏览器路径常量改成 env 拼路径的 BROWSER_CANDIDATES + browserPath()，顺序保持 Chrome → bundled chromium → Edge，逻辑不变',
@@ -959,7 +959,7 @@ function renderMd(st) {
     const o = it[2];
     L.push('## 2. E3 既有门禁（影子副本独立复跑）');
     L.push('');
-    L.push('- 影子根：`<tmp>\\mv-c-shadow-*`（仓库副本；node_modules 用 junction；含 `.git` 以便 gh-pages-smoke 的 `git ls-files` 步骤等价）');
+    L.push('- 影子根：`TMPDIR\\mv-c-shadow-*`（仓库副本；node_modules 用 junction；含 `.git` 以便 gh-pages-smoke 的 `git ls-files` 步骤等价）');
     L.push('- 仓库既有报告未被覆盖：' + (o.repo_untouched ? '✅ 未回写' : '❌ 有回写'));
     L.push('');
     L.push(table(['门禁', '命令', 'exit', '结果', '耗时', '副本内写入'], o.gates.map((g) => [

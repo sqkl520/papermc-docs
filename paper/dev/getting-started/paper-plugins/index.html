@@ -152,7 +152,7 @@
 <p>Paper plugins do not use the <code>commands</code> field to register commands. This means that you do not need to include all of your commands in the <code>paper-plugin.yml</code> file. Instead, you can register commands using the <a href="../../command-api/basics/introduction/index.html" class="internal">Brigadier Command API</a>.</p>
 <h3 id="cyclic-plugin-loading" class="heading heading-3">Cyclic plugin loading<a class="heading-anchor" href="#cyclic-plugin-loading" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>Cyclic loading describes the phenomenon when a plugin loading causes a loop that eventually cycles back to the original plugin. Unlike Bukkit plugins, Paper plugins will not attempt to resolve cyclic loading issues.</p>
-<p><img src="../../../../archive/paper/assets/docs.papermc.io/d2/docs/paper/dev/getting-started/paper-plugins-0.svg" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Diagram"></p>
+<p><img src="../../../../archive/paper/assets/docs.papermc.io/d2/docs/paper/dev/getting-started/paper-plugins-0.svg" class="content-img" width="813" height="208" data-zoom="1" loading="lazy" decoding="async" alt="Diagram"></p>
 <p>However, if Paper detects a loop that cannot be resolved, you will get an error that looks like this:</p>
 <figure class="code-block"><figcaption class="code-title"><span class="code-lang">text</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块，可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-text">[ERROR]: [LoadOrderTree] =================================
 [ERROR]: [LoadOrderTree] Circular plugin loading detected:

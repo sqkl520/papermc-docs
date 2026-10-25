@@ -1,11 +1,11 @@
 'use strict';
 /**
- * b2b-mk.js — 从实测 JSON 生成报告用的 markdown 片段（只读，写 %TEMP%）
+ * b2b-mk.js — 从实测 JSON 生成报告用的 markdown 片段（只读，写 TMPDIR）
  * 用法：node tools/b2b-mk.js <a|c|d|e|d2>  → 打印 markdown
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b');
 const load = (n) => JSON.parse(fs.readFileSync(path.join(TMP, n + '.json'), 'utf8'));
 const R0 = (v) => (v == null ? '—' : Math.round(v));
 const R1 = (v) => (v == null ? '—' : (Math.round(v * 10) / 10).toFixed(1));

@@ -11,7 +11,7 @@
  *
  * 用法示例（在仓库根目录下）：
  *   node tools/taxonomy-util.js extract paper velocity
- *   node tools/taxonomy-util.js build <tmp>\papermc-tax-data.json
+ *   node tools/taxonomy-util.js build TMPDIR\papermc-tax-data.json
  *   node tools/taxonomy-util.js validate
  *   node tools/taxonomy-util.js report
  *

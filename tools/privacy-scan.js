@@ -78,7 +78,7 @@ const RULES = [
   {
     id: 'temp-path',
     note: '临时目录引用',
-    re: /%TEMP%|%TMP%|AppData[\\/](?:Local|Roaming)|[\\/]Temp[\\/]|\/tmp\//g,
+    re: /<tmp>|%TMP%|AppData[\\/](?:Local|Roaming)|[\\/]Temp[\\/]|\/tmp\//g,
   },
   {
     id: 'user-name',

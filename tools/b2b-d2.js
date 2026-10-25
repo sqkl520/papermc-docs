@@ -12,7 +12,7 @@
  * 两遍同进程、同视口、同 CLS 观察器，可直接对拍。
  *
  * 用法：node tools/b2b-d2.js
- * 产出：<tmp>\b2b\d2.json
+ * 产出：TMPDIR\b2b\d2.json
  */
 const L = require('./b2b-lib');
 

@@ -12,7 +12,7 @@
  *   DESC   = `.article :is(p,ul,ol,blockquote,dl){max-width:40rem}`  （后代全限，含容器）
  *
  * 用法：node tools/b2b2-e3.js
- * 产出：%TEMP%\b2b2\e3.json
+ * 产出：TMPDIR\b2b2\e3.json
  */
 const L = require('./b2b2-lib');
 

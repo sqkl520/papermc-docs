@@ -12,7 +12,7 @@
  * 本脚本先滚到底再滚回顶，全程累积 layout-shift。
  *
  * 用法：node tools/b2b2-d.js
- * 产出：%TEMP%\b2b2\d.json
+ * 产出：TMPDIR\b2b2\d.json
  */
 const fs = require('fs');
 const path = require('path');

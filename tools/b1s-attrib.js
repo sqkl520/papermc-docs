@@ -13,14 +13,14 @@
  *   r-copy    : .code-copy 还原 21.2px 高（隔离 P0-3 对 pageHeight 的贡献）
  *   r-pad     : .content 横向 padding 还原 2rem（隔离批 0 的列宽改动）
  *
- * 只读站点；结果写 <tmp>\b1s\attrib.json。用法: node tools/b1s-attrib.js
+ * 只读站点；结果写 TMPDIR\b1s\attrib.json。用法: node tools/b1s-attrib.js
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
 const ROOT = path.join(__dirname, '..');
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 
 const EXE = [

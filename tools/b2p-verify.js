@@ -35,7 +35,7 @@ const STAGE = opt('stage', 'post');          // pre = 落地前采基线；post 
 const OUT = opt('out', '');
 const BASE = opt('url', 'http://127.0.0.1:8787');
 
-const TMP = path.join(process.env.TEMP || '', 'b2p');
+const TMP = path.join(require("os").tmpdir() || '', 'b2p');
 fs.mkdirSync(TMP, { recursive: true });
 
 const EXE = [

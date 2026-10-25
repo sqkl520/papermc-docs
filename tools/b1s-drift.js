@@ -8,13 +8,13 @@
  *   2. 开抽屉瞬间 clientWidth / scrollHeight / 各区块 docTop 怎么变
  *   3. 候选因子逐个置空：scrollbar-gutter / body overflow / sidebar position / 遮罩
  * 另附 Escape 关闭行为（8787 vs 8788）与焦点归位。
- * 只读站点；写 <tmp>\b1s\drift.json。用法: node tools/b1s-drift.js
+ * 只读站点；写 TMPDIR\b1s\drift.json。用法: node tools/b1s-drift.js
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

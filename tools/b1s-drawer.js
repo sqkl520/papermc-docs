@@ -12,13 +12,13 @@
  *   - 若 A（真实鼠标）在两棵树都 ≈0，则"改前每次 −428"是自动化伪影，P0-2 修的缺陷不存在；
  *   - 只测"阅读位置" = 抽屉覆盖的正文里，某个固定段落的视口 y 变化（比 scrollY 更贴近用户损失）。
  * 另测 390 档 +27 的根因：scrollbar-gutter / 滚动锚定 / 焦点。
- * 只读站点；写 <tmp>\b1s\drawer.json。用法: node tools/b1s-drawer.js
+ * 只读站点；写 TMPDIR\b1s\drawer.json。用法: node tools/b1s-drawer.js
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

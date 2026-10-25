@@ -11,13 +11,13 @@
  *   4. 从目录里真实点击第 N 个链接（不是设 hash），看目标标题相对 sticky 条的位置
  *   5. 再折叠回去，重复一次，看 offset 是否回落到 61
  * 额外：检查 syncTocOffset 只在 resize/toggle 触发，滚轮/内容变化不触发。
- * 只读站点；写 <tmp>\b1s\toc2.json。
+ * 只读站点；写 TMPDIR\b1s\toc2.json。
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

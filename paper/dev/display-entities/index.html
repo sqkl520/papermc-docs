@@ -46,7 +46,7 @@
 <h2 id="transformation" class="heading heading-2">Transformation<a class="heading-anchor" href="#transformation" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>Displays can have an arbitrary affine transformation applied to them, allowing you to position and warp them as you choose in 3D space.</p>
 <p>Transformations are applied to the display in this order:</p>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/d2/docs/paper/dev/api/entity-api/display-entities-0.svg" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Diagram"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/d2/docs/paper/dev/api/entity-api/display-entities-0.svg" class="content-img" width="890" height="168" data-zoom="1" loading="lazy" decoding="async" alt="Diagram"></p>
 <aside class="alert alert-tip" role="note" data-alert-type="tip"><p class="alert-title">Visualizing transformations</p><div class="alert-body"><p>Use the <a href="https://misode.github.io/transformation/" class="external" target="_blank" rel="noopener">Transformation Visualizer</a> website to visualize a transformation for quick prototyping!</p>
 </div></aside>
 <h3 id="scale" class="heading heading-3">Scale<a class="heading-anchor" href="#scale" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -67,7 +67,7 @@
     <span class="hljs-comment">//                 .scale(2) // scale up by a factor of 2 on all axes</span>
     <span class="hljs-comment">// );</span>
 });</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-scale.CGw8wYbk_Z2rvyPD.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Scaling example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-scale.CGw8wYbk_Z2rvyPD.webp" class="content-img" width="1920" height="1011" data-zoom="1" loading="lazy" decoding="async" alt="Scaling example"></p>
 <h3 id="rotation" class="heading heading-3">Rotation<a class="heading-anchor" href="#rotation" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>You can also rotate it, let’s tip it on its corner:</p>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">world.spawn(location, BlockDisplay.class, entity -&gt; {
@@ -91,7 +91,7 @@
     <span class="hljs-comment">//                 )</span>
     <span class="hljs-comment">// );</span>
 });</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-rotation.BGw2MF-Y_Z1xyorc.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Rotation example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-rotation.BGw2MF-Y_Z1xyorc.webp" class="content-img" width="1920" height="1011" data-zoom="1" loading="lazy" decoding="async" alt="Rotation example"></p>
 <h3 id="translation" class="heading heading-3">Translation<a class="heading-anchor" href="#translation" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>Finally, we can also apply a translation transformation (position offset) to the display, for example:</p>
 <figure class="code-block" data-lang="java"><figcaption class="code-title"><span class="code-lang">java</span><span class="code-file"></span><button class="code-copy" type="button" data-copy-code aria-label="复制代码">复制</button></figcaption><div class="code-scroll" tabindex="0" role="region" aria-label="代码块（java），可用左右方向键横向滚动"><pre class="code-pre"><code class="hljs language-java" data-lang="java">world.spawn(location, BlockDisplay.class, entity -&gt; {
@@ -116,7 +116,7 @@
     <span class="hljs-comment">//                 )</span>
     <span class="hljs-comment">// );</span>
 });</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-trans.DS2MbS_l_qH4Rg.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Translation example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-trans.DS2MbS_l_qH4Rg.webp" class="content-img" width="1920" height="1011" data-zoom="1" loading="lazy" decoding="async" alt="Translation example"></p>
 <h2 id="interpolation" class="heading heading-2">Interpolation<a class="heading-anchor" href="#interpolation" aria-label="本节链接" title="本节链接">#</a></h2>
 <p>Transformations and teleports can be linearly interpolated by the client to create a smooth animation, switching from one transformation/location to the next.</p>
 <h3 id="transformation-1" class="heading heading-3">Transformation<a class="heading-anchor" href="#transformation-1" aria-label="本节链接" title="本节链接">#</a></h3>
@@ -141,7 +141,7 @@ Bukkit.getScheduler().runTaskTimer(plugin, task -&gt; {
     display.setInterpolationDelay(<span class="hljs-number">0</span>); <span class="hljs-comment">// no delay to the interpolation</span>
     display.setInterpolationDuration(duration); <span class="hljs-comment">// set the duration of the interpolated rotation</span>
 }, <span class="hljs-number">1</span> <span class="hljs-comment">/* delay the initial transformation by one tick from display creation */</span>, duration);</code></pre></div></figure>
-<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-interp.BKwIK_Zm_20sRcF.webp" class="content-img" data-zoom="1" loading="lazy" decoding="async" alt="Interpolation example"></p>
+<p><img src="../../../archive/paper/assets/docs.papermc.io/_astro/display-interp.BKwIK_Zm_20sRcF.webp" class="content-img" width="540" height="476" data-zoom="1" loading="lazy" decoding="async" alt="Interpolation example"></p>
 <h3 id="teleportation" class="heading heading-3">Teleportation<a class="heading-anchor" href="#teleportation" aria-label="本节链接" title="本节链接">#</a></h3>
 <p>Similarly to the transformation interpolation, you may also want to interpolate the movement of the entire display entity between two points.</p>
 <p>A similar effect may be achieved using an interpolated translation, however if you change other properties of the transformation, those too will be interpolated, which may or may not be what you want.</p>

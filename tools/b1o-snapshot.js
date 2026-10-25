@@ -26,7 +26,7 @@ const opt = (n, d) => {
   return hit ? hit.slice(p.length) : d;
 };
 
-const OUT = opt('out', path.join(process.env.TEMP || '.', 'b1o-snapshot.json'));
+const OUT = opt('out', path.join(require("os").tmpdir() || '.', 'b1o-snapshot.json'));
 const CMP = opt('compare', '');
 
 /** 不做全量哈希的重目录：依赖与 git 元数据与本任务无关 */

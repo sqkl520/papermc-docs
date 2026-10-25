@@ -15,7 +15,7 @@
  *   FixMax1200   = FixAlign1200 + 去掉 `.content{max-width:1000px}` 的 1280 提前触发（改到 ≥1200）
  *
  * 用法：node tools/b2b2-b3.js
- * 产出：%TEMP%\b2b2\b3.json
+ * 产出：TMPDIR\b2b2\b3.json
  */
 const L = require('./b2b2-lib');
 

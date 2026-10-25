@@ -1,11 +1,11 @@
 'use strict';
 /**
- * b2b2-sec.js — 生成报告小节 markdown 到 %TEMP%\b2b2\sec<X>.md（只读数据，不改仓库）
+ * b2b2-sec.js — 生成报告小节 markdown 到 TMPDIR\b2b2\sec<X>.md（只读数据，不改仓库）
  * 用法：node tools/b2b2-sec.js a|b|c|d|e
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
 const rd = (n) => JSON.parse(fs.readFileSync(path.join(TMP, n), 'utf8'));
 const w = (n, s) => { const f = path.join(TMP, n); fs.writeFileSync(f, s, 'utf8'); console.log('wrote ' + f + ' (' + s.length + ' chars)'); };
 

@@ -18,7 +18,7 @@
  *   node tools/critique-mobile-probe.js                     # 全部视口 × 全部探针页
  *   node tools/critique-mobile-probe.js --vp=390x844
  *   node tools/critique-mobile-probe.js --json=out.json
- *   node tools/critique-mobile-probe.js --shots=1           # 额外把关键区域截图到 <tmp>\critique-mobile
+ *   node tools/critique-mobile-probe.js --shots=1           # 额外把关键区域截图到 TMPDIR\critique-mobile
  */
 
 const fs = require('fs');

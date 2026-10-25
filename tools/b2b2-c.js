@@ -10,7 +10,7 @@
  *   4. 三方（new/b0/old）对照，判定 strut 是否仍在、由谁引入
  *
  * 用法：node tools/b2b2-c.js
- * 产出：%TEMP%\b2b2\c.json
+ * 产出：TMPDIR\b2b2\c.json
  */
 const L = require('./b2b2-lib');
 

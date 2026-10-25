@@ -11,7 +11,7 @@
  * 40rem = 40 × 根字号；本页根字号未缩放时 = 640px。
  *
  * 用法：node tools/b2b2-e.js
- * 产出：%TEMP%\b2b2\e.json
+ * 产出：TMPDIR\b2b2\e.json
  */
 const L = require('./b2b2-lib');
 

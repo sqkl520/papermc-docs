@@ -6,13 +6,13 @@
  *   1. 右键目标出现 "P"/"DIV/layout" —— 是操作间页面滚动导致坐标漂移命中别处；
  *   2. Tab 600 次未到达 .src-link —— 需要先定位它在 tab 序中的位置。
  * 本脚本每次交互前**重新取**几何；焦点环用「聚焦前一个可聚焦元素再按一次 Tab」的真实键盘路径。
- * 只读站点；写 <tmp>\b1s\stretch3.json。
+ * 只读站点；写 TMPDIR\b1s\stretch3.json。
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

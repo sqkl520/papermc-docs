@@ -28,7 +28,7 @@ const opt = (n, d) => {
   const hit = argv.find((a) => a.startsWith(p));
   return hit ? hit.slice(p.length) : d;
 };
-const OUT_JSON = path.resolve(opt('json', path.join(process.env.TEMP || '.', 'b1o', 'file.json')));
+const OUT_JSON = path.resolve(opt('json', path.join(require("os").tmpdir() || '.', 'b1o', 'file.json')));
 
 /** 浏览器可执行文件：env 拼路径，不写盘符字面量（privacy-scan ① 类） */
 const CANDIDATES = [

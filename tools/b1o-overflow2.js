@@ -22,7 +22,7 @@ const { chromium } = require('playwright-core');
 const REPO = path.resolve(__dirname, '..');
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const p = '--' + n + '='; const h = argv.find((a) => a.startsWith(p)); return h ? h.slice(p.length) : d; };
-const OUT_JSON = path.resolve(opt('json', path.join(process.env.TEMP || '.', 'b1o', 'overflow2.json')));
+const OUT_JSON = path.resolve(opt('json', path.join(require("os").tmpdir() || '.', 'b1o', 'overflow2.json')));
 
 const CANDIDATES = [
   process.env.CHROME_PATH,

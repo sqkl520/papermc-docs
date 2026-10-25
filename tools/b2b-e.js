@@ -14,7 +14,7 @@
  * 另设对照组 sim=article-max：`.article{max-width:40rem}`（整块限宽），用来证明「只封行文块」更优。
  *
  * 用法：node tools/b2b-e.js
- * 产出：<tmp>\b2b\e.json
+ * 产出：TMPDIR\b2b\e.json
  */
 const L = require('./b2b-lib');
 

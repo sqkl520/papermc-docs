@@ -85,7 +85,7 @@ node tools/crosslinks.js                                # 指向镜像区之外�
 ```bash
 node tools/source-nav.js                                # 从 HTML 快照提取上游侧栏结构 -> data/source-nav.json
 node tools/taxonomy-util.js extract paper velocity      # 抽取分类证据到临时目录
-node tools/taxonomy-util.js build <tmp>/tax-data.json   # 组装 data/taxonomy.json
+node tools/taxonomy-util.js build TMPDIR/tax-data.json  # 组装 data/taxonomy.json（TMPDIR 指系统临时目录）
 node tools/build-site.js                                # 生成站点（assets/**、paper/**、velocity/**、根 HTML）
 ```
 

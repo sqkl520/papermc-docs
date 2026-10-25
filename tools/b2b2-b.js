@@ -10,7 +10,7 @@
  *   把「≥1025 常驻右栏」搬到 ≥bp，并在 1025..bp-0.02 区间退回单栏、隐藏 .toc-side。
  *
  * 用法：node tools/b2b2-b.js
- * 产出：%TEMP%\b2b2\b.json
+ * 产出：TMPDIR\b2b2\b.json
  */
 const L = require('./b2b2-lib');
 

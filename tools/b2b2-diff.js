@@ -5,7 +5,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
 const a = JSON.parse(fs.readFileSync(path.join(TMP, 'a.json'), 'utf8'));
 
 const VPS = ['1440', '1280', '1200', '1100', '1025', '1024', '900', '768', '390', '320'];

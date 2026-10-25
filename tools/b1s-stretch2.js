@@ -7,13 +7,13 @@
  * 本脚本对 src-link / src-sum / src-rel **各自**取 getBoundingClientRect() 的中心点。
  *
  * 测：拖选(逐段) / 双击取词(逐段) / 右键目标(逐段) / Tab 焦点环 / 整行分段命中(按各段真实 y)
- * 只读站点；写 <tmp>\b1s\stretch2.json。
+ * 只读站点；写 TMPDIR\b1s\stretch2.json。
  */
 const fs = require('fs');
 const path = require('path');
 const { chromium } = require('playwright-core');
 
-const TMP = path.join(process.env.TEMP || '.', 'b1s');
+const TMP = path.join(require("os").tmpdir() || '.', 'b1s');
 fs.mkdirSync(TMP, { recursive: true });
 const EXE = [
   process.env.CHROME_PATH,

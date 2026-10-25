@@ -1,11 +1,11 @@
 'use strict';
 /**
- * b2b2-sec5.js — 生成报告 F 小节（给规划的结论）markdown 到 %TEMP%\b2b2\secF.md
+ * b2b2-sec5.js — 生成报告 F 小节（给规划的结论）markdown 到 TMPDIR\b2b2\secF.md
  * 用法：node tools/b2b2-sec5.js
  */
 const fs = require('fs');
 const path = require('path');
-const TMP = path.join(process.env.TEMP || '.', 'b2b2');
+const TMP = path.join(require("os").tmpdir() || '.', 'b2b2');
 const rd = (n) => JSON.parse(fs.readFileSync(path.join(TMP, n), 'utf8'));
 const w = (n, s) => { const f = path.join(TMP, n); fs.writeFileSync(f, s, 'utf8'); console.log('wrote ' + f + ' (' + s.length + ' chars)'); };
 
@@ -114,7 +114,7 @@ for (const pg of ['particles', 'dialogs', 'worldcfg']) {
 }
 
 s += '\n#### F.3.4 40rem 预演基线（E 组，4 视口 × 5 页 × 4 写法）\n\n';
-s += '完整数据在 `%TEMP%\\b2b2\\e.json` / `e2.json` / `e3.json`。下表给「基线 + 推荐写法（`.article p`）」两列，作为对拍锚点：\n\n';
+s += '完整数据在 `TMPDIR\\b2b2\\e.json` / `e2.json` / `e3.json`。下表给「基线 + 推荐写法（`.article p`）」两列，作为对拍锚点：\n\n';
 s += '| 视口 | 页面 | 基线 lineW/ch/h | 40rem（`.article p`）lineW/ch/h | 代码块宽 基线 → 40rem |\n|---|---|---|---|---|\n';
 for (const vp of [1440, 1280, 1025]) {
   for (const pg of ['dialogs', 'worldcfg', 'particles', 'tuning']) {

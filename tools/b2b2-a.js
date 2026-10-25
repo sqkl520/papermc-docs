@@ -7,7 +7,7 @@
  * 代码块横滚数/总数、表格横滚数。
  *
  * 用法：node tools/b2b2-a.js
- * 产出：%TEMP%\b2b2\a.json + stdout 每格一行 JSON
+ * 产出：TMPDIR\b2b2\a.json + stdout 每格一行 JSON
  */
 const L = require('./b2b2-lib');
 

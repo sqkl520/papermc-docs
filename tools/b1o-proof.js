@@ -19,7 +19,7 @@ const path = require('path');
 
 const argv = process.argv.slice(2);
 const opt = (n, d) => { const p = '--' + n + '='; const h = argv.find((a) => a.startsWith(p)); return h ? h.slice(p.length) : d; };
-const TMPROOT = path.join(process.env.TEMP || process.env.TMP || '.', 'b1o');
+const TMPROOT = path.join(require("os").tmpdir() || require("os").tmpdir() || '.', 'b1o');
 const BEFORE = path.resolve(opt('before', path.join(TMPROOT, 'before.json')));
 const AFTER = path.resolve(opt('after', path.join(TMPROOT, 'after.json')));
 const OUT_JSON = path.resolve(opt('json', path.join(TMPROOT, 'proof.json')));

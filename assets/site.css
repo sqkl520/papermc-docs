@@ -289,7 +289,7 @@ a.chip{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
   font-size:.72rem;padding:.1rem .45rem;cursor:pointer;font-family:var(--font);min-height:44px;min-width:44px;justify-content:center}
 .code-copy:hover{color:var(--accent);border-color:var(--border-strong)}
 .code-copy.done{color:var(--tip);border-color:var(--tip)}
-.code-pre{margin:0;padding:.85rem 1rem;overflow:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;font-family:var(--mono);line-height:1.55;tab-size:2}
+.code-pre{margin:0;padding:.85rem 1rem;overflow:auto;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;font-family:var(--mono);font-size:.875rem;line-height:1.55;tab-size:2}
 .code-pre:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 /* P1-3：JS 一直在真的溢出时设 data-overflowing，但此前没有任何 CSS 消费它 ——
    长代码在手机上要横滚 3.2 屏却毫无提示。用右侧渐隐 + 顶栏提示条给出可发现性。
