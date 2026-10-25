@@ -1,46 +1,44 @@
-feat(ui): C3 断崖修复 —— 侧栏与 TOC 断点同绑 1200（台阶 2 -> 1，1024 死区消失）
+feat(ui): C2 阅读列宽 640px + C5 收尾四条（h5 层级 / 表格断行 / 筛选吸顶 / pill 让位）
 
-## 改动（tools/site/assets.js，66 行；tools/verify-mobile.js，15 行）
-把原先的两级桌面断点合并为单一 1200：
-- @media (min-width:1024px)（只进 280px 侧栏、不进 TOC）与
-  @media (min-width:1025px)（再进 250px TOC）**合并为 @media (min-width:1200px)**
-- 配套把 @media (max-width:1024.98px) 搬到 1199.98px（否则 1025-1199 会出现
-  「展开态仍 sticky」的遮挡回归）
-- syncTocOffset 的 window.innerWidth < 1025 与 syncToc 的 matchMedia 同步改到 1200
+## C2 阅读列宽（1 条 CSS）
+`@media (min-width:768px){ .article p{max-width:40rem} }`
 
-## 根因（基线实测）
-原设计在 1023->1025 产生两级台阶：
-  1023  artW=972  TOC=top-block  cols=1023px
-  1024  artW=693  TOC=hidden     cols=280px 744px      <- 台阶(1) -279px
-  1025  artW=434  TOC=rail       cols=290px 485px 250px <- 台阶(2) -259px
-即 min-width:1024 让侧栏进场但 TOC 没进，产生 1024 死区；min-width:1025 再进 TOC。
+**只封叶段落**，不封容器/代码/表格/图片。实测 1440 四页全部收敛到 capW=640 / 74 字符：
+| 页面 | capW | 字符数 | 代码块宽 | 代码横滚 |
+| dialogs | 640 | 74ch | 847（不变）| 5/13 不变 |
+| world-configuration | 640 | 74ch | 875/851（不变）| 0/5 不变 |
+| particles | 640 | 74ch | 847（不变）| 4/46 不变 |
+| velocity/tuning | 640 | 74ch | 847（不变）| 1/1 不变 |
 
-## 实测验收（1021->1300 逐 1px 扫描）
-| # | 断言 | 目标 | 实测 |
-| 1 | 台阶数 | 2 -> 1 | **1** PASS |
-| 2 | 台阶位置 | 1199->1200 | **1199->1200** PASS |
-| 3 | 台阶幅度 | 约 -340px | **-340px** PASS |
-| 4 | 1024 处 artW | 693 -> 949 | **949** PASS（死区消失）|
+为什么不选其它写法（均有实测反证）：
+- `.article > :is(p,ul,ol,...)`：worldcfg 的直接子 p = 0（31 段全在 <ul>/<aside.alert> 内），
+  且限宽 ul 会把该页代码块从 874.81 压到 566px 而横滚数仍 0/5 —— 只看横滚会漏判
+- `.article{max-width:40rem}`（整列）：particles 代码横滚从 4/46 恶化到 15/46
 
-关键点数值：1023/1024/1025/1199 = 949（单调），1200=609，1279=688，1280=689，1300=709。
-合并后 1200->1300 严格 +1px/px（无二次台阶）。
+左边缘：18 段顶层段落全部 left=316（完全对齐）；另 2 段的差异来自 .alert-body（+18px）
+与 li（+24px）的容器内缩，属正常结构缩进，不是错位。
 
-## 锚点遮挡验证（C3 的最大风险点，已实测清零）
-syncTocOffset 的 JS 若不同步改，1025-1199 会静默复现批 1 刚修好的 F-2 遮挡（历史实测 3/3）。
-| 视口 | TOC 形态 | --toc-offset | 标题落点 | 被遮挡 |
-| 1024-1199 | 吸顶条 61px | 61px | 129 | 0% PASS |
-| 1200-1440 | 右栏 250px | 0px | 64 | 0% PASS |
+## C5 收尾四条
+| 编号 | 改动 | 改前 | 改后 |
+| P2-1 | h5/h6 拆开，h5 提到 1.0625rem(17px) + 恢复主色 | 15.2px < 正文（层级倒置）| 17px > 正文，31 个 h5 全生效 |
+| P2-2 | .table-wrap td{overflow-wrap:break-word} | 320px 词中断 19 处 | **0 处** |
+| P2-3 | .filter-bar{position:sticky;top:var(--topbar-h);z-index:3} | static（滚走即不可见）| 滚 5000px 后 top=52 可见 |
+| P1-6 | .grp-name{flex:1 1 auto;min-width:0} + .grp-zh 收缩 | 29 个 pill 里 4 个组名被截断 | 组名优先占位 |
+
+P2-1 的依据：全站 h5 共 46 处（cli-arguments 31 / pdc 10 / using-databases 4 / scheduler 1），
+其中 cli-arguments 的 31 个 h5 是**唯一小节层级**（h2-h4 全为 0），原来 15.2px + muted
+比正文更不像标题。h6 保持 .95rem + muted（全站 0 处使用，改它无收益）。
 
 ## 门禁（全绿）
 build-site --verify-artifacts PASS / check-site PASS / verify-site 15/15 /
 url-parity 141/141 / privacy must-fix=0 / gh-pages-smoke 19/19 /
 verify-mobile --check=4 PASS、--check=5 PASS
 
-## 门禁口径同步（owner 裁决，非绕过）
-verify-mobile 的 B5 断言原为「>=1024 ☰ 隐藏 + 侧栏常驻」。C3 把桌面线搬到 1200 后，
-1024-1199 档**理应**是抽屉模式（☰ 可见）——这是设计变更而非回归。
-因此把 B5 的桌面阈值同步上移到 1200：
-- 循环视口 [VP_1024, VP_1280] -> [VP_1280, VP_1440]
-- 断言标签「B5 >=1024」-> 「B5 >=1200」，检查项标题「>=1024 复位」-> 「>=1200 复位」
-裁决理由：C3 的收益是可量化的（台阶 2->1、1024 死区 693->949、幅度 -536->-340px），
-而 1024-1199 走抽屉模式是该方案的必然结果且体验可接受（吸顶条形态已实测遮挡 0%）。
+## 过程记录
+1. 本轮 5 个 Agent 并行，其中 3 个会重建站点 → 新增 tools/build-guard.js 文件锁串行化
+   （上一轮 4 条结论作废全部源于并发重建）。
+2. 一个批量隐私清理脚本误删了 FAVICON_SVG 模板字符串的反引号，导致 assets.js 语法损坏、
+   构建必红。已用 git show HEAD 的干净头部替换恢复，并复验 node --check 通过。
+   教训：批量改写模板字符串文件时不能用行启发式，必须按语法边界处理。
+3. C4（图片固有宽高）经核查在 HEAD 中已实现并生效：85/85 张 content-img 全部带
+   width+height，dialogs @1440 CLS 从 0.08018（dims 0/6）降到 0（dims 6/6）。

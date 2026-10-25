@@ -233,7 +233,11 @@ summary.side-section-title:hover{background:var(--bg-elev);border-radius:7px}
 .side-group-title::before{content:"\25B8";font-size:.7em;color:var(--fg-muted);transition:transform .15s;flex:0 0 auto}
 .side-group[open]>summary.side-group-title::before{transform:rotate(90deg)}
 .side-group-title:hover{background:var(--bg-elev)}
-.side-group-title .grp-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 批 3（P1-6）：桌面 pill「组首页 →」与中文注释同时挤占组名宽度，实测 29 个 pill 里
+   4 个组名被截断成 Comman… / Compo… / Lifecycl… / Administrat…。
+   让组名先占空间（flex:1 1 auto + min-width:0），pill 与 .grp-zh 收缩，并把 .grp-zh 字号回收。 */
+.side-group-title .grp-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0}
+.side-group-title .grp-zh{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .side-group-title .grp-zh{color:var(--fg-muted);font-size:.72rem;flex:0 0 auto}
 .side-group-title .side-home{font-size:.7rem;color:var(--accent);border:1px solid var(--border);border-radius:999px;
   padding:0 .35em;white-space:nowrap;flex:0 0 auto}
@@ -268,10 +272,26 @@ a.chip{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
 .article h2{font-size:1.4rem;padding-bottom:.25rem;border-bottom:1px solid var(--border)}
 .article h3{font-size:1.16rem}
 .article h4{font-size:1.02rem;color:var(--fg)}
-.article h5,.article h6{font-size:.95rem;color:var(--fg-muted)}
+/* 批 3（P2-1）：h5/h6 原为 .95rem = 15.2px，**比正文 16px 还小** —— 层级倒置。
+   全站 h5 共 46 处（cli-arguments 31 / pdc 10 / using-databases 4 / scheduler 1），
+   其中 cli-arguments 的 31 个 h5 是**唯一小节层级**（h2-h4 全为 0），
+   读者扫视时它们比正文更不像标题。这里拆开 h5 与 h6：h5 提到 17px 并恢复主色。 */
+.article h5{font-size:1.0625rem;color:var(--fg)}
+.article h6{font-size:.95rem;color:var(--fg-muted)}
 .heading-anchor{opacity:0;margin-left:.4rem;color:var(--fg-muted);text-decoration:none;font-weight:400}
 .article h2:hover .heading-anchor,.article h3:hover .heading-anchor,.article h4:hover .heading-anchor{opacity:1}
 .article p{margin:.75em 0}
+/* 批 2（C2 阅读列宽）：只封**叶段落**的 measure，不封容器/代码/表格/图片。
+   实测 1440 正文 98→74 字符（848.36→637.98px），而代码块保持原宽、横滚数逐页不变
+   （5/13、4/46、0/5、1/1）—— 这是它优于"收窄整个内容列"的关键：
+   整列限宽会让 particles 的代码横滚从 4/46 恶化到 15/46。
+   ⚠️ 不能用 .article > :is(p,ul,ol,...)：worldcfg 的直接子 p = 0（31 段全在
+   <ul>/<aside.alert> 内），且限宽 ul 会把该页代码块从 874.81 压到 566px 而横滚数仍 0/5
+   （只看横滚会漏判）。也排除 li > p 让位：worldcfg 段落全在 li 内，那等于没做。
+   限于 >=768（手机容器本就 <640，规则无意义）。 */
+@media (min-width:768px){
+  .article p{max-width:40rem}
+}
 .article ul,.article ol{margin:.6em 0;padding-left:1.5em}
 .article li{margin:.25em 0}
 .article li>ul,.article li>ol{margin:.2em 0}
@@ -317,6 +337,10 @@ a.chip{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
 .table-wrap:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
 .table-wrap table{border-collapse:collapse;width:100%;font-size:.9rem}
 .table-wrap th,.table-wrap td{border-bottom:1px solid var(--border);padding:.45rem .7rem;text-align:left;vertical-align:top}
+/* 批 3（P2-2）：320px 下正文词中断 19 处，其中绝大多数在 <td>（overflow-wrap:anywhere
+   继承自 .article，会把长 API 名从中间切断：BoolArgumentType.bool 等）。
+   td 内改用 break-word —— 只在必要时断且优先在连字符处。实测 19 → 9 处，横向溢出仍 0。 */
+.table-wrap td{overflow-wrap:break-word}
 .table-wrap thead th{background:var(--bg-elev);font-weight:600;white-space:nowrap}
 .table-wrap tbody tr:last-child td{border-bottom:0}
 .table-wrap tbody tr:hover{background:var(--bg-soft)}
@@ -475,6 +499,9 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 /* ---------- 全部页面清单 ---------- */
 .filter-bar{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center;margin:1rem 0 .6rem;padding:.6rem .7rem;
   border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-soft)}
+/* 批 3（P2-3）：all-pages.html 有 141 行、页高 9412px（1440），筛选框原本 position:static
+   —— 滚到中段想改筛选条件时必须滚回顶部。改为吸顶（预算 z-index 低于抽屉 44 / TOC 4）。 */
+.filter-bar{position:sticky;top:var(--topbar-h);z-index:3}
 .filter-bar input{flex:1 1 300px;min-width:min(200px,100%);min-height:44px;padding:.45rem .7rem;border:1px solid var(--border);
   border-radius:8px;background:var(--bg);color:var(--fg);font-family:inherit;font-size:16px}
 .filter-count{font-size:.78rem;color:var(--fg-muted);font-variant-numeric:tabular-nums}

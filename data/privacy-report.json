@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-25T08:55:11.186Z",
+  "generated_at": "2026-10-25T09:07:37.863Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1019,
-    "scanned_text_files": 946,
+    "files": 1029,
+    "scanned_text_files": 956,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -17,11 +17,11 @@
   "summary": {
     "must_fix": 0,
     "public_url": 327,
-    "loopback_ok": 395,
+    "loopback_ok": 398,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 808
+    "total_hits": 811
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 481,
+      "total": 484,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 395,
+      "loopback_ok": 398,
       "upstream": 86
     },
     {
@@ -442,42 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-25T08:11:50.985Z",
-      "files": 1000,
-      "must_fix": 21,
-      "public_url": 327,
-      "loopback_ok": 382,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-25T08:12:06.179Z",
-      "files": 1000,
-      "must_fix": 21,
-      "public_url": 327,
-      "loopback_ok": 382,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-25T08:13:39.116Z",
-      "files": 1001,
-      "must_fix": 20,
-      "public_url": 327,
-      "loopback_ok": 383,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-25T08:14:05.767Z",
-      "files": 1002,
-      "must_fix": 20,
-      "public_url": 327,
-      "loopback_ok": 383,
-      "upstream": 86,
-      "clean": false
-    },
-    {
       "at": "2026-10-25T08:16:39.924Z",
       "files": 1003,
       "must_fix": 20,
@@ -528,6 +492,42 @@
       "must_fix": 0,
       "public_url": 327,
       "loopback_ok": 395,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T09:01:09.870Z",
+      "files": 1023,
+      "must_fix": 0,
+      "public_url": 327,
+      "loopback_ok": 398,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T09:05:12.309Z",
+      "files": 1028,
+      "must_fix": 0,
+      "public_url": 327,
+      "loopback_ok": 398,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T09:07:30.869Z",
+      "files": 1029,
+      "must_fix": 0,
+      "public_url": 327,
+      "loopback_ok": 398,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T09:07:37.863Z",
+      "files": 1029,
+      "must_fix": 0,
+      "public_url": 327,
+      "loopback_ok": 398,
       "upstream": 86,
       "clean": true
     }
