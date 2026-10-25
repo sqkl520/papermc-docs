@@ -207,6 +207,7 @@ html.nav-locked{scrollbar-gutter:stable}
 .side-toc a:hover{background:var(--bg-elev);color:var(--fg);text-decoration:none}
 .side-toc .lvl-3{padding-left:.7rem}
 .side-toc .lvl-4{padding-left:1.3rem}
+.side-toc .lvl-5{padding-left:1.9rem;font-size:.95em}
 /* 抽屉内的分区切换（顶栏那份 <1024 隐藏） */
 .side-secs{display:flex;flex-wrap:wrap;gap:.3rem;margin:0 0 .6rem}
 .side-secs a{display:inline-flex;align-items:center;min-height:44px;padding:.1rem .7rem;border:1px solid var(--border);
@@ -423,6 +424,7 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .toc-side a.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg-soft);font-weight:600}
 .toc-side .lvl-3{padding-left:.7rem}
 .toc-side .lvl-4{padding-left:1.3rem;font-size:.95em}
+.toc-side .lvl-5{padding-left:1.9rem;font-size:.93em}
 .toc-empty{color:var(--fg-muted)}
 
 /* overview pages */
@@ -679,6 +681,22 @@ table.allpages td.lnk{margin-top:.1rem}
 .about-site[open]>summary{color:var(--fg)}
 .about-site .page-desc{font-size:.86rem;margin:.5rem 0 .4rem;max-width:52rem}
 .about-site .page-meta{font-size:.78rem;margin:.3rem 0 0}
+/* ---------- R3-3：回到顶部 ---------- */
+.to-top{position:fixed;right:1rem;bottom:1rem;z-index:36;width:44px;height:44px;border-radius:50%;
+  border:1px solid var(--border-strong);background:var(--bg);color:var(--fg);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:1.1rem;line-height:1;
+  box-shadow:var(--shadow);opacity:.94;transition:opacity .15s ease,transform .15s ease}
+.to-top:hover{opacity:1;transform:translateY(-2px);border-color:var(--accent);color:var(--accent)}
+.to-top:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.to-top[hidden]{display:none}
+@media (max-width:520px){.to-top{right:.7rem;bottom:.7rem;width:42px;height:42px}}
+/* R3-3：极窄屏元信息条仍会换行（320 档 2 个 chip 占 96px）。压字号 + 收紧间距，
+   让「分区名 + 主题」两个 chip 尽量在一行内。 */
+@media (max-width:400px){
+  .page-meta{font-size:.72rem;gap:.32rem;margin-bottom:.7rem}
+  .page-meta .chip{padding:.1rem .4rem}
+}
+@media print{.to-top{display:none}}
 .info-footer{display:flex;flex-direction:column;gap:.35rem;margin-top:2rem;border-top:1px solid var(--border);padding-top:.9rem}
 .info-footer code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85em}
 
@@ -1081,28 +1099,77 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     });
   }
 
-  /* ---------- table of contents scroll spy ---------- */
+  /* ---------- table of contents scroll spy ----------
+     R3-3 修两处缺件（cr2-content-nav §9 #2/#3）：
+       ① 冷启动空档：原来 scrollY=0 时高亮 0 条，滚到 321 才亮第一条
+          → 读者刚打开页面时右栏目录**没有任何"你在这"**
+       ② 抽屉 TOC 无 spy：移动端抽屉里的「本页目录」点了才知道在哪
+          （实测 3 个滚动位置 drawerActive 恒为 []）
+     两处都改成同一套逻辑：把页面所有目标节收集起来，取"视口上方最后一个"作为当前。 */
   function initToc() {
-    var links = doc.querySelectorAll('.toc-side a[href^="#"]');
-    if (!links.length || !('IntersectionObserver' in window)) return;
-    var map = {};
+    if (!('IntersectionObserver' in window)) return;
+    /* 两类 TOC 一起装：右栏 .toc-side 与抽屉里的 [data-drawer-toc] */
+    var hosts = [];
+    var right = doc.querySelector('.toc-side');
+    if (right) hosts.push(right);
+    var drawer = doc.querySelector('[data-drawer-toc]');
+    if (drawer) hosts.push(drawer);
+    if (!hosts.length) return;
+
+    var map = {};          /* id -> [linkA, linkB]（同一 id 可能在两个 TOC 里各有一条） */
     var targets = [];
-    for (var i = 0; i < links.length; i++) {
-      var id = decodeURIComponent(links[i].getAttribute('href').slice(1));
-      var el = doc.getElementById(id);
-      if (el) { map[id] = links[i]; targets.push(el); }
+    for (var h = 0; h < hosts.length; h++) {
+      var ls = hosts[h].querySelectorAll('a[href^="#"]');
+      for (var i = 0; i < ls.length; i++) {
+        var id = decodeURIComponent(ls[i].getAttribute('href').slice(1));
+        var el = doc.getElementById(id);
+        if (!el) continue;
+        if (!map[id]) { map[id] = []; targets.push(el); }
+        map[id].push(ls[i]);
+      }
     }
-    var current = null;
+    if (!targets.length) return;
+
+    var activeId = null;
+    function setActive(id) {
+      if (id === activeId) return;
+      activeId = id;
+      for (var k in map) {
+        if (!Object.prototype.hasOwnProperty.call(map, k)) continue;
+        for (var j = 0; j < map[k].length; j++) {
+          if (k === id) map[k][j].classList.add('active');
+          else map[k][j].classList.remove('active');
+        }
+      }
+    }
+
     var io = new IntersectionObserver(function (entries) {
       for (var e = 0; e < entries.length; e++) {
         if (!entries[e].isIntersecting) continue;
-        var id2 = entries[e].target.id;
-        if (current && current.classList) current.classList.remove('active');
-        current = map[id2];
-        if (current) current.classList.add('active');
+        setActive(entries[e].target.id);
       }
     }, { rootMargin: '-60px 0px -70% 0px', threshold: [0, 1] });
     for (var t = 0; t < targets.length; t++) io.observe(targets[t]);
+
+    /* ① 冷启动/边界兜底：IO 只在「进入该带」时回调，顶部区域与页面末尾会留空档。
+       这里用滚动位置做一次校正：取最后一个 top <= (顶栏 + 24px) 的标题；
+       若一个都没有（还在页面最开头），则高亮**第一条**。 */
+    var syncTimer = null;
+    function syncByScroll() {
+      var top = 0;
+      for (var n = 0; n < targets.length; n++) {
+        var r = targets[n].getBoundingClientRect();
+        if (r.top <= 80) top = n;
+      }
+      if (targets[top]) setActive(targets[top].id);
+    }
+    function onScroll() {
+      if (syncTimer) return;
+      syncTimer = window.requestAnimationFrame(function () { syncTimer = null; syncByScroll(); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    syncByScroll();   /* 冷启动立即给一个「你在这」 */
   }
 
   /* ---------- search ----------
@@ -1582,6 +1649,41 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
       try { side.inert = !!on; } catch (e) {}
       if (on) side.setAttribute('inert', ''); else side.removeAttribute('inert');
     }
+    /* R3-3：抽屉打开时把**主内容区**置为 inert —— 这是焦点陷阱的正确做法：
+       原来只给「关闭状态的侧栏」设 inert，打开抽屉后主内容仍然可聚焦，
+       Tab 会从抽屉游走到正文里的可聚焦元素（新增的 .to-top 按钮让这个问题显性化）。
+       同时把顶栏里除 ☰ 之外的可聚焦控件也设为 inert 的替代（tabindex=-1），
+       否则焦点从 ☰ 出发会先走顶栏（品牌链接 / 搜索 / 主题）再进抽屉 ——
+       B6 要求「Tab 25 次不外逃」，顶栏在抽屉之外，必须先摘掉。 */
+    function setTopbarTrap(on) {
+      var bar = doc.querySelector('.topbar');
+      if (!bar) return;
+      var focusables = bar.querySelectorAll('a[href], button, input, select, textarea, [tabindex]');
+      for (var i = 0; i < focusables.length; i++) {
+        var el = focusables[i];
+        if (el === toggle) continue;              /* ☰ 必须保持可达（Esc/再点关闭） */
+        if (on) {
+          if (!el.hasAttribute('data-prev-tabindex')) {
+            el.setAttribute('data-prev-tabindex', el.getAttribute('tabindex') === null ? '' : el.getAttribute('tabindex'));
+          }
+          el.setAttribute('tabindex', '-1');
+        } else {
+          var prev = el.getAttribute('data-prev-tabindex');
+          if (prev !== null) {
+            if (prev === '') el.removeAttribute('tabindex'); else el.setAttribute('tabindex', prev);
+            el.removeAttribute('data-prev-tabindex');
+          }
+        }
+      }
+    }
+    function setMainInert(on) {
+      var m = doc.querySelector('main');
+      if (m) {
+        try { m.inert = !!on; } catch (e) {}
+        if (on) m.setAttribute('inert', ''); else m.removeAttribute('inert');
+      }
+      setTopbarTrap(!!on);
+    }
     function lockScroll(on) {
       if (on) {
         doc.body.style.overflow = 'hidden';
@@ -1606,6 +1708,7 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
       doc.body.classList.add('nav-open');
       toggle.setAttribute('aria-expanded', 'true');
       setInert(false);
+      setMainInert(true);   /* R3-3：焦点陷阱——抽屉打开时主内容不可聚焦 */
       lockScroll(true);
       if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
       /* P1-2：抽屉里的侧栏是整站导航（190 链接，2 屏多高）。打开时若用户当前页在
@@ -1629,14 +1732,40 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
          focusTop=-337（WCAG 2.4.7 失败）。现在优先把焦点给 .active 本身。 */
       var focusTarget = active;
       if (!focusTarget || !focusTarget.focus) focusTarget = side.querySelector('#side-filter, a[href], button, input, summary');
-      if (focusTarget && focusTarget.focus) { try { focusTarget.focus({ preventScroll: true }); } catch (e) { try { focusTarget.focus(); } catch (e2) {} } }
-      if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
+      /* R3-3：setMainInert(true) 会**撤销**主内容里原本的焦点（浏览器把 activeElement
+         移回 <body>），所以焦点必须在 inert 生效之后（下一帧）再给。
+         原来同步 focus 时，main 一被 inert，焦点又被打回 body/顶栏——实测打开抽屉后
+         activeElement 是 ☰ 按钮，第一次 Tab 就跳到顶栏品牌链接（B6/B7 失败）。 */
+      var doFocus = function () {
+        /* R3-3：优先给 #side-filter（抽屉顶部、永远可见可聚焦）。
+           原因：active 链接常位于**折叠的 details 内**，其祖先 display:none
+           → focus() 静默失败（实测 doFocus 跑了但 activeElement 仍是 ☰）。
+           侧栏已自动把 .active 滚到中间，用户一眼能看到；键盘焦点给过滤框
+           是标准做法（与 MDN / Docusaurus 抽屉一致），且保证 B7「焦点在抽屉内」。 */
+        var candidates = [
+          side.querySelector('#side-filter'),
+          active,
+          side.querySelector('a[href]'),
+        ];
+        for (var ci = 0; ci < candidates.length; ci++) {
+          var t = candidates[ci];
+          if (!t || !t.focus) continue;
+          try { t.focus({ preventScroll: true }); } catch (e) { try { t.focus(); } catch (e2) {} }
+          if (side.contains(doc.activeElement)) break;
+        }
+        if (Math.abs(window.pageYOffset - beforeY) > 1) { try { window.scrollTo({ top: beforeY, behavior: 'instant' }); } catch (e) { window.scrollTo(0, beforeY); } }
+      };
+      /* 双帧：第一帧让 inert 生效，第二帧落焦点 —— 单帧在 Chromium 上仍可能被 inert 覆盖 */
+      if (window.requestAnimationFrame) {
+        window.requestAnimationFrame(function () { window.requestAnimationFrame(doFocus); });
+      } else setTimeout(doFocus, 16);
     }
     function closeDrawer(refocus) {
       var wasOpen = isOpen();
       doc.body.classList.remove('nav-open');
       toggle.setAttribute('aria-expanded', 'false');
       lockScroll(false);
+      setMainInert(false);   /* R3-3：解除焦点陷阱 */
       if (!isWide()) setInert(true);
       /* focus({preventScroll:true}) 让焦点回到 ☰ 而不滚动（Safari<15 会静默忽略，此时
          仍会滚一下，但那属于浏览器能力缺失，不再用 scrollTo 强行拉回——见 M1）。 */
@@ -1651,7 +1780,27 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     });
     doc.addEventListener('keydown', function (ev) {
       var k = ev.key || '';
-      if ((k === 'Escape' || k === 'Esc') && isOpen()) { ev.preventDefault(); closeDrawer(); }
+      if ((k === 'Escape' || k === 'Esc') && isOpen()) { ev.preventDefault(); closeDrawer(); return; }
+      /* R3-3：抽屉内的焦点循环（focus trap）。主内容已 inert、顶栏除 ☰ 已 tabindex=-1，
+         但 Tab 从抽屉最后一个可聚焦元素出去后仍会回到浏览器 UI / 地址栏，
+         B6 要求「Tab 25 次始终在抽屉内」——这里在首尾两端手动回绕。 */
+      if (k !== 'Tab' || !isOpen()) return;
+      var focusables = side.querySelectorAll('a[href], button:not([disabled]), input:not([disabled]), select, textarea, summary, [tabindex]:not([tabindex="-1"])');
+      if (!focusables.length) return;
+      var list = [];
+      for (var i = 0; i < focusables.length; i++) {
+        var el = focusables[i];
+        if (el.checkVisibility && !el.checkVisibility()) continue;
+        var r = el.getBoundingClientRect();
+        if (r.width <= 0 && r.height <= 0) continue;
+        list.push(el);
+      }
+      if (!list.length) return;
+      var first = list[0], last = list[list.length - 1];
+      var activeEl = doc.activeElement;
+      if (ev.shiftKey && (activeEl === first || activeEl === toggle)) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && activeEl === last) { ev.preventDefault(); first.focus(); }
+      else if (activeEl === toggle) { ev.preventDefault(); first.focus(); }
     });
     function applyMode() {
       if (isWide()) { closeDrawer(false); setInert(false); }
@@ -2017,6 +2166,44 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     initToc();
     initSearch();
     initTableFilter();
+    initToTop();
+  }
+
+  /* ---------- R3-3：长页「回到顶部」 ----------
+     cr2-content-nav §9 缺件 #5：全站 grep "to-top / backToTop / 回到顶部" = 0 命中，
+     而 world-configuration 在 320 档有 43,633px（51 屏）、1440 档 16,583px（18 屏），
+     滚到中段后没有任何抓手，只能一路滑回。
+     只在**页面足够长**（>3 屏）时出现，避免短页多一个悬浮元素。 */
+  function initToTop() {
+    var btn = doc.createElement('button');
+    btn.type = 'button';
+    btn.className = 'to-top';
+    btn.setAttribute('aria-label', '回到顶部');
+    btn.innerHTML = '<span aria-hidden="true">↑</span>';
+    btn.hidden = true;
+    /* 挂在 <main> 内而不是 <body> 末尾 —— 抽屉（#sidebar）在 body 里是 main 的兄弟，
+       如果把按钮 append 到 body 末尾，DOM 顺序上它就排在抽屉之后，
+       打开抽屉后连按 Tab 会从抽屉内「逃」到这个按钮上（verify-mobile B6 实测
+       escapedAt 命中）。放进 main 内即可让焦点顺序保持在内容区一侧。 */
+    var host = doc.querySelector('main') || doc.querySelector('.article') || doc.body;
+    host.appendChild(btn);
+    var SHOW_AT = 0;
+    function sync() {
+      var long = doc.documentElement.scrollHeight > window.innerHeight * 3;
+      var y = window.pageYOffset || doc.documentElement.scrollTop || 0;
+      btn.hidden = !(long && y > window.innerHeight * SHOW_AT * 1.5);
+    }
+    btn.addEventListener('click', function () {
+      var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      try { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); }
+      catch (e) { window.scrollTo(0, 0); }
+      /* 焦点回到正文起点，键盘用户不会「滚上去但焦点还在底部」 */
+      var h1 = doc.querySelector('.article h1');
+      if (h1) { try { h1.setAttribute('tabindex', '-1'); h1.focus({ preventScroll: true }); } catch (e2) {} }
+    });
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    sync();
   }
 
   var rsTimer = null;

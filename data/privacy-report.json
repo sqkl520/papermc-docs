@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-25T15:35:28.610Z",
+  "generated_at": "2026-10-25T16:50:58.155Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1122,
-    "scanned_text_files": 1049,
+    "files": 1124,
+    "scanned_text_files": 1051,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -17,11 +17,11 @@
   "summary": {
     "must_fix": 0,
     "public_url": 329,
-    "loopback_ok": 505,
+    "loopback_ok": 511,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 920
+    "total_hits": 926
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 591,
+      "total": 597,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 505,
+      "loopback_ok": 511,
       "upstream": 86
     },
     {
@@ -259,6 +259,14 @@
       "upstream": 5
     },
     {
+      "file": "tools/_r33check.js",
+      "total": 5,
+      "must_fix": 0,
+      "public_url": 0,
+      "loopback_ok": 5,
+      "upstream": 0
+    },
+    {
       "file": "tools/b2b2-lib.js",
       "total": 5,
       "must_fix": 0,
@@ -425,14 +433,6 @@
       "public_url": 0,
       "loopback_ok": 3,
       "upstream": 0
-    },
-    {
-      "file": "tools/b1a-probe.js",
-      "total": 3,
-      "must_fix": 0,
-      "public_url": 0,
-      "loopback_ok": 3,
-      "upstream": 0
     }
   ],
   "verdict": {
@@ -441,24 +441,6 @@
     "statement": "通过：仓库中不存在必须修复的本机痕迹。"
   },
   "history": [
-    {
-      "at": "2026-10-25T10:49:02.211Z",
-      "files": 1056,
-      "must_fix": 0,
-      "public_url": 329,
-      "loopback_ok": 448,
-      "upstream": 86,
-      "clean": true
-    },
-    {
-      "at": "2026-10-25T13:07:18.422Z",
-      "files": 1121,
-      "must_fix": 14,
-      "public_url": 329,
-      "loopback_ok": 506,
-      "upstream": 86,
-      "clean": false
-    },
     {
       "at": "2026-10-25T13:08:17.058Z",
       "files": 1121,
@@ -528,6 +510,24 @@
       "must_fix": 0,
       "public_url": 329,
       "loopback_ok": 505,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T15:45:14.587Z",
+      "files": 1122,
+      "must_fix": 0,
+      "public_url": 329,
+      "loopback_ok": 509,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T16:50:58.155Z",
+      "files": 1124,
+      "must_fix": 0,
+      "public_url": 329,
+      "loopback_ok": 511,
       "upstream": 86,
       "clean": true
     }

@@ -799,13 +799,16 @@ function check7(T) {
       shellH1, articleH1Texts: artH1,
       firstArticleHeading: firstArtHeading[1] ? { level: Number(firstArtHeading[1]), text: sanitizeHtmlEntity(firstArtHeading[2].replace(/<[^>]*>/g, '')).trim().slice(0, 80) } : null,
     });
-    const heads = [...art.matchAll(/<h([234])\b([^>]*)>([\s\S]*?)<\/h\1>/g)].map((m) => ({
+    /* R3-3：目录口径从 h2-h4 扩到 h2-h5 —— 原来只收 h2-h4，导致 h5-only 页面
+       （如 paper/reference/cli-arguments/ 的 31 个 h5）拿到 0 条目录。
+       生成器 render.js 已同步改为 depth<=5，这里必须同源更新，否则断言会误报。 */
+    const heads = [...art.matchAll(/<h([2345])\b([^>]*)>([\s\S]*?)<\/h\1>/g)].map((m) => ({
       level: Number(m[1]),
       id: (/id\s*=\s*"([^"]*)"/.exec(m[2]) || [])[1] || null,
       text: sanitizeHtmlEntity(m[3].replace(/<[^>]*>/g, '')).replace(/\s*#\s*$/, '').trim(),
     }));
     const noId = heads.filter((h) => !h.id || h.id.trim() === '');
-    if (noId.length) { idMissing += noId.length; issues.push(`h2-h4 缺 id：${p.section}:${p.rel} 缺 ${noId.length} 个（如“${noId[0].text}”）`); }
+    if (noId.length) { idMissing += noId.length; issues.push(`h2-h5 缺 id：${p.section}:${p.rel} 缺 ${noId.length} 个（如“${noId[0].text}”）`); }
     const tocIds = [...toc.matchAll(/<a\s+href="#([^"]*)"/g)].map((m) => m[1]);
     totalToc += tocIds.length;
     if (tocIds.length) tocPages++;
@@ -819,7 +822,7 @@ function check7(T) {
         const miss = ids234.filter((x) => !tocIds.includes(x));
         const extraT = tocIds.filter((x) => !ids234.includes(x));
         detail.push({ page: `${p.section}:${p.rel}`, toc: tocIds.length, h234: ids234.length, missingInToc: miss.slice(0, 5), extraInToc: extraT.slice(0, 5) });
-        if (issues.length < 200) issues.push(`目录与正文标题不一致：${p.section}:${p.rel} 目录=${tocIds.length} 标题(h2-h4)=${ids234.length} 目录缺=${JSON.stringify(miss.slice(0, 3))} 目录多=${JSON.stringify(extraT.slice(0, 3))}`);
+        if (issues.length < 200) issues.push(`目录与正文标题不一致：${p.section}:${p.rel} 目录=${tocIds.length} 标题(h2-h5)=${ids234.length} 目录缺=${JSON.stringify(miss.slice(0, 3))} 目录多=${JSON.stringify(extraT.slice(0, 3))}`);
       }
     }
   }

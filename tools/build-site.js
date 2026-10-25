@@ -894,11 +894,18 @@ function writeEverything(state) {
       crumbItems.push({ label: p.title });
     }
     const crumbs = L.crumbsHtml(crumbItems);
+    /* R3-3（cr2-content-nav §7.3 / §11.2）：批 1 在 <1200 引入 61px 吸顶折叠条后，
+       手机端正文首行被推晚 149px（390）/157px（320），首屏导航像素 5.3% → 34.8%。
+       其中很大一部分是这一行元信息条在 390 档换行成 4 行（99px → 148px）。
+       实测它 4 个 chip 里有 2 个与上方面包屑说同一件事：
+         · 「源结构 Development > API」 —— 面包屑已逐级展示相同路径
+         · 「源结构第 92 篇 / 共 103 篇」 —— 导航位置，pager 与侧栏已表达
+       删掉这两个，元信息条在窄屏回到约 36px，把那 149px 基本赚回。
+       保留「分区名」（可点，回分区首页）、「主题」（跨分区横切入口）、
+       「查看原文」（上游溯源，唯一提供本站外信息）。 */
     const metaChips = ['<a class="chip" href="' + U.attr(prefix + 'sections/' + p.section + '.html') + '">'
       + U.escapeHtml(p.sectionTitle) + '</a>'];
     if (navMeta) {
-      metaChips.push('<span class="chip">源结构 ' + U.escapeHtml(navMeta.groupPath || '（分区根级）') + '</span>');
-      metaChips.push('<span class="chip">源结构第 ' + navMeta.index + ' 篇 / 共 ' + navMeta.total + ' 篇</span>');
       if (navMeta.isGroupHome) metaChips.push('<span class="chip">分组「' + U.escapeHtml(navMeta.groupPath) + '」的索引页</span>');
       if (navMeta.isSectionRoot) metaChips.push('<span class="chip">分区根页</span>');
     }
@@ -1703,7 +1710,11 @@ function main() {
     // renderer (its id is reused below), so count the article h1s for the self test.
     p.articleH1 = (p.html.match(/<h1\b/g) || []).length;
     p.text = R.htmlToText(p.html);
-    p.tocText = (p.toc || []).map((h) => h.text);
+    /* R3-3：p.toc 从 h2-h4 扩到了 h2-h5（给 h5-only 页如 cli-arguments 的 31 个 h5
+       一个可跳转目录）。但**搜索打分不能跟着变** —— headings 字段参与打分（12 分档），
+       掺入 h5 会让「配置」「命令」这类查询的排序整体位移（verify-mobile F1 实测
+       改前/改后 UI 顺序不一致）。这里保持搜索只见 h2-h4，与扩列前完全一致。 */
+    p.tocText = (p.toc || []).filter((h) => h.level <= 4).map((h) => h.text);
     p.htmlCounts = {
       code: countOccurrences(p.html, '<figure class="code-block'),
       alerts: countOccurrences(p.html, 'class="alert alert-'),
@@ -1889,7 +1900,7 @@ function main() {
         + ' 本地 + ' + stats.imagesExternal + ' 第三方外链 + 1 data: URI；不含每页灯箱占位 <img>',
       detailsBlocks: '源 Markdown 中的原始 <details> 折叠块数',
       headings: '生成页 article 内的 h1-h6 总数（= Markdown 标题数 - 被外壳接管的 h1 + 为无 h1 页面补的标题）',
-      tocEntries: '“本页目录”条目总数（h2-h4）',
+      tocEntries: '“本页目录”条目总数（h2-h5，R3-3 起含 h5）',
       linksRewritten: '相对 .md 链接 + 指向 docs.papermc.io 的绝对链接中被改写本地化的条数',
       externalLinks: '源 Markdown 中指向站外的链接条数（docs.papermc.io 之外）',
       unmirroredLinks: '源 Markdown 中指向 docs.papermc.io 未镜像区域（misc / adventure 等）的条数；folia 已纳入镜像，指向它的绝对链接改为本地化（计入 linksRewritten/crossSectionLinks）',
@@ -1907,7 +1918,7 @@ function main() {
         + ' = ' + stats.sourceNavPagesInNav,
       sourceNavPagesNotInNav: '组首页 / 分区根页总数：' + nav.sections.map((s) => s.id + ' ' + s.pagesNotInNav).join(' + ')
         + ' = ' + stats.sourceNavPagesNotInNav + '（挂在组标题或分区标题上，未丢弃）',
-      subsections: '生成页 article 内的 h2-h6 小节总数（其中 h2-h4 进入“本页目录”= tocEntries）',
+      subsections: '生成页 article 内的 h2-h6 小节总数（其中 h2-h5 进入“本页目录”= tocEntries）',
     },
     siteTotals: state.siteTotals,
     siteTotalsMeta: {

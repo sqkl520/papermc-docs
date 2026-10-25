@@ -291,7 +291,10 @@ class MarkdownRenderer {
       this.counts.demotedH1 = (this.counts.demotedH1 || 0) + 1;
     }
 
-    if (depth >= 2 && depth <= 4) {
+    /* R3-3（cr2-content-nav §9 #4）：原来只收 h2–h4，导致 h5-only 页面
+       （典型：paper/reference/cli-arguments/ 有 31 个 h5）拿到 **0 条目录** ——
+       31 个参数小节全部不可导航。收到 h5；h6 仍然不进（层级太深，目录会失真）。 */
+    if (depth >= 2 && depth <= 5) {
       this.toc.push({ level: depth, id, text: plain || id });
     }
     const anchor = '<a class="heading-anchor" href="#' + U.attr(id) + '" aria-label="本节链接" title="本节链接">#</a>';
