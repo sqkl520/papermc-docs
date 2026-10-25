@@ -1,45 +1,52 @@
-feat(ui): R3-3 内容页导航收敛 —— 手机首屏赚回 75px + 补 4 处缺件
+feat(ui): R3-4 五个无标题配置页重建配置键索引（盲滚 39 屏 → 1 次点击）
 
-按 reports/cr2-ruling.md §5 实施。
+本轮最大一件：cr2-content-nav §9 缺件 #7。
 
-## 1) 手机端正文首行前移（cr2-content-nav §7.3 的批 1 回归）
+## 问题
 
-批 1 引入 61px 吸顶折叠条后，手机正文首行被推晚 149px(390)/157px(320)，
-首屏导航像素 5.3% → 34.8%。其中很大一部分是元信息条在窄屏换行成 4 行（99→148px）。
-实测 4 个 chip 里有 2 个与上方面包屑说同一件事，已删：
-  · 「源结构 Development > API」—— 面包屑已逐级展示相同路径
-  · 「源结构第 92 篇 / 共 103 篇」—— 导航位置，pager 与侧栏已表达
-保留：分区名（可点回分区首页）、主题（跨分区横切入口）、查看原文（唯一站外信息）。
-再加 ≤400px 的字号/间距压缩。
+上游配置参考页在 Markdown 里**只有 1 个 `#` 标题**，正文是纯嵌套列表
+（anticheat > anti-xray > enabled，每个键用反引号包裹）。上游靠「点击叶子节点展开」
+的交互组件呈现；镜像成静态 HTML 后变成完全无导航的盲滚：
 
-| 视口 | 批 1 后 | R3-3 后 | 改善 |
+| 页面 | 字符 | 页高@1440 | 页高@390 | h2 | TOC |
+|---|---|---|---|---|---|
+| world-configuration | 30,629 | 16,721 | 34,309 | 0 | 0 |
+| spigot-configuration | 17,146 | 10,727 | 21,070 | 0 | 0 |
+| global-configuration | 15,030 | 8,039 | 16,774 | 0 | 0 |
+| server-properties | 9,366 | 4,587 | 10,149 | 0 | 0 |
+| bukkit-configuration | 3,991 | 2,494 | 4,981 | 0 | 0 |
+
+实测 world-configuration 最末配置键在 390 档需**盲滚 39.3 屏**。
+
+## 做法（不改上游正文一个字）
+
+1. 定位正文最外层 `<ul>`，遍历其**直接子 `<li>`**，从行首 `<code>` 取配置键
+2. 给这些 `<li>` 补 `id="cfg-<key>"`；**若已有 id（recoverListAnchors 注入的
+   Starlight 原 id，如 feature-seeds → feature_seeds）则复用该 id**，
+   否则会生成指向不存在锚点的死链（实测初版 122 条链接里有 8 条死链）
+3. 在 `<h1>` 之后插入紧凑的「本页配置项（N）」chip 索引
+
+只在「无 h2/h3」的页面生效，普通页面完全不受影响；索引块不产生 heading，
+不污染 TOC 与搜索打分。
+
+## 效果
+
+| 页面 | 索引项 | 索引块高@1440 | 最末键原需盲滚@390 |
 |---|---|---|---|
-| 390 | 447 | **406** | −41px |
-| 320 | 481 | **406** | **−75px** |
-| 1440 | 238 | 238 | 不变 |
+| world-configuration | **18** | 150px | **39.3 屏 → 1 次点击** |
+| spigot-configuration | **8** | 84px | 22.8 屏 → 1 次点击 |
+| global-configuration | **21** | 150px | 19 屏 → 1 次点击 |
+| server-properties | **69** | 445px | 11.3 屏 → 1 次点击 |
+| bukkit-configuration | **6** | 84px | 4.7 屏 → 1 次点击 |
 
-## 2) 补 4 处缺件（cr2-content-nav §9 诚实清单）
+**122 条索引链接，死链 0**（逐页对账 `id=` 存在性）。
+跳转落点实测：1440 目标 top=64（遮挡物底 52）、390 目标 top=68（遮挡物底 56），
+全部落在遮挡物下方且可见；`:target` 高亮帮助确认。
 
-| 缺件 | 原实测 | 修复后 |
-|---|---|---|
-| scroll spy 冷启动空档 | scrollY=0 时高亮 **0 条**，滚到 321 才亮 | 冷启动即 **1 条** + 滚动校正 |
-| 抽屉 TOC 无 spy | 3 个滚动位置 `drawerActive: []` | **1 条**高亮 |
-| h5-only 页无目录 | `cli-arguments` 31 个 h5 → TOC **0 条** | TOC **31 条**（全部 lvl-5） |
-| 长页无回顶 | 全站 grep 0 命中，43,633px 页面无抓手 | 44×44 按钮，>3 屏才出现，点击回 scrollY=0 |
-
-h5 进目录的同时**保持搜索打分不变**：p.toc 扩到 h2-h5，但搜索索引的 headings
-仍只取 h2-h4（否则「配置」「命令」的 UI 排序会整体位移，verify-mobile F1 实测）。
-
-## 3) 顺带修出的两个连带回归（自查发现）
-
-- **抽屉焦点陷阱**：新增的 .to-top 按钮放在 body 末尾，DOM 顺序排在抽屉之后，
-  打开抽屉后连按 Tab 会逃逸（B6 失败）。改为挂在 `<main>` 内 + `setMainInert(true)`
-  给主内容设 inert + 顶栏除 ☰ 外 tabindex=-1 + 抽屉内首尾回绕 → **Tab 25 次零逃逸**。
-- **初始焦点**：`active` 链接常位于折叠 details 内（祖先 display:none）→ focus() 静默
-  失败，焦点留在 ☰（B7 失败）。改为优先聚焦 #side-filter（抽屉顶部、永远可见）。
+对照组验证：cli-arguments（R3-3 已由 h5 进 TOC 解决）与 pdc（有 h2 的普通页）
+均正确跳过，无索引、无注入。
 
 ## 验证
 
-verify-mobile 15/16（唯一 FAIL = item 16 性能，历史遗留平台层地板）
-verify-site 15/15｜check-site PASS｜verify-artifacts PASS｜privacy 0｜url-parity PASS
-（verify-site #7 的目录口径已同步从 h2-h4 改为 h2-h5，否则会误报「目录多出 h5 条目」）
+verify-mobile 15/16（唯一 FAIL = item 16 性能，历史遗留）
+verify-site 15/15｜check-site PASS｜verify-artifacts PASS｜privacy 0

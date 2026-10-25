@@ -924,6 +924,14 @@ function writeEverything(state) {
       + (p.description ? '<p class="page-desc">' + U.escapeHtml(p.description) + '</p>' : '')
       + '<p class="page-meta">' + metaChips.join('') + viewOriginal + '</p>';
     let article = p.html;
+    /* R3-4：长而无标题的配置参考页 → 重建配置键索引（盲滚 17.9 屏 → 1 次点击） */
+    const cfg = buildConfigKeyIndex(article);
+    let cfgIndex = '';
+    if (cfg.keys.length) {
+      article = cfg.html;
+      cfgIndex = configKeyIndexHtml(cfg.keys);
+      p.cfgKeyCount = cfg.keys.length;
+    }
     const pager = L.pagerHtml(p.prev, p.next, prefix);
     const html = L.shell({
       site, prefix,
@@ -933,7 +941,7 @@ function writeEverything(state) {
       active: { pageId: p.id, rel: p.rel, sectionId: p.section, categoryId: p.category, navGroupKeys: p.navGroupKeys || [] },
       // one <h1> per document, living inside the article: the page title + its metadata,
       // followed by the Markdown body whose own h1 the renderer already dropped.
-      crumbs, toc: p.toc, content: '<article class="article">' + head + article + '</article>',
+      crumbs, toc: p.toc, content: '<article class="article">' + head + cfgIndex + article + '</article>',
       pager, page: p,
     });
     const bytes = U.writeFile(outAbs, html);
@@ -1115,6 +1123,116 @@ function recoverListAnchors(html, needed) {
     recovered.push(path);
   }
   return { html: out, recovered };
+}
+
+/**
+ * R3-4：为「长但零标题」的配置参考页重建配置键索引。
+ *
+ * 背景（cr2-content-nav §9 缺件 #7，本轮最大一件）：
+ *   上游配置参考页（world / spigot / global / server-properties / bukkit）在 Markdown
+ *   里**只有 1 个 `#` 标题**，正文是纯嵌套列表，每个配置键用反引号包裹
+ *   （anticheat > anti-xray > enabled）。上游靠「点击叶子展开」的交互组件呈现，
+ *   镜像成静态 HTML 后就变成 16583px 的盲滚：实测 world-configuration 最深配置键
+ *   需要**盲滚 17.9 屏**才能看到，全页 h2=0 / TOC=0 / 无可跳转结构。
+ *
+ * 做法（不改上游正文一个字）：
+ *   1) 定位正文最外层 <ul>，遍历它的**直接子 <li>**，从行首 <code> 取配置键；
+ *   2) 给这些 <li> 补 id="cfg-<key>"（幂等：已有 id 则跳过，避免覆盖
+ *      recoverListAnchors 已注入的 Starlight 原 id）；
+ *   3) 在 <h1> 之后插入紧凑的「本页配置项（N）」索引块。
+ *   只在「无 h2/h3」的页面生效，普通页面完全不受影响；索引块不产生 heading，
+ *   因此不影响 TOC 与搜索打分。
+ */
+function buildConfigKeyIndex(articleHtml) {
+  if (/<h[23]\b/.test(articleHtml)) return { html: articleHtml, keys: [] };
+
+  /* 定位最外层 <ul> 的起始偏移（其祖先中没有 ul/ol） */
+  const walk = /<(\/?)(ul|ol)\b[^>]*>/g;
+  let stack = 0;
+  let outerUlBodyStart = -1;
+  let wm;
+  let outerUlAt = -1;
+  while ((wm = walk.exec(articleHtml)) !== null) {
+    const closing = wm[1] === '/';
+    if (!closing) {
+      stack++;
+      if (stack === 1) {
+        outerUlAt = wm.index;
+        outerUlBodyStart = wm.index + wm[0].length;
+      }
+    } else {
+      stack--;
+      if (stack === 0 && outerUlBodyStart >= 0) break;
+    }
+  }
+  if (outerUlBodyStart < 0) return { html: articleHtml, keys: [] };
+
+  /* 从最外层 <ul> 内部扫描，只取深度 1 的 li */
+  const re2 = /<(\/?)(ul|ol|li)\b[^>]*>/g;
+  re2.lastIndex = outerUlBodyStart;
+  let depth = 1;
+  const keys = [];
+  const inject = [];
+  let m;
+  while ((m = re2.exec(articleHtml)) !== null) {
+    const closing = m[1] === '/';
+    const tag = m[2];
+    if (tag === 'ul' || tag === 'ol') {
+      depth += closing ? -1 : 1;
+      if (depth <= 0) break;
+      continue;
+    }
+    if (closing) continue;
+    if (depth !== 1) continue;
+    const tagStart = m.index;
+    const tagEnd = m.index + m[0].length;
+    const gtIdx = tagEnd - 1;
+    const rest = articleHtml.slice(tagEnd, tagEnd + 400);
+    const stop = rest.search(/<ul\b|<ol\b|<\/li\b|<pre\b|<div\b|<table\b/);
+    const lead = (stop === -1 ? rest : rest.slice(0, stop)).replace(/<\/?p\b[^>]*>/g, '');
+    const cm = lead.match(/<code[^>]*>([\s\S]*?)<\/code>/);
+    if (!cm) continue;
+    const keyText = U.decodeAttrText(cm[1]).trim();
+    if (!keyText) continue;
+    const slug = keyText.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (!slug) continue;
+    let id = 'cfg-' + slug;
+    /* 子项数：给索引一个「这个键展开后有多少条」的次要提示 */
+    const liEnd = articleHtml.indexOf('</li>', tagEnd);
+    const seg = liEnd > 0 ? articleHtml.slice(tagEnd, liEnd) : '';
+    const childCount = (seg.match(/<li\b/g) || []).length;
+    /* 该 <li> 若**已有 id**（recoverListAnchors 注入的 Starlight 原 id，如
+       feature-seeds → feature_seeds），索引必须链接到那个已存在的 id，
+       否则会生成指向不存在锚点的死链（实测 world-configuration 的
+       cfg-feature-seeds 就是这种情形）。 */
+    const existingId = /<li\b[^>]*\sid="([^"]+)"/.exec(articleHtml.slice(tagStart, tagEnd));
+    if (existingId) {
+      id = existingId[1];
+    } else {
+      inject.push({ at: gtIdx, id });
+    }
+    keys.push({ key: keyText, id, childCount });
+  }
+  if (!keys.length) return { html: articleHtml, keys: [] };
+
+  let out = articleHtml;
+  for (let i = inject.length - 1; i >= 0; i--) {
+    out = out.slice(0, inject[i].at) + ' id="' + U.attr(inject[i].id) + '"' + out.slice(inject[i].at);
+  }
+  return { html: out, keys };
+}
+
+/** 渲染配置键索引块（插在 <h1> 之后、正文之前） */
+function configKeyIndexHtml(keys) {
+  if (!keys || !keys.length) return '';
+  const links = keys.map((k) => '<a class="cfg-key" href="#' + U.attr(k.id) + '">'
+    + '<code>' + U.escapeHtml(k.key) + '</code>'
+    + (k.childCount ? '<span class="cfg-n">' + k.childCount + '</span>' : '')
+    + '</a>').join('');
+  return '<nav class="cfg-index" aria-label="本页配置项索引">'
+    + '<div class="cfg-index-head">本页配置项<span class="cfg-total">' + keys.length + '</span></div>'
+    + '<div class="cfg-index-list">' + links + '</div>'
+    + '</nav>';
 }
 
 /** rewrite href="X#frag" -> href="X" and add a visible marker (target page has no such anchor) */

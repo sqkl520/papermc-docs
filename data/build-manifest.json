@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T16:34:44.791Z",
+  "generated_at": "2026-10-25T16:58:27.980Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -389,11 +389,11 @@
     "imgInArticle": 89,
     "imgExternal": 1,
     "imgMissing": 0,
-    "anchorsAll": 40696,
+    "anchorsAll": 40824,
     "anchorsExternal": 1433,
     "anchorsUnmirrored": 25,
     "anchorsInternalPage": 31235,
-    "anchorsFragmentOnly": 3174,
+    "anchorsFragmentOnly": 3302,
     "anchorsUnresolved": 4,
     "uniqueExternalHrefs": 783
   },
@@ -522,7 +522,7 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 63363
+        "bytes": 65002
       },
       "js": {
         "output": "assets/site.js",
@@ -546,7 +546,7 @@
     "sectionCount": 3,
     "siteDir": "repo-root (GitHub Pages /papermc-docs/)",
     "pageLayout": "<section>/<rel>.html（rel 直接展开，URL 与上游 docs.papermc.io 逐段一致）",
-    "totalBytes": 17114880
+    "totalBytes": 17130576
   },
   "pages": [
     {
@@ -7955,7 +7955,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 100982,
+      "bytes": 101805,
       "warnings": 14
     },
     {
@@ -8003,7 +8003,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 95676,
+      "bytes": 96486,
       "warnings": 0
     },
     {
@@ -8051,7 +8051,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93511,
+      "bytes": 93815,
       "warnings": 0
     },
     {
@@ -8551,7 +8551,7 @@
         "fencePairs": 2
       },
       "headings": [],
-      "bytes": 116971,
+      "bytes": 119658,
       "warnings": 0
     },
     {
@@ -8747,7 +8747,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 106047,
+      "bytes": 113785,
       "warnings": 1
     },
     {
@@ -8795,7 +8795,7 @@
         "fencePairs": 3
       },
       "headings": [],
-      "bytes": 122628,
+      "bytes": 123703,
       "warnings": 10
     },
     {
@@ -9206,7 +9206,7 @@
         "fencePairs": 5
       },
       "headings": [],
-      "bytes": 145182,
+      "bytes": 147441,
       "warnings": 14
     },
     {
@@ -12551,6 +12551,6 @@
     }
   ],
   "timing_ms": {
-    "total": 7760
+    "total": 5754
   }
 }
