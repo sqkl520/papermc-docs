@@ -605,6 +605,43 @@ table.allpages td.lnk{margin-top:.1rem}
 .quickbar .qa:hover{border-style:solid;border-color:var(--accent)}
 .quickbar .qa b{font-size:.98rem}
 .quickbar .qa span{color:var(--fg-muted);font-size:.84rem}
+/* ---------- R3-1：首屏任务入口 + 折叠目录树 ---------- */
+/* 一行任务导向副标题（原两段开发自述降级到页脚） */
+.hero .hero-lede{font-size:.98rem;color:var(--fg-muted);margin:.1rem 0 .9rem;max-width:46rem}
+/* 服主四条路：首屏必须出现具体文档链接。视觉权重刻意高于统计卡（原 21.6px 数字
+   比入口卡标题还响），这里标题 15px、描述 13px，一眼可扫。 */
+.host-paths{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:.7rem;margin:.2rem 0 1.1rem}
+/* 窄屏用两列紧凑卡：320 档首屏要装下全部四条（原来纵向堆叠时只装得下 1 条） */
+@media (max-width:520px){
+  .host-paths{grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
+  .host-card{padding:.5rem .6rem}
+  .host-card .hc-title{font-size:.9rem}
+  .host-card .hc-desc{font-size:.76rem;line-height:1.45}
+}
+.host-card{display:flex;flex-direction:column;gap:.18rem;padding:.7rem .85rem;border:1px solid var(--border);
+  border-left:3px solid var(--accent);border-radius:.55rem;background:var(--bg);text-decoration:none;color:var(--fg);
+  transition:border-color .15s ease,background .15s ease}
+.host-card:hover{border-color:var(--accent);background:var(--bg-soft)}
+.host-card .hc-title{font-size:.95rem;font-weight:700}
+.host-card .hc-desc{font-size:.82rem;color:var(--fg-muted);line-height:1.5}
+/* 完整目录：默认折叠（原来 5,753px = 首页 78% 全铺开，且 97.9% 与侧栏重复） */
+.tree-fold{margin:1rem 0 1.4rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-soft)}
+.tree-fold>.tree-fold-title{display:flex;align-items:center;gap:.5rem;min-height:48px;padding:0 .9rem;
+  cursor:pointer;font-weight:700;font-size:.92rem;list-style:none;color:var(--fg)}
+.tree-fold>.tree-fold-title::-webkit-details-marker{display:none}
+.tree-fold>.tree-fold-title::before{content:"";width:0;height:0;flex:0 0 auto;
+  border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;
+  transition:transform .15s ease;color:var(--fg-muted)}
+.tree-fold[open]>.tree-fold-title::before{transform:rotate(90deg)}
+.tree-fold>.tree-fold-title .side-count{margin-left:auto;font-size:.82rem;color:var(--fg-muted);font-variant-numeric:tabular-nums}
+.tree-fold:not([open])>*:not(summary){display:none}
+.tree-fold[open]>section.src-tree{margin:.4rem .7rem 1rem}
+/* 页脚里的「关于本站（维护者信息）」——原来占首页尾部 150px */
+.about-site{margin:0 0 .5rem}
+.about-site>summary{cursor:pointer;font-size:.86rem;color:var(--fg-muted);min-height:24px;display:flex;align-items:center}
+.about-site[open]>summary{color:var(--fg)}
+.about-site .page-desc{font-size:.86rem;margin:.5rem 0 .4rem;max-width:52rem}
+.about-site .page-meta{font-size:.78rem;margin:.3rem 0 0}
 .info-footer{display:flex;flex-direction:column;gap:.35rem;margin-top:2rem;border-top:1px solid var(--border);padding-top:.9rem}
 .info-footer code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85em}
 

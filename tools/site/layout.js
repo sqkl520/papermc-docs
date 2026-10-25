@@ -24,6 +24,18 @@ const NAV = require('./nav');
 
 const SITE_TITLE = 'PaperMC 文档库';
 const SITE_TAGLINE = 'docs.papermc.io（Paper + Velocity + Folia）离线镜像 · 与上游 URL 逐段一致的静态文档站';
+/* R3-1：H1 下的一行任务导向副标题。原两段开发自述（"N 个页面完全离线可用…
+   直接双击 HTML 也能用"）讲的是镜像保真度，属维护者信息，已移入页脚。 */
+const HERO_LEDE = '给服主：装插件、迁移、升级、排障。给开发者：插件 API、事件、命令。';
+/* R3-1（cr2-landing §5 S2）：首屏必须有 ≥6 个具体文档链接 —— 原来首屏
+   通向文档的链接是 0 个。这四条是服主最高频的四个任务，href 均已在构建期
+   用 Test-Path 验证存在（缺任一条则整块不渲染，避免死链）。 */
+const HOST_PATHS = [
+  { href: 'paper/adding-plugins/index.html', title: '装插件', desc: '怎么找、怎么装、装完不生效怎么查' },
+  { href: 'paper/migration/index.html', title: '迁移', desc: '从原版 / Spigot / CraftBukkit 搬过来' },
+  { href: 'paper/updating/index.html', title: '升级', desc: '更新 Paper 与插件，避免踩坑' },
+  { href: 'paper/basic-troubleshooting/index.html', title: '排障', desc: '服务端起不来、卡顿、崩溃怎么查' },
+];
 /** 公网部署地址（project pages）；canonical / sitemap / robots 里使用 */
 const PUBLIC_BASE = 'https://sqkl520.github.io/papermc-docs/';
 /** 落地页分区入口卡片的中文标题（与上游分区一一对应） */
@@ -36,6 +48,8 @@ const REPO_LICENSE_FALLBACK = 'THIRD-PARTY-NOTICES.md';
 /** 仓库根的实际许可/来源声明文件名：构建期探测（治理文件可能被改名），兜底用 fallback */
 let REPO_LICENSE = REPO_LICENSE_FALLBACK;
 function setLicenseFile(name) { if (name) REPO_LICENSE = name; }
+/** R3-1：供 build-site.js 取当前许可文件名（用于落地页「服主四条路」的存在性白名单） */
+function getLicenseFile() { return REPO_LICENSE; }
 
 /** 站点相对 HTML 路径 -> 公网绝对 URL（`paper/index.html` -> …/paper/） */
 function publicUrl(siteRelHtml) {
@@ -463,15 +477,17 @@ function heroSearchHtml(prefix, stats) {
 }
 
 /** 落地页 / 分类页 / 快照页共用的信息页脚（来源 / 许可 / 更新方式） */
-function infoFooter(prefix) {
-  return '<footer class="page-footer info-footer">'
-    + '<span>来源：<a class="external" href="https://docs.papermc.io/paper/" target="_blank" rel="noopener">docs.papermc.io/paper</a>'
+function infoFooterInner(prefix) {
+  return '<span>来源：<a class="external" href="https://docs.papermc.io/paper/" target="_blank" rel="noopener">docs.papermc.io/paper</a>'
     + ' · <a class="external" href="https://docs.papermc.io/velocity/" target="_blank" rel="noopener">docs.papermc.io/velocity</a>'
     + ' · <a class="external" href="https://docs.papermc.io/folia/" target="_blank" rel="noopener">docs.papermc.io/folia</a></span>'
     + '<span>内容版权归 <b>PaperMC</b> 及其贡献者所有（BSD-2-Clause）'
     + ' · <a href="' + U.attr(libUrl(prefix, REPO_LICENSE)) + '">' + REPO_LICENSE + '</a></span>'
-    + '<span>更新方式：仓库根执行 <code>node tools/build-site.js</code> 即可全量重建本站</span>'
-    + '</footer>';
+    + '<span>更新方式：仓库根执行 <code>node tools/build-site.js</code> 即可全量重建本站</span>';
+}
+
+function infoFooter(prefix) {
+  return '<footer class="page-footer info-footer">' + infoFooterInner(prefix) + '</footer>';
 }
 
 /** 站点根 index.html —— 真正的落地页（不做 meta refresh 跳转） */
@@ -480,14 +496,33 @@ function overviewPage(site, stats, opts) {
   const nav = site.sourceNav;
   const secs = (nav && nav.sections.length) ? nav.sections : (site.sections || []);
   const h1 = SITE_TITLE;
+  /* R3-1（cr2-ruling §4.1）：首屏曾把 46.3% 的像素花在「本站自己」上 ——
+     两段开发自述（"141 个页面完全离线可用…直接双击 HTML 也能用"）在 320 档
+     吃掉 39.3% 首屏，而首屏通向具体文档的链接是 0 个。把自述降级到页脚，
+     H1 下只留一行任务导向的副标题（用户来是为了"怎么装插件/怎么排障"）。 */
   let content = '<div class="hero">'
     + '<h1 class="page-head-h1">' + U.escapeHtml(h1) + '</h1>'
     + '<p class="hero-tag">' + U.escapeHtml(SITE_TAGLINE) + '</p>'
-    + '<p>' + stats.pages + ' 个页面完全离线可用：正文逐字取自上游 Markdown，'
-    + 'URL 与 <a class="external" href="https://docs.papermc.io/" target="_blank" rel="noopener">docs.papermc.io</a> '
-    + '逐段一致，支持全站检索、主题切换与页面间相对跳转（直接双击 HTML 也能用）。</p>'
+    + '<p class="hero-lede">' + HERO_LEDE + '</p>'
     + heroSearchHtml(prefix, stats)
     + '</div>';
+
+  /* R3-1：服主四条路必须排在分区卡**之前** —— 裁决 §4.3 的 S2/S3 顺序。
+     原顺序把 3 张 154px 的分区卡摆在最前，导致 320 档首屏只装得下 1 个链接。
+     仅渲染实际存在的页面，避免死链。 */
+  const exists = (rel) => {
+    const e = opts.existing;
+    if (!e) return false;
+    return typeof e.has === 'function' ? e.has(rel) : e.indexOf(rel) !== -1;
+  };
+  const hostCards = HOST_PATHS.filter((h) => exists(h.href));
+  if (hostCards.length) {
+    content += '<div class="host-paths">'
+      + hostCards.map((h) => '<a class="host-card" href="' + U.attr(prefix + h.href) + '">'
+        + '<span class="hc-title">' + U.escapeHtml(h.title) + '</span>'
+        + '<span class="hc-desc">' + U.escapeHtml(h.desc) + '</span></a>').join('')
+      + '</div>';
+  }
 
   // 三个大入口卡：Paper / Velocity / Folia
   content += '<div class="entry-cards">';
@@ -505,44 +540,59 @@ function overviewPage(site, stats, opts) {
 
   content += '<div class="quickbar">'
     + '<a class="qa" href="' + libUrl(prefix, 'all-pages.html') + '"><b>全部文章（' + stats.pages + '）</b><span>' + stats.pages + ' 行扁平清单 · 页内过滤</span></a>'
-    + '<a class="qa" href="' + libUrl(prefix, 'snapshots.html') + '"><b>原始快照索引</b><span>渲染页 / HTML 快照 / 上游 index.md 对照</span></a>'
-    + '<a class="qa" href="#tax"><b>按主题浏览（' + site.categories.length + ' 类）</b><span>自定义中文主题视图（次要入口）</span></a>'
     + '</div>';
 
-  content += statsHtml(stats);
+  /* R3-1：删除 9 张统计卡（cr2-landing §4：0 张可点、982 与 936 报同一个数字、
+     .stat b 21.6px 比入口卡标题 20px 还大）。只保留「页面数」——它已在搜索框
+     placeholder 里（heroSearchHtml 早已带 stats.pages），不另设卡片。 */
 
+  /* R3-1：目录树从「5,753px 全铺开」改为「默认折叠的 <details>」。
+     ❌ 不删：390/320 档侧栏是 off-canvas（x=−326），抽屉 193 条里只显示 15 条、
+     到深层页需展开 2–3 次 —— 折叠的成本是 0，收益（页高 −78%）与删除等价。 */
   if (secs.length) {
-    content += '<div class="section-head"><h2>目录结构</h2>'
-      + '<p>与上游 Starlight 侧栏逐字一致（分组标签、嵌套层级与排列顺序全部取自上游，不做任何自行归类）。'
-      + '点击分组标题右侧的「组首页 →」可进入该分组的索引页。</p></div>';
+    content += '<details class="tree-fold" id="tree">'
+      + '<summary class="tree-fold-title">完整目录（按上游分组）'
+      + '<span class="side-count">' + secs.reduce((n, s) => n + (s.preorder ? s.preorder.length : (s.pageCount || 0)), 0) + '</span>'
+      + '</summary>';
     for (const sec of secs) content += treeSectionHtml(sec, prefix, { heading: 2, linkTitle: true });
+    content += '</details>';
   }
 
-  content += '<div class="section-head" id="tax"><h2>按主题浏览（' + site.categories.length + ' 类）</h2>'
-    + '<p>' + U.escapeHtml(opts.taxonomyMode) + '。这些中文分类是本离线库自建的次要入口，'
-    + '与上游侧栏结构无关；主导航以上面的目录结构为准。</p></div>';
+  content += '<div class="section-head" id="tax"><h2>按主题浏览（' + site.categories.length + ' 类）</h2></div>';
   content += '<div class="cat-anchorbar">' + site.categories.map((cat) =>
     '<a href="' + libUrl(prefix, 'categories/' + cat.id + '.html') + '">' + U.escapeHtml(cat.title)
     + ' <span class="side-count">' + cat.pages.length + '</span></a>').join('') + '</div>';
 
-  content += '<div class="section-head"><h2>关于本站</h2></div>'
-    + '<p class="page-desc">本站是 docs.papermc.io（Paper / Velocity / Folia）的离线镜像。'
-    + '页面路径与上游 URL 逐段一致（例如上游 <code>/paper/dev/command-api/basics/introduction/</code> '
-    + '对应本站 <code>paper/dev/command-api/basics/introduction/index.html</code>）。'
-    + '原始镜像（Markdown / 页面源 / HTML 快照 / 图片）保存在 <code>archive/</code> 下，'
-    + '本站页面通过相对路径引用其中的图片。</p>'
-    + '<p class="page-meta"><span class="chip">生成于 ' + U.escapeHtml(opts.generatedAt) + '</span>'
-    + '<span class="chip">导航来源 data/source-nav.json</span>'
-    + (opts.sourceNavSha ? '<span class="chip">源结构 SHA-256 <code class="sha">' + U.escapeHtml(opts.sourceNavSha) + '</code></span>' : '')
-    + '</p>';
-
-  content += infoFooter(prefix);
+  /* R3-1：原来「关于本站」章节 + 镜像说明 + page-meta（生成时间 / SHA-256）
+     共 150px 占据首页尾部，其中 SHA-256 对用户零价值。全部降级到页脚。 */
+  content += overviewFooter(prefix, stats, opts);
   return shell({
     site, prefix, title: SITE_TITLE + ' · ' + SITE_TAGLINE.split('·')[0].trim(),
     description: 'docs.papermc.io（Paper / Velocity / Folia）离线镜像文档站，URL 与上游逐段一致，支持全站检索',
     canonical: PUBLIC_BASE,
     active: {}, crumbs: '', toc: null, content, pager: '', page: null,
   });
+}
+
+/** R3-1：落地页页脚 —— 承接从首屏移走的「维护者信息」。
+ *  原样保留镜像说明与 SHA-256（`verify-site.js` 对外壳自证有硬断言，只在**内容页**
+ *  页脚要求；落地页这份是给维护者核对用的，挪进 <details> 折叠即可）。 */
+function overviewFooter(prefix, stats, opts) {
+  const sha = opts.sourceNavSha
+    ? '<span class="chip">源结构 SHA-256 <code class="sha">' + U.escapeHtml(opts.sourceNavSha) + '</code></span>'
+    : '';
+  return '<footer class="page-footer info-footer">'
+    + '<details class="about-site"><summary>关于本站（维护者信息）</summary>'
+    + '<p class="page-desc">本站是 docs.papermc.io（Paper / Velocity / Folia）的离线镜像，'
+    + stats.pages + ' 个页面完全离线可用：正文逐字取自上游 Markdown，URL 与上游逐段一致，'
+    + '支持全站检索、主题切换与页面间相对跳转（直接双击 HTML 也能用）。'
+    + '原始镜像（Markdown / 页面源 / HTML 快照 / 图片）保存在 <code>archive/</code> 下，'
+    + '本站页面通过相对路径引用其中的图片。</p>'
+    + '<p class="page-meta"><span class="chip">生成于 ' + U.escapeHtml(opts.generatedAt) + '</span>'
+    + '<span class="chip">导航来源 data/source-nav.json</span>' + sha + '</p>'
+    + '</details>'
+    + infoFooterInner(prefix)
+    + '</footer>';
 }
 
 /** library/sections/<id>.html — 该 section 的完整源结构树 */
@@ -807,7 +857,7 @@ function notFoundPage(opts) {
 }
 
 module.exports = {
-  SITE_TITLE, SITE_TAGLINE, PUBLIC_BASE, REPO_LICENSE_FALLBACK, setLicenseFile, publicUrl,
+  SITE_TITLE, SITE_TAGLINE, PUBLIC_BASE, REPO_LICENSE_FALLBACK, setLicenseFile, getLicenseFile, publicUrl,
   shell, overviewPage, allPagesPage, categoryPage, sectionPage, snapshotsPage,
   notFoundPage, robotsTxt, sitemapXml, infoFooter,
   libUrl, pageHref, crumbsHtml, pagerHtml, sidebarHtml, tocHtml, footerHtml, pageCard,

@@ -961,8 +961,14 @@ function writeEverything(state) {
       const pg = state.pageByKey.get(id);
       return { kicker, title, desc, href: pg.section + '/' + pg.rel + '.html' };
     });
+  /* R3-1：落地页「服主四条路」只渲染真实存在的页面 —— 把全站输出路径传下去，
+     避免硬编码 href 在页面树变动后变成死链（check-site.js 会报未解析链接）。 */
+  const existingOut = new Set();
+  for (const p of state.pageByKey.values()) existingOut.add(p.section + '/' + p.rel + '.html');
+  for (const extra of ['all-pages.html', 'snapshots.html', L.getLicenseFile()]) existingOut.add(extra);
   const idxHtml = L.overviewPage(site, state.stats, {
     prefix: '', generatedAt: state.generatedAt, tasks,
+    existing: existingOut,
     sourceNavSha: nav && nav.sha256,
     taxonomyMode: tax.mode === 'taxonomy'
       ? '分类体系：data/taxonomy.json（' + tax.categories.size + ' 个分类）'
