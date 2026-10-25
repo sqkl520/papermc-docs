@@ -548,6 +548,28 @@ table.allpages td.lbl{font-weight:600;font-size:.95rem}
 table.allpages td.lbl a,table.allpages td.lnk a,table.snapshots td a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
 table.allpages td.lbl a{color:var(--fg)}
 table.allpages td.lnk{margin-top:.1rem}
+/* ---------- R3-2：all-pages 移动端瘦身 ----------
+   cr2-visual-noise 实测：批 1 把表格改卡片后，@390 页高 11,919 → 29,086（+144%）、
+   带边框元素 239 → 378（+58%），平均行高 192px —— 因为 6 个 td 全部纵向堆叠。
+   但其中 3 列是冗余的：
+     · td.num（序号）        —— 列表本身有序，序号不提供导航信息
+     · td.pth（源结构路径）  —— 与面包屑/侧栏重复，且是本行最长的次要信息
+     · td.lnk（「打开页面」）—— td.lbl 的标题本身就是链接，这是死重（44px 高）
+   Owner 原型实测：隐藏这 3 列 + 压缩内边距 → 29,086 → 18,562（−36%）。
+   保留 td.lbl（主标题，可点）与 td.sum（中文摘要，唯一有信息增益的一列）。 */
+@media (max-width:767.98px){
+  table.allpages td.num,table.allpages td.pth,table.allpages td.lnk{display:none}
+  table.allpages tr{padding:.42rem .55rem;margin:0 0 .4rem;border-radius:8px}
+  table.allpages td.lbl{font-size:.9rem;line-height:1.35}
+  table.allpages td.lbl a{min-height:32px;justify-content:flex-start}
+  table.allpages td.sum{font-size:.78rem;line-height:1.45;margin-top:.1rem}
+  /* 摘要默认两行截断：141 行 × 长摘要会让页面变长，滚到底仍能靠筛选找到目标 */
+  table.allpages td.sum{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+}
+/* snapshots 页保留 pth（它就是「三类产物对照」的核心列），只压内边距 */
+@media (max-width:767.98px){
+  table.snapshots tr{padding:.42rem .55rem;margin:0 0 .4rem}
+}
 
 .crumbs .crumb-zh{color:var(--fg-muted);opacity:.75;font-size:.92em;margin-left:.15em}
 .cat-links .pth{font-size:.7rem}
