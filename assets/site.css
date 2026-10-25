@@ -163,8 +163,14 @@ html.nav-locked{scrollbar-gutter:stable}
 }
 .toc-side .toc-title{display:flex;align-items:center;gap:.4rem;min-height:48px;margin:0;padding:0 .75rem;cursor:pointer;list-style:none;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted)}
 .toc-side .toc-title::-webkit-details-marker{display:none}
+/* A11Y 回归（批 1 引入）：闭合的 <details> 在实测 Chromium 里**没有**隐藏其内容 ——
+   .toc-fold 高 56px，但里面的 <ol> 仍 display:block、实测高 319px，7 个链接
+   全部留在可命中区（y=118~392），被正文覆盖 → elementFromPoint 命中的是
+   main/h1/page-desc，点击 TOC 实际触发的是正文。桌面（>=1200 右栏）不受影响。
+   这里显式声明闭合态隐藏，不依赖 UA 对 ::details-content 的默认行为。 */
+.toc-fold:not([open])>ol{display:none}
 /* 展开后限高，长目录（83 项）不撑满全屏 */
-.toc-fold[open]>ol{max-height:min(45vh,calc(100vh - var(--topbar-h) - 96px));overflow-y:auto;padding:0 .5rem .5rem}
+.toc-fold[open]>ol{display:block;max-height:min(45vh,calc(100vh - var(--topbar-h) - 96px));overflow-y:auto;padding:0 .5rem .5rem}
 .toc-side .toc-title::before{content:"▸";font-size:.75em;color:var(--fg-muted);transition:transform .15s}
 /* a11y（b1-a11y F-6 / SC 4.1.2）：上面那条的 "▸" 会被并入可访问名（AX 树实测
    DisclosureTriangle name="▸ 本页目录 5"）。改用 border 画的纯装饰三角 —— 不进 AX 树。 */

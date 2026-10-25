@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-25T13:11:35.407Z",
+  "generated_at": "2026-10-25T14:09:15.161Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1120,
-    "scanned_text_files": 1047,
+    "files": 1128,
+    "scanned_text_files": 1055,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -17,11 +17,11 @@
   "summary": {
     "must_fix": 0,
     "public_url": 329,
-    "loopback_ok": 504,
+    "loopback_ok": 513,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 919
+    "total_hits": 928
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 590,
+      "total": 599,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 504,
+      "loopback_ok": 513,
       "upstream": 86
     },
     {
@@ -442,15 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-25T09:17:03.150Z",
-      "files": 1036,
-      "must_fix": 0,
-      "public_url": 327,
-      "loopback_ok": 407,
-      "upstream": 86,
-      "clean": true
-    },
-    {
       "at": "2026-10-25T09:18:17.956Z",
       "files": 1036,
       "must_fix": 0,
@@ -528,6 +519,15 @@
       "must_fix": 0,
       "public_url": 329,
       "loopback_ok": 504,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-25T14:09:15.161Z",
+      "files": 1128,
+      "must_fix": 0,
+      "public_url": 329,
+      "loopback_ok": 513,
       "upstream": 86,
       "clean": true
     }

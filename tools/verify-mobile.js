@@ -1982,9 +1982,37 @@ check(10, 12, 'E4', '交互未坏：搜索 / 侧栏过滤 / 主题切换 / 锚�
           const h = document.getElementById(hid);
           const bar = document.querySelector('header.topbar, header');
           const hr = h.getBoundingClientRect(), br = bar.getBoundingClientRect();
-          return { id: hid, headingTop: Math.round(hr.top), barBottom: Math.round(br.bottom), gap: Math.round(hr.top - br.bottom), scrollY: Math.round(window.scrollY), scrollPaddingTop: getComputedStyle(document.documentElement).scrollPaddingTop, scrollMarginTop: getComputedStyle(h).scrollMarginTop };
+          /* 口径修正（E4 在批 1 之后必然失败的原因）：批 1 在 <1200 引入了**吸顶折叠条**
+             （.toc-side，61px，紧贴顶栏之下）。此时标题物理上不可能落进
+             「顶栏底部 + 8~20px」——它必须落在折叠条下方。旧口径只量顶栏，
+             于是把「正确实现」判成 gap=73 失败。
+             正确的口径是量到**实际遮挡物底部**（顶栏与吸顶条取更低者），
+             这样不管有无折叠条，断言都表达同一件事：标题紧贴遮挡物下方且不被盖住。 */
+          const toc = document.querySelector('.toc-side');
+          let occluderBottom = br.bottom;
+          let tocInfo = null;
+          if (toc && window.innerWidth < 1200) {
+            const tcs = getComputedStyle(toc);
+            const tr = toc.getBoundingClientRect();
+            if ((tcs.position === 'sticky' || tcs.position === 'fixed') && tr.height > 0 && tr.bottom > occluderBottom) {
+              occluderBottom = tr.bottom;
+            }
+            tocInfo = { pos: tcs.position, top: Math.round(tr.top), bottom: Math.round(tr.bottom), h: Math.round(tr.height) };
+          }
+          return {
+            id: hid,
+            headingTop: Math.round(hr.top),
+            barBottom: Math.round(br.bottom),
+            occluderBottom: Math.round(occluderBottom),
+            covered: hr.top < occluderBottom - 1,
+            gap: Math.round(hr.top - occluderBottom),
+            scrollY: Math.round(window.scrollY),
+            scrollPaddingTop: getComputedStyle(document.documentElement).scrollPaddingTop,
+            scrollMarginTop: getComputedStyle(h).scrollMarginTop,
+            toc: tocInfo,
+          };
         }, id).catch(() => null);
-        if (m) anchors.push({ page: p, how, ...m, ok: m.gap >= 8 && m.gap <= 20 });
+        if (m) anchors.push({ page: p, how, ...m, ok: !m.covered && m.gap >= 8 && m.gap <= 20 });
       }
     }
     out.anchor = { samples: anchors, ok: anchors.length > 0 && anchors.every((a) => a.ok), gapRange: anchors.length ? [Math.min(...anchors.map((a) => a.gap)), Math.max(...anchors.map((a) => a.gap))] : null };
