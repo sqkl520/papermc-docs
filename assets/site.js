@@ -749,13 +749,14 @@
     if (info) info.textContent = text || '';
   }
 
-  /* ---------- off-canvas 抽屉导航（契约 §2.3：<=1023.98px 抽屉；>=1024px 复位为常驻侧栏） ---------- */
+  /* ---------- off-canvas 抽屉导航（契约 §2.3：<=1199.98px 抽屉；>=1200px 复位为常驻侧栏） ---------- */
   function initDrawer() {
     var toggle = doc.getElementById('nav-toggle');
     var side = doc.getElementById('sidebar');
     var scrim = doc.getElementById('nav-scrim') || doc.querySelector('[data-nav-scrim], .nav-scrim, .nav-overlay');
     if (!toggle || !side) return;
-    var wide = window.matchMedia('(min-width:1024px)');
+    /* 批 3（C3）：与 CSS 的 @media (min-width:1200px) 严格同源，改一处必须改另一处。 */
+    var wide = window.matchMedia('(min-width:1200px)');
     var supportsGutter = !!(window.CSS && window.CSS.supports && window.CSS.supports('scrollbar-gutter', 'stable'));
     function isWide() { return wide.matches; }
     function isOpen() { return doc.body.classList.contains('nav-open'); }
@@ -840,15 +841,18 @@
     }
     if (wide.addEventListener) wide.addEventListener('change', applyMode);
     else if (wide.addListener) wide.addListener(applyMode);
-    /* P0-1 配套：<1025 时 TOC 是折叠的面板（layout.js 不再输出 open）；
-       >=1025 时它变成常驻右栏，必须强制展开，否则桌面右栏会是空的。
+    /* P0-1 配套：<1200 时 TOC 是折叠的面板（layout.js 不再输出 open）；
+       >=1200 时它变成常驻右栏，必须强制展开，否则桌面右栏会是空的。
+       ⚠️ 批 3（C3）：阈值与 CSS 的 @media (min-width:1200px) 同源。若这里留在 1025，
+          则 1025–1199 会被强制 open=true 而 CSS 侧 .toc-side 仍是折叠面板（sticky 展开态）
+          → 批 1 刚修好的锚点遮挡静默复现（实测 3/3）。
 
        a11y 修复（b1-a11y F-1 / SC 3.2.5 + 2.2.2）：**只在跨断点时才动手**。
        第一版把 syncToc 挂在 resize 上并无条件赋值，导致用户在 1440 手动收起后
        视口变化 1px 就被强行展开；在 390 展开后地址栏一收（高 844→780）就自动折叠 ——
        用户的选择被非请求事件静默撤销。现在记住上一次的「宽窄」状态，只有它真变了才同步。 */
     (function () {
-      var tocWide = window.matchMedia ? window.matchMedia('(min-width:1025px)') : null;
+      var tocWide = window.matchMedia ? window.matchMedia('(min-width:1200px)') : null;
       /* D5（红队）：HTML 保留 open 作无 JS 降级，所以首帧必须由 JS 在窄屏主动收起。
          用 null 作哨兵，保证首帧一定执行一次，之后只在真正跨断点时动手。 */
       var lastIsWide = null;
@@ -880,7 +884,7 @@
         }, true);
       }
       function syncToc() {
-        var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1025;
+        var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1200;
         if (isWide === lastIsWide) return;   /* 同档内不干预用户手动折叠（a11y F-1） */
         lastIsWide = isWide;
         applyToc(isWide);
@@ -941,7 +945,10 @@
       function syncTocOffset() {
         var toc = doc.querySelector('.toc-side');
         var h = 0;
-        if (toc && window.innerWidth < 1025) {
+        /* 批 3（C3）硬约束：这里必须与 CSS 断点同源（1200）。写到 1025 会让 1025–1199
+           既保留吸顶折叠条、又不计 --toc-offset → 锚点跳转后标题被目录条盖住
+           （批 1 的 b1-a11y F-2 静默复现，实测 coveredPct=100）。 */
+        if (toc && window.innerWidth < 1200) {
           var pos = window.getComputedStyle(toc).position;
           var b = toc.getBoundingClientRect();
           if ((pos === 'sticky' || pos === 'fixed') && b.height > 0) h = Math.round(b.height);

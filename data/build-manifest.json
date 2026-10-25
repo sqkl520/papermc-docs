@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T08:23:22.391Z",
+  "generated_at": "2026-10-25T08:50:08.011Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -522,11 +522,11 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 52679
+        "bytes": 54478
       },
       "js": {
         "output": "assets/site.js",
-        "bytes": 59516
+        "bytes": 60220
       },
       "favicon": {
         "output": "assets/favicon.svg",
@@ -12320,6 +12320,6 @@
     }
   ],
   "timing_ms": {
-    "total": 6057
+    "total": 4472
   }
 }

@@ -1,38 +1,46 @@
-perf(ui): C1 代码行距 strut 修复（行推进 25 -> 22）+ 构建/指纹基础设施
+feat(ui): C3 断崖修复 —— 侧栏与 TOC 断点同绑 1200（台阶 2 -> 1，1024 死区消失）
 
-## C1 改动（唯一源码改动，1 行）
-tools/site/assets.js 的 .code-pre 规则加 font-size:.875rem
+## 改动（tools/site/assets.js，66 行；tools/verify-mobile.js，15 行）
+把原先的两级桌面断点合并为单一 1200：
+- @media (min-width:1024px)（只进 280px 侧栏、不进 TOC）与
+  @media (min-width:1025px)（再进 250px TOC）**合并为 @media (min-width:1200px)**
+- 配套把 @media (max-width:1024.98px) 搬到 1199.98px（否则 1025-1199 会出现
+  「展开态仍 sticky」的遮挡回归）
+- syncTocOffset 的 window.innerWidth < 1025 与 syncToc 的 matchMedia 同步改到 1200
 
-根因：<pre> 继承 16px + line-height:1.55 -> strut 24.8px，压过内层 <code> 的
-13.6px/21.08px，浏览器按行盒最大行高排版 -> 实际行推进 25px = 1.82 倍代码字号。
+## 根因（基线实测）
+原设计在 1023->1025 产生两级台阶：
+  1023  artW=972  TOC=top-block  cols=1023px
+  1024  artW=693  TOC=hidden     cols=280px 744px      <- 台阶(1) -279px
+  1025  artW=434  TOC=rail       cols=290px 485px 250px <- 台阶(2) -259px
+即 min-width:1024 让侧栏进场但 TOC 没进，产生 1024 死区；min-width:1025 再进 TOC。
 
-实测（1440x900，三页）：
-| 页面 | 行推进 改前 | 改后 | 页高变化 | 代码横滚 |
-| dialogs | [24,25] 中位25 | [21,22] 中位22 | 13805 -> 13050 (-755) | 5/13 不变 |
-| particles | [24,25] | [21,22] | 23159 -> 22441 (-718) | 4/46 不变 |
-| worldcfg | [24,25] | [21,22] | 16214 -> 16115 (-99) | 0/5 不变 |
+## 实测验收（1021->1300 逐 1px 扫描）
+| # | 断言 | 目标 | 实测 |
+| 1 | 台阶数 | 2 -> 1 | **1** PASS |
+| 2 | 台阶位置 | 1199->1200 | **1199->1200** PASS |
+| 3 | 台阶幅度 | 约 -340px | **-340px** PASS |
+| 4 | 1024 处 artW | 693 -> 949 | **949** PASS（死区消失）|
 
-反证（不采用的写法）：.article pre code{font-size:inherit} 会让 particles 的代码横滚
-从 4/46 恶化到 11/46。正确修法是给 pre 设字号，不是让 code 继承。
+关键点数值：1023/1024/1025/1199 = 949（单调），1200=609，1279=688，1280=689，1300=709。
+合并后 1200->1300 严格 +1px/px（无二次台阶）。
 
-## 基础设施（本轮新增，解决上轮返工根因）
-1. tools/fingerprint.js —— 产物指纹（6 件产物 sha256 + 16 位联合 anchor）。
-   支持 --write（写 data/build.json）、--check <anchor>（不一致 exit 2，与断言失败的
-   exit 1 区分），用于检测"测量期间产物被重建"导致的证据失效。
-2. tools/build-guard.js —— 构建串行化（文件锁）。本轮 5 个 Agent 并行，其中 3 个会重建
-   站点，并发构建会互相覆盖产物。上一轮的 4 条结论作废全部源于此。
-3. data/build.json —— F0 冻结锚点（初始 anchor 3d47519c9dc8f28a）。
+## 锚点遮挡验证（C3 的最大风险点，已实测清零）
+syncTocOffset 的 JS 若不同步改，1025-1199 会静默复现批 1 刚修好的 F-2 遮挡（历史实测 3/3）。
+| 视口 | TOC 形态 | --toc-offset | 标题落点 | 被遮挡 |
+| 1024-1199 | 吸顶条 61px | 61px | 129 | 0% PASS |
+| 1200-1440 | 右栏 250px | 0px | 64 | 0% PASS |
 
 ## 门禁（全绿）
-build-site --verify-artifacts PASS（产物=源）/ check-site PASS /
-verify-site 15/15 / url-parity 141/141 / privacy must-fix=0 / gh-pages-smoke 19/19
+build-site --verify-artifacts PASS / check-site PASS / verify-site 15/15 /
+url-parity 141/141 / privacy must-fix=0 / gh-pages-smoke 19/19 /
+verify-mobile --check=4 PASS、--check=5 PASS
 
-## 同时清理
-- 66 个 tools/ 脚本里的临时目录字面量统一改为 os.tmpdir() 派生，privacy ① 从 42 处清零
-- CONTRIBUTING.md 的占位符改为 TMPDIR 措辞
-- 全部 tools/*.js 通过 node --check（0 语法错误）
-
-## 红队交叉验证（本轮）
-红队独立实测确认：C1 行推进 21.688/中位22、dialogs 页高 -755、代码横滚 0 变化、
-行内 <code> 13.76px 完全没动、打印同比例缩小无回归。
-C1 执行 Agent 自报的 22.75/-197 是错的（我已用独立复测裁决为 22/-755）。
+## 门禁口径同步（owner 裁决，非绕过）
+verify-mobile 的 B5 断言原为「>=1024 ☰ 隐藏 + 侧栏常驻」。C3 把桌面线搬到 1200 后，
+1024-1199 档**理应**是抽屉模式（☰ 可见）——这是设计变更而非回归。
+因此把 B5 的桌面阈值同步上移到 1200：
+- 循环视口 [VP_1024, VP_1280] -> [VP_1280, VP_1440]
+- 断言标签「B5 >=1024」-> 「B5 >=1200」，检查项标题「>=1024 复位」-> 「>=1200 复位」
+裁决理由：C3 的收益是可量化的（台阶 2->1、1024 死区 693->949、幅度 -536->-340px），
+而 1024-1199 走抽屉模式是该方案的必然结果且体验可接受（吸顶条形态已实测遮挡 0%）。

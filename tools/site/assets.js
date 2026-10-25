@@ -171,7 +171,9 @@ html.nav-locked{scrollbar-gutter:stable}
    ⚠️ 必须限定 <1025 档（b1r2 P0-1 实测）：≥1025 时 syncToc 强制 open=true，若无断点限定，
       桌面右栏会永远 static → 滚动 2000px 后 TOC 完全滚出视口（可见链接 24→0，改前恒 top=52）。
    同时不能只靠 :has()（Firefox<=120 / Safari<15.4 不支持），并列 .toc-open class 由 JS 维护。 */
-@media (max-width:1024.98px){
+/* 批 3（C3 断崖）：本块的阈值与桌面断点**同源** —— 桌面线搬到 1200 后，这里必须
+   一起搬到 1199.98，否则 1200 以下到 1025 之间会出现「展开态仍 sticky」的遮挡回归。 */
+@media (max-width:1199.98px){
   .toc-side.toc-open,.toc-side:has(.toc-fold[open]){position:static}
 }
 .toc-side .toc-title{display:flex;align-items:center;gap:.4rem;min-height:48px;margin:0;padding:0 .75rem;cursor:pointer;list-style:none;font-weight:700;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted)}
@@ -382,7 +384,7 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .toc-side ol{list-style:none;margin:0;padding:0}
 .toc-side li{margin:.12rem 0}
 /* 第二轮修复（红队 F3 断言：移动端本页目录每条 ≥44px）：base = 手机，行高 44px；
-   >=1025px 的常驻右栏在断点层恢复为改造前的 block/24px 密度（见 @media (min-width:1025px)）。 */
+   >=1200px 的常驻右栏在断点层恢复为改造前的 block/24px 密度（见 @media (min-width:1200px)）。 */
 .toc-side a{display:flex;align-items:center;min-height:44px;padding:.1rem .45rem;border-left:2px solid transparent;color:var(--fg-muted);line-height:1.45}
 .toc-side a:hover{color:var(--fg);text-decoration:none;background:var(--bg-soft)}
 .toc-side a.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg-soft);font-weight:600}
@@ -589,7 +591,9 @@ table.allpages td.lnk{margin-top:.1rem}
    Mobile-first 断点层（契约 v2 §1）
    令牌在 :root：--bp-sm 480 / --bp-md 768 / --bp-lg 1024 / --bp-xl 1280；
    媒体查询不能读 var()，故下列字面量与令牌一一对应。
-   base = 320px 手机；>=1024 与改造前视觉一致（零回归线）。
+   base = 320px 手机；>=1200 与改造前视觉一致（零回归线）。
+   批 3（C3 断崖）：桌面线 = **1200**（原 1024/1025 两级已合并；--bp-lg 1024 令牌
+   自此只服务于「移动线」语义，不再有对应的桌面断点块）。
    ========================================================================== */
 @media (min-width:480px){
   .topbar .tbtn>.lbl{display:inline}
@@ -613,15 +617,21 @@ table.allpages td.lnk{margin-top:.1rem}
   table.allpages td.lnk{margin:0;white-space:nowrap}
   table.allpages td.lbl a,table.allpages td.lnk a,table.snapshots td a{display:inline;min-height:0}
 }
-@media (min-width:1024px){
+/* 批 3（C3 断崖）：**桌面线 = 1200**。
+   原先这里是 @media (min-width:1024px)（只进侧栏、不进 TOC），紧接着一个
+   @media (min-width:1025px)（才进 TOC）。两级台阶就是这么产生的：
+     1023→1024  artW 972→693（−279，侧栏进场但 TOC 没进 = 1024 死区）
+     1024→1025  artW 693→434（−259，TOC 再进场）
+   两块现在合到同一阈值 1200，得到**单级台阶**（1199→1200，−340），
+   1024 死区消失（1024 处 artW 693→949）。
+   ⚠️ 阈值只能与下面的 JS（drawer 的 matchMedia / syncToc / syncTocOffset）一起改，
+      只改 CSS 会让 1024–1199 的抽屉逻辑与版式脱钩。 */
+@media (min-width:1200px){
   :root{--topbar-h:52px}
-  .layout{grid-template-columns:280px minmax(0,1fr)}
-  .layout.has-toc{grid-template-columns:280px minmax(0,1fr)}
   .sidebar{position:sticky;top:var(--topbar-h);left:auto;width:auto;height:auto;
     max-height:calc(100vh - var(--topbar-h));transform:none;transition:none;box-shadow:none;z-index:auto;
     border-right:1px solid var(--border);padding:.8rem .7rem 2rem;background:var(--bg-soft);font-size:.88rem}
   .nav-scrim,.side-secs,.sidebar-toggle{display:none}
-  .toc-side{display:none}
   .content{padding:1.4rem 1.6rem 3rem;max-width:1000px}
   .topbar{gap:.75rem;padding:0 1rem;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px)}
   .topbar .sec-switch{display:flex}
@@ -648,10 +658,8 @@ table.allpages td.lnk{margin-top:.1rem}
   .side-filter{min-height:32px;height:32px;padding:0 .55rem}
   .filter-bar input{min-height:34px;height:34px;padding:0 .7rem}
   .hero-search #hero-search{min-height:38px;height:38px;padding:0 .8rem}
-}
-/* 契约 v2 §1：右栏 TOC 的阈值由改造前的 1200px 下调到 1024px（<=1024 隐藏，>=1025 常驻）。
-   >=1025 与改造前 >=1201 的版式逐项一致（290 / 250 / 同 padding）。 */
-@media (min-width:1025px){
+  /* 批 3（C3）：这两条原在 @media (min-width:1025px) 的第二块里，现已并进本块 ——
+     侧栏与 TOC 同在 1200 进场，版式只有一档（290 / 1fr / 250，与改造前 >=1201 逐项一致）。 */
   .layout{grid-template-columns:290px minmax(0,1fr)}
   .layout.has-toc{grid-template-columns:290px minmax(0,1fr) 250px}
   .toc-side{order:0;display:block;position:sticky;top:var(--topbar-h);max-height:calc(100vh - var(--topbar-h));overflow-y:auto;
@@ -662,16 +670,25 @@ table.allpages td.lnk{margin-top:.1rem}
   .content{order:0}
   .side-toc{display:none}
 }
+/* 批 3（C3）第二半：内容列封顶离开断点层。
+   原先 max-width:1000px 只写在 >=1024 的块里，桌面线搬到 1200 后，1024–1199 会失去封顶，
+   artW 一路涨到 1148 → 主台阶放大成 −539px（实测 nocap 变体）。
+   这里把它提到**全宽度生效**（放在最小宽度断点层之前，两条 min-width 块里的同名声明仍可覆盖）：
+   视口 <=1000 时 max-width:1000px 是 no-op（内容本来就更窄），>=1000 起才真正封顶，
+   于是 1023→1024 的 −23px 残留台阶一并消失（实测 cap1000 变体：台阶数 1）。 */
+.content{max-width:1000px}
 /* --bp-xl 1280：现状已是最宽版式（290/250），无需额外规则，令牌保留供后续使用 */
 @media (min-width:1280px){
   .content{max-width:1000px}
 }
-/* 能力回退（契约 v2 §6）：不支持 backdrop-filter / color-mix 时保持观感与可读性 */
+/* 能力回退（契约 v2 §6）：不支持 backdrop-filter / color-mix 时保持观感与可读性
+   批 3（C3）：阈值随桌面线一起搬到 1200（这两条只在桌面态兜底，留在 1024 会让 1024–1199
+   拿到本不该有的不透明顶栏 → 与相邻档不一致）。 */
 @supports not (backdrop-filter:blur(1px)){
-  @media (min-width:1024px){ .topbar{background:var(--bg)} }
+  @media (min-width:1200px){ .topbar{background:var(--bg)} }
 }
 @supports not (color:color-mix(in srgb,red 50%,blue)){
-  @media (min-width:1024px){ .topbar{background:var(--bg)} }
+  @media (min-width:1200px){ .topbar{background:var(--bg)} }
   .sr-hit{background:var(--accent-soft)}
 }
 /* 红队 F8 / spec §10：触屏上标题锚点必须看得见（桌面仍是 hover 才出现，零回归） */
@@ -1455,13 +1472,14 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     if (info) info.textContent = text || '';
   }
 
-  /* ---------- off-canvas 抽屉导航（契约 §2.3：<=1023.98px 抽屉；>=1024px 复位为常驻侧栏） ---------- */
+  /* ---------- off-canvas 抽屉导航（契约 §2.3：<=1199.98px 抽屉；>=1200px 复位为常驻侧栏） ---------- */
   function initDrawer() {
     var toggle = doc.getElementById('nav-toggle');
     var side = doc.getElementById('sidebar');
     var scrim = doc.getElementById('nav-scrim') || doc.querySelector('[data-nav-scrim], .nav-scrim, .nav-overlay');
     if (!toggle || !side) return;
-    var wide = window.matchMedia('(min-width:1024px)');
+    /* 批 3（C3）：与 CSS 的 @media (min-width:1200px) 严格同源，改一处必须改另一处。 */
+    var wide = window.matchMedia('(min-width:1200px)');
     var supportsGutter = !!(window.CSS && window.CSS.supports && window.CSS.supports('scrollbar-gutter', 'stable'));
     function isWide() { return wide.matches; }
     function isOpen() { return doc.body.classList.contains('nav-open'); }
@@ -1546,15 +1564,18 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     }
     if (wide.addEventListener) wide.addEventListener('change', applyMode);
     else if (wide.addListener) wide.addListener(applyMode);
-    /* P0-1 配套：<1025 时 TOC 是折叠的面板（layout.js 不再输出 open）；
-       >=1025 时它变成常驻右栏，必须强制展开，否则桌面右栏会是空的。
+    /* P0-1 配套：<1200 时 TOC 是折叠的面板（layout.js 不再输出 open）；
+       >=1200 时它变成常驻右栏，必须强制展开，否则桌面右栏会是空的。
+       ⚠️ 批 3（C3）：阈值与 CSS 的 @media (min-width:1200px) 同源。若这里留在 1025，
+          则 1025–1199 会被强制 open=true 而 CSS 侧 .toc-side 仍是折叠面板（sticky 展开态）
+          → 批 1 刚修好的锚点遮挡静默复现（实测 3/3）。
 
        a11y 修复（b1-a11y F-1 / SC 3.2.5 + 2.2.2）：**只在跨断点时才动手**。
        第一版把 syncToc 挂在 resize 上并无条件赋值，导致用户在 1440 手动收起后
        视口变化 1px 就被强行展开；在 390 展开后地址栏一收（高 844→780）就自动折叠 ——
        用户的选择被非请求事件静默撤销。现在记住上一次的「宽窄」状态，只有它真变了才同步。 */
     (function () {
-      var tocWide = window.matchMedia ? window.matchMedia('(min-width:1025px)') : null;
+      var tocWide = window.matchMedia ? window.matchMedia('(min-width:1200px)') : null;
       /* D5（红队）：HTML 保留 open 作无 JS 降级，所以首帧必须由 JS 在窄屏主动收起。
          用 null 作哨兵，保证首帧一定执行一次，之后只在真正跨断点时动手。 */
       var lastIsWide = null;
@@ -1586,7 +1607,7 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         }, true);
       }
       function syncToc() {
-        var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1025;
+        var isWide = tocWide ? tocWide.matches : window.innerWidth >= 1200;
         if (isWide === lastIsWide) return;   /* 同档内不干预用户手动折叠（a11y F-1） */
         lastIsWide = isWide;
         applyToc(isWide);
@@ -1647,7 +1668,10 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
       function syncTocOffset() {
         var toc = doc.querySelector('.toc-side');
         var h = 0;
-        if (toc && window.innerWidth < 1025) {
+        /* 批 3（C3）硬约束：这里必须与 CSS 断点同源（1200）。写到 1025 会让 1025–1199
+           既保留吸顶折叠条、又不计 --toc-offset → 锚点跳转后标题被目录条盖住
+           （批 1 的 b1-a11y F-2 静默复现，实测 coveredPct=100）。 */
+        if (toc && window.innerWidth < 1200) {
           var pos = window.getComputedStyle(toc).position;
           var b = toc.getBoundingClientRect();
           if ((pos === 'sticky' || pos === 'fixed') && b.height > 0) h = Math.round(b.height);

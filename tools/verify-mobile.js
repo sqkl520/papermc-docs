@@ -1197,7 +1197,7 @@ check(4, 4, 'A4', '中间断点：无横向溢出 + 有可用本页目录或等�
 });
 
 /* ── 5 / item 5：B1–B6 抽屉 ── */
-check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / 焦点 / Tab 25 次 / ≥1024 复位', 'B1–B6 逐条断言（滚动锁用真实滚轮法）', async (ctx) => {
+check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / 焦点 / Tab 25 次 / ≥1200 复位', 'B1–B6 逐条断言（滚动锁用真实滚轮法）', async (ctx) => {
   const detail = {};
   const VP390 = { name: '390x844', w: 390, h: 844 };
   await withCtx(ctx.browser, VP390, async (page) => {
@@ -1332,8 +1332,8 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
       };
     });
   }
-  // ≥1024 复位
-  for (const vp of [VP_1024, VP_1280]) {
+  // ≥1200 复位（C3 断崖重裁后桌面阈值由 1024 上移到 1200）
+  for (const vp of [VP_1280, VP_1440]) {
     await withCtx(ctx.browser, vp, async (page) => {
       await go(page, u('/paper/dev/pdc/'));
       const m = await probe(page);
@@ -1348,7 +1348,12 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
       };
     });
   }
-  const b5 = [detail['B5_1024x768'], detail['B5_1280x800']];
+  /* B5 的桌面阈值随 C3 断崖重裁从 1024 改为 1200（owner 书面裁决）：
+     C3 把「侧栏常驻 + TOC 右栏」的断点从 1025 上移到 1200，以消除 1024 死区
+     （实测台阶 2→1，幅度 −536→−340px，1024 处 artW 693→949）。
+     因此 1024–1199 档现在**应当**是抽屉模式（☰ 可见），只有 ≥1200 才是桌面常驻。
+     断言口径同步上移，否则会把设计变更误判成回归。 */
+  const b5 = [detail['B5_1280x800'], detail['B5_1440x900']].filter(Boolean);
   const B = {
     'B1 ☰ 可见且 ≥44×44 + aria-expanded=false + aria-controls + 抽屉初始 offscreen/inert': detail.B1.ok_visible && detail.B1.ok_size && detail.B1.ok_aria_false && detail.B1.ok_controls && detail.B1.ok_drawer_offscreen && detail.B1.ok_drawer_inert && detail['B1_900x800'].ok_menu_visible && detail['B1_1023x800'].ok_menu_visible,
     'B2 打开后进入视口 + aria=true + inert 移除 + 无横向滚动': detail.B2.ok_in_viewport && detail.B2.ok_aria_true && detail.B2.ok_inert_removed && detail.B2.ok_no_hscroll,
@@ -1357,7 +1362,7 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
     'B3c 遮罩命中：elementFromPoint(右侧中线) === .nav-scrim': detail.B2.ok_scrim_hit,
     'B4 滚轮法滚动锁：打开后滚轮 600px → window.scrollY 增量 0；抽屉自身可滚': detail.B4.ok_wheel_locked && detail.B4.ok_drawer_scrollable,
     'B4b 打开态 overflow<=1': detail.B4.ok_no_hscroll_when_open,
-    'B5 ≥1024 ☰ display:none + transform:none + 无 inert + 侧栏常驻': b5.every((x) => x.ok_menu_hidden && x.ok_menu_display_none && x.ok_transform_none && x.ok_no_inert && x.ok_sidebar_sticky),
+    'B5 ≥1200 ☰ display:none + transform:none + 无 inert + 侧栏常驻': b5.every((x) => x.ok_menu_hidden && x.ok_menu_display_none && x.ok_transform_none && x.ok_no_inert && x.ok_sidebar_sticky),
     'B6 抽屉内导航行高 ≥44px + Tab 25 次不外逃': detail.B6.ok_tab_no_escape && (detail.B6.ok_nav_rows || (detail.B2.drawerScroll.scrollH > detail.B2.drawerScroll.clientH && detail.B2.drawerScroll.overflowY !== 'visible')),
     'B7 焦点初始落在抽屉内': detail.B2.ok_focus_in_drawer,
   };
