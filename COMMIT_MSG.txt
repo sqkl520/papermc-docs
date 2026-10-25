@@ -1,44 +1,56 @@
-feat(ui): C2 阅读列宽 640px + C5 收尾四条（h5 层级 / 表格断行 / 筛选吸顶 / pill 让位）
+fix(ui): P1-6 层叠覆盖修复 + 门禁口径随 C3 断点同步（16 项 15/16 通过）
 
-## C2 阅读列宽（1 条 CSS）
-`@media (min-width:768px){ .article p{max-width:40rem} }`
+## P1-6 真缺陷修复（C4/C5 Agent 独立发现）
+.side-group-title .grp-zh 在本文件里声明了**两次**，后一条旧规则 flex:0 0 auto
+同具体度且后置，把批 3 新加的 flex:0 1 auto 覆盖 → 中文名不可收缩，
+组名照旧被截断（实测 9→9，与未改前逐像素相同）。
+合并为单条声明（+ 字号 .72→.68rem、margin-left .15rem）后：
+组名截断 9 → 5 → 收紧后 1（5 档视口稳定），达 ≤1 阈值。
 
-**只封叶段落**，不封容器/代码/表格/图片。实测 1440 四页全部收敛到 capW=640 / 74 字符：
-| 页面 | capW | 字符数 | 代码块宽 | 代码横滚 |
-| dialogs | 640 | 74ch | 847（不变）| 5/13 不变 |
-| world-configuration | 640 | 74ch | 875/851（不变）| 0/5 不变 |
-| particles | 640 | 74ch | 847（不变）| 4/46 不变 |
-| velocity/tuning | 640 | 74ch | 847（不变）| 1/1 不变 |
+## 门禁口径同步（三处，均为 C3 设计变更的必然结果，非绕过）
+C3 把桌面线由 1024/1025 合并为 1200，1024 自此归属移动线（☰ 可见、单栏、
+正文顶部折叠目录）。以下三处的 1024 语义必须同步上移，否则会把设计变更误判为回归：
 
-为什么不选其它写法（均有实测反证）：
-- `.article > :is(p,ul,ol,...)`：worldcfg 的直接子 p = 0（31 段全在 <ul>/<aside.alert> 内），
-  且限宽 ul 会把该页代码块从 874.81 压到 566px 而横滚数仍 0/5 —— 只看横滚会漏判
-- `.article{max-width:40rem}`（整列）：particles 代码横滚从 4/46 恶化到 15/46
+1. verify-mobile.js 的 check=5 / B5：已在前一提交改为 >=1200
+2. check=8 的 WHITELIST['1024x768']：补齐 12 个字段的变化归因（☰ 出现 / toc 可见 /
+   行高 24 / layoutCols 单列 / 侧栏 fixed+inert / scrollPaddingTop 64→129 等），
+   并为 ['1280x800'] 补 navRowMin 21→24（批 1 的 WCAG 2.5.8 AA 修复，红队 A1 整改项）
+3. check=8 的硬断言：`['1024x768','1280x800'] 不含 ☰` → 只对 1280 断言，文案改 >=1200
 
-左边缘：18 段顶层段落全部 left=316（完全对齐）；另 2 段的差异来自 .alert-body（+18px）
-与 li（+24px）的容器内缩，属正常结构缩进，不是错位。
+## navRowMin 统计口径修正（顺带修掉一个长期误判）
+navSel 里含 #sidebar a[data-search]，把「组首页 →」pill（a.side-home，24px）
+与 summary 折叠标题也算成「导航行」，导致：
+- C3 移动线断言报 navRowMin=24 < 44（假红）
+- C3 桌面线断言报 21→24 不一致（假红）
+排除 a.side-home / summary 后：1280 档 post=31 / pre=31 **完全一致**，移动线 ≥44 达标。
 
-## C5 收尾四条
-| 编号 | 改动 | 改前 | 改后 |
-| P2-1 | h5/h6 拆开，h5 提到 1.0625rem(17px) + 恢复主色 | 15.2px < 正文（层级倒置）| 17px > 正文，31 个 h5 全生效 |
-| P2-2 | .table-wrap td{overflow-wrap:break-word} | 320px 词中断 19 处 | **0 处** |
-| P2-3 | .filter-bar{position:sticky;top:var(--topbar-h);z-index:3} | static（滚走即不可见）| 滚 5000px 后 top=52 可见 |
-| P1-6 | .grp-name{flex:1 1 auto;min-width:0} + .grp-zh 收缩 | 29 个 pill 里 4 个组名被截断 | 组名优先占位 |
+## 独立验收数据（三个 Agent 并行实测，已交叉核对）
+| # | 断言 | 实测 |
+| 1 | 1440 dialogs 行宽 | 637.984px / 74ch PASS |
+| 2 | 1440 dialogs 代码横滚 | 5/13 PASS |
+| 3 | 1440 worldcfg 代码块宽 | 850.81~874.81 PASS |
+| 4 | 1440 worldcfg 行宽 | 636.891px / 74ch PASS |
+| 5 | C2-only 页高增量 | +373~+574（随图片加载状态漂移，+457 只是采样点）|
+| 6 | C1 后行推进 | 22（[21,22] 混合值）PASS |
+| 7 | C1-only 页高增量 | dialogs -756 PASS |
+| 8 | C1 后代码横滚 | 5/13 不变 PASS |
+| 9 | C3 台阶数 | 2 → 1（1199→1200，-340.00）PASS |
+| 10 | C3 后 1024 处 artW | 692.81 → 948.81 PASS |
+| 11 | 横向溢出 | 48/48 格 = 0 PASS |
 
-P2-1 的依据：全站 h5 共 46 处（cli-arguments 31 / pdc 10 / using-databases 4 / scheduler 1），
-其中 cli-arguments 的 31 个 h5 是**唯一小节层级**（h2-h4 全为 0），原来 15.2px + muted
-比正文更不像标题。h6 保持 .95rem + muted（全站 0 处使用，改它无收益）。
+归因分离（2×2 因子，精确可加）：
+dialogs C1 -756 / C2 +373 / 净 -383；worldcfg -100/+468；particles -718/-1015；tuning -3/+414。
+锚点遮挡：1025/1100/1199/1200/1280/1440 全部 covered=0%。
 
 ## 门禁（全绿）
 build-site --verify-artifacts PASS / check-site PASS / verify-site 15/15 /
 url-parity 141/141 / privacy must-fix=0 / gh-pages-smoke 19/19 /
-verify-mobile --check=4 PASS、--check=5 PASS
+verify-mobile 16 项 **15/16**（唯一 FAIL 是 item 16 性能，该指标在批 2/3 之前就已 FAIL；
+item 8 C3 行高与 item 10 E1/E2 零回归已从 FAIL 转为 PASS）
 
-## 过程记录
-1. 本轮 5 个 Agent 并行，其中 3 个会重建站点 → 新增 tools/build-guard.js 文件锁串行化
-   （上一轮 4 条结论作废全部源于并发重建）。
-2. 一个批量隐私清理脚本误删了 FAVICON_SVG 模板字符串的反引号，导致 assets.js 语法损坏、
-   构建必红。已用 git show HEAD 的干净头部替换恢复，并复验 node --check 通过。
-   教训：批量改写模板字符串文件时不能用行启发式，必须按语法边界处理。
-3. C4（图片固有宽高）经核查在 HEAD 中已实现并生效：85/85 张 content-img 全部带
-   width+height，dialogs @1440 CLS 从 0.08018（dims 0/6）降到 0（dims 6/6）。
+## 过程记录（两次自伤，已修复并记录教训）
+1. 批量隐私清理脚本用行启发式删反引号，误删 FAVICON_SVG 模板字符串边界 →
+   assets.js 语法损坏、构建必红。已用 git show HEAD 的干净头部替换恢复。
+   后续改用「只在 CSS 注释区间内删反引号」的逐字符扫描器。
+2. 两次改完注释/白名单后未先 node --check 就重建，浪费一轮。
+3. 8787/8788 两个服务在长时间运行后自行退出，导致 check=8 报 ERROR（非回归）。

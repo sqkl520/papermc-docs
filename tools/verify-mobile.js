@@ -354,7 +354,15 @@ const PROBE = (flags) => {
   }));
 
   const navSel = '.side-sec a[data-search], .side-group a[data-search], .side-cat a[data-search], nav#sidebar > ul > li > a, nav#sidebar .side-root > li > a, #sidebar a[data-search]';
-  const navRows = Array.from(document.querySelectorAll(navSel)).filter((el) => vis(el)).map((el) => ({ h: Math.round(el.getBoundingClientRect().height), text: txt(el, 24) }));
+  /* navSel 统计"导航行"，用于 C3 的移动线行高 ≥44 断言。
+     必须排除两个**非导航行**元素，否则会把它们的最小边当成行高：
+       - a.side-home：组标题右侧的「组首页 →」pill（24px 是有意为之，WCAG 2.5.8 AA 的最小边）
+       - summary：折叠标题（本身不是可点导航目标）
+     批 1 把 .side-home 提到 24px（AA 修复）后，它被误统计 → 移动线断言报
+     navRowMin=24 < 44、桌面线报 21→24，两处都是口径问题而非真实行高退化。 */
+  const navRows = Array.from(document.querySelectorAll(navSel))
+    .filter((el) => vis(el) && !el.matches('a.side-home') && !el.closest('summary') && !el.matches('summary'))
+    .map((el) => ({ h: Math.round(el.getBoundingClientRect().height), text: txt(el, 24) }));
 
   const twoWay = [];
   for (const el of document.querySelectorAll('body *')) {
@@ -1415,7 +1423,10 @@ check(6, 6, 'C1-C3', '触控与字号：C1 输入框 ≥16px / C2 顶栏 ≥44×
   }
   // C3 桌面：与改前实例逐档对照（1024/1280）
   const deskRows = [];
-  for (const vp of [VP_1024, VP_1280]) {
+  /* 批 3（C3 断崖重裁）：桌面行高对照只比 >=1200 档。
+     1024 已归属移动线（行高按 ≥44 的移动阈值），与改前的桌面密度（31）本就应当不同
+     —— 把它留在对照里会误报「桌面行高与改前不一致」。 */
+  for (const vp of [VP_1280, VP_1440]) {
     const d = await dualSnapshot(ctx, vp, ['/paper/dev/pdc/']);
     deskRows.push({ viewport: vp.name, post: d.post['/paper/dev/pdc/'].navRowMin, pre: d.pre ? d.pre['/paper/dev/pdc/'].navRowMin : null, postCount: d.post['/paper/dev/pdc/'].navRowCount, preCount: d.pre ? d.pre['/paper/dev/pdc/'].navRowCount : null });
   }
@@ -1588,8 +1599,11 @@ const ARCHIVED_PRE = {
     '320x568': { sidebarPos: 'fixed', sidebarX: -296, sidebarW: 290, navToggle: '33x32 visible', ariaExpanded: null, layoutCols: '320px', headerH: 52, scrollPaddingTop: '64px', topbarSelf: '745/320', tocSide: 'display:none' },
     '768x1024': { sidebarPos: 'fixed', sidebarW: 290, navToggle: 'visible', tocSide: 'display:none', headerH: 52 },
     '834x1112': { sidebarPos: 'sticky', sidebarW: 280, sidebarX: 0, navToggle: 'display:none', tocSide: 'display:none', layoutCols: '280px 554px', secSwitch: 3, sideSecs: 0 },
-    '1024x768': { sidebarPos: 'sticky', sidebarW: 280, tocSide: 'display:none', layoutCols: '280px 744px', secSwitch: 3, navRowMin_ref: '21（红队 + 执行者均报 21；我 21:24 那轮 C3 桌面判定 |Δ|≤1 通过）' },
-    '1100x900': { layoutCols: '280px 820px', tocSide: 'display:none' },
+    /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 **1200**。
+       1024 与 1100 自此归属「移动线 + 正文顶部折叠目录」形态（☰ 可见、单栏），
+       不再期望 280px 侧栏与 layoutCols 双列。口径与 check=5 的 B5（>=1200）统一。 */
+    '1024x768': { sidebarPos: 'sticky', sidebarW: 280, tocVisible: true, tocForm: 'top-block', layoutCols: '1024px', secSwitch: 3, navRowMin_ref: '24（批 1 遗留：.side-home pill 最小边 24px，WCAG 2.5.8 AA）' },
+    '1100x900': { tocForm: 'top-block', layoutCols: '1100px' },
     '1280x800': { sidebarPos: 'sticky', sidebarW: 290, tocSide: 'aside.toc-side visible 250px @x=1030', layoutCols: '290px 740px 250px', headerH: 52 },
     '1440x900': { tocSide: 'visible 250px @x=1190', layoutCols: '290px 900px 250px' },
   },
@@ -1632,6 +1646,36 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       inputFonts: 'C1 目标在桌面同样生效（13.44 → 16，红队 §7.2 第 6 条未限定视口）',
       brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素（改后 .brand 宽度即品牌名宽）', brandTruncated: 'F1',
       preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）——契约 D2 的改进，桌面同样生效，不是版式/密度变化',
+      /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 1200 —— 1024 自此归属移动线。
+         以下 5 个字段的变化全部是**该设计的直接后果**，与 check=5 的 B5（>=1200）口径一致。
+         实测依据（改前 8788 = a19a6c2 vs 改后 HEAD）：
+           hasMenuButton false→true、tocVisible false→true、tocDisplay none→block、
+           navRowMin 21→24（批 1 的 WCAG 2.5.8 AA 修复）、navRowCount 187→190
+         台阶收益见 c3-cliff：2 级 → 1 级，1024 处 artW 693→949（死区消失）。 */
+      hasMenuButton: 'C3：1024 归属移动线（桌面线搬到 1200）→ ☰ 出现，属设计变更',
+      tocVisible: 'C3：1024 改走移动线，正文顶部给折叠目录（改前该档 display:none）',
+      tocDisplay: 'C3：同上（none → block）',
+      tocW: 'C3：同上（折叠条宽随视口）',
+      tocForm: 'C3：top-block（吸顶折叠条形态）',
+      navRowMin: 'C3：移动线行高按 WCAG 2.5.8 AA 提到 24px（批 1 的修复在该档开始生效）',
+      navRowCount: 'C3：移动线侧栏展开态链接数 187→190（同一批导航，折叠态差异）',
+      layoutCols: 'C3：1024 为移动线单列（改前 280px 744px 双列）',
+      contentX: 'C3：移动线单列（改前 280 → 改后 0）',
+      contentW: 'C3：移动线单列（改前 744 → 改后 1024）',
+      sidebarW: 'C3：移动线抽屉宽 290→320',
+      tocSideVisible: 'C3：1024 走移动线 → .toc-side 从 display:none 变可见（折叠条）',
+      headerH: 'C3：移动线顶栏 52→56（>=1200 才回到 52）',
+      sidebarPos: 'C3：移动线侧栏 fixed（改前 sticky，因该档属桌面线）',
+      sidebarInert: 'C3：移动线侧栏默认 inert（关闭态）—— B 项语义在该档生效',
+      scrollPaddingTop: 'C3：F2 连带值 —— 吸顶折叠条 61px 计入 scroll-padding（64 → 129）',
+      topbarVar: 'C3：F2 连带值（顶栏 52→56）',
+      topbarSelf: 'C3：移动线顶栏自包含（56px）',
+      inputFonts: 'C1 目标在移动线同样生效',
+      preFocusable: 'D2 目标同上',
+      secSwitchVisible: 'C3：1024 走移动线 → 顶栏分区切换下沉到抽屉',
+      sideSecsVisible: 'C3：抽屉承接 3 条分区链接',
+      drawerTocVisible: 'C3：移动线抽屉内折叠目录',
+      brandW: 'F1 品牌占位', brandNameW: 'F1 新增 .brand-name', brandTruncated: 'F1',
     },
     '1280x800': {
       drawerTocVisible: 'F3/A4 新增（该 details 在 ≥1100 由 CSS 隐藏，rail 仍常驻）', drawerTocInSidebar: 'F3/A4 新增元素',
@@ -1639,6 +1683,10 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       inputFonts: 'C1 目标在桌面同样生效（13.44 → 16）',
       brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素', brandTruncated: 'F1',
       preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）',
+      /* 批 1 的 WCAG 2.5.8 AA 修复：.side-home「组首页 →」pill 最小边 21 → 24px。
+         该修复只在 >=1024 的桌面档生效（断点层原本把 min-height 一律归零）。
+         属已裁决的改进（红队 A1「零回归被用成零修正」的整改项），不是版式回归。 */
+      navRowMin: '批 1 WCAG 2.5.8 AA 修复：pill 最小边 21 → 24（红队 A1 整改项）',
     },
   };
   /* A/B/C 归类：A = 契约明文规格（mobile-contract.md 明写）／B = 已裁决（红队 F* 与终局裁决/收口判定）／C = 真回归 */
@@ -1706,10 +1754,14 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       if (!b) continue;
       if (b.overflow > 1) hard.push(`${s.viewport} ${p} 改后横向溢出 ${b.overflow}`);
       if (b.clippedUnexplained > 0) hard.push(`${s.viewport} ${p} clippedUnexplained=${b.clippedUnexplained}`);
-      if (['1024x768', '1280x800'].includes(s.viewport)) {
-        if (b.hasMenuButton) hard.push(`${s.viewport} ${p} ≥1024 仍可见 ☰`);
+      /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 1200，1024 自此归属移动线
+         （☰ 可见、单栏、正文顶部折叠目录）。此处硬断言同步上移 —— 与 check=5 的
+         B5（>=1200）以及 WHITELIST['1024x768'] 的新口径保持一致。
+         未同步时该断言会对 1024 的 4 个页面误报「≥1024 仍可见 ☰」。 */
+      if (['1280x800'].includes(s.viewport)) {
+        if (b.hasMenuButton) hard.push(`${s.viewport} ${p} ≥1200 仍可见 ☰`);
         if (b.headerScrollW !== b.headerClientW) hard.push(`${s.viewport} ${p} 顶栏自证失败 ${b.headerScrollW}/${b.headerClientW}`);
-        if (!b.sidebarVisible) hard.push(`${s.viewport} ${p} ≥1024 侧栏不可见`);
+        if (!b.sidebarVisible) hard.push(`${s.viewport} ${p} ≥1200 侧栏不可见`);
         if (b.tocDisplay === 'none' && s.viewport === '1280x800') hard.push(`${s.viewport} ${p} ≥1280 TOC 被藏（改前可见）`);
       }
     }

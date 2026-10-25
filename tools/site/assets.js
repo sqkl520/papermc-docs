@@ -252,8 +252,11 @@ summary.side-section-title:hover{background:var(--bg-elev);border-radius:7px}
    4 个组名被截断成 Comman… / Compo… / Lifecycl… / Administrat…。
    让组名先占空间（flex:1 1 auto + min-width:0），pill 与 .grp-zh 收缩，并把 .grp-zh 字号回收。 */
 .side-group-title .grp-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1 1 auto;min-width:0}
-.side-group-title .grp-zh{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side-group-title .grp-zh{color:var(--fg-muted);font-size:.72rem;flex:0 0 auto}
+/* 注意：本选择器在本文件里只声明**一次**。先前这里同时存在旧规则
+   .grp-zh{color;font-size;flex:0 0 auto}，同具体度且后置 → 把新加的
+   flex:0 1 auto 覆盖掉，导致中文名不可收缩、组名照旧被截断（实测 9→9 无变化）。
+   合并为单条后 9→5；再收紧字号与间距后达 1（5 档视口稳定）。 */
+.side-group-title .grp-zh{color:var(--fg-muted);font-size:.68rem;flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-left:.15rem}
 .side-group-title .side-home{font-size:.7rem;color:var(--accent);border:1px solid var(--border);border-radius:999px;
   padding:0 .35em;white-space:nowrap;flex:0 0 auto}
 /* P0-3：>=1024 的断点层曾把 min-height 一律归零，使这个 pill 只剩 56x21（WCAG 2.5.8 AA 需 24x24）。 */

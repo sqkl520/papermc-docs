@@ -93,6 +93,12 @@ const VARIANTS = [
       + '.side-group-title a.side-home{padding:0 .18em!important}',
   },
   {
+    id: 'v2b', note: 'v2 + 中文件名 .64rem + gap .1rem（争取中文名也不被裁）',
+    css: '.side-group-title .grp-zh{flex:0 1 auto!important;min-width:0!important;font-size:.62rem!important}'
+      + '.side-group-title{gap:.1rem!important}'
+      + '.side-group-title a.side-home{padding:0 .14em!important}',
+  },
+  {
     id: 'v3', note: 'v2 + .side-count 字号 .7rem→.66rem + 组内左右内边距 .4rem→.28rem',
     css: '.side-group-title .grp-zh{flex:0 1 auto!important;min-width:0!important;font-size:.66rem!important}'
       + '.side-group-title{gap:.12rem!important;padding-left:.28rem!important;padding-right:.28rem!important}'
