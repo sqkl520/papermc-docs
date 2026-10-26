@@ -2033,6 +2033,17 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
         try { id = decodeURIComponent(location.hash.slice(1)); } catch (e) { return; }
         var el = doc.getElementById(id);
         if (!el) return;
+        /* 批 4 配套（验证报告 verify-b4-cfg §4.1 P1）：配置页改成 .node 树后，
+           叶子说明被包进 details（198 个全默认收起）。外部深链（搜索引擎 /
+           GitHub issue / 他人文档）命中某个叶子时，浏览器 :target 只滚动定位、
+           不展开 → 用户看到一行骨架而不是说明。上游用 4 行内联 JS 解决，这里补等价逻辑。
+           放在智能落点校正之前：先展开再算落点，否则展开引起的高度变化会让落点偏。 */
+        try {
+          var det = el.querySelector(':scope > details')
+            || (el.tagName === 'DETAILS' ? el : null)
+            || el.closest('details');
+          if (det && !det.open) det.open = true;
+        } catch (e0) {}
         var lastY = -1, still = 0, ticks = 0;
         function tick() {
           ticks++;

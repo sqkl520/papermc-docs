@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-26T11:13:13.976Z",
+  "generated_at": "2026-10-26T11:36:52.641Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1409,
-    "scanned_text_files": 1336,
+    "files": 1358,
+    "scanned_text_files": 1285,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -15,13 +15,13 @@
     "ignored_paths": 4
   },
   "summary": {
-    "must_fix": 28,
-    "public_url": 329,
-    "loopback_ok": 537,
+    "must_fix": 48,
+    "public_url": 286,
+    "loopback_ok": 530,
     "upstream": 86,
     "suppressed_must_fix": 4,
-    "must_fix_files": 7,
-    "total_hits": 980
+    "must_fix_files": 12,
+    "total_hits": 950
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -33,8 +33,8 @@
     {
       "id": "win-abs-path",
       "note": "Windows 绝对路径（转义写法：盘符 + 双反斜杠，JSON / 源码字符串里常见）",
-      "total": 28,
-      "must_fix": 28,
+      "total": 48,
+      "must_fix": 48,
       "public_url": 0,
       "loopback_ok": 0,
       "upstream": 0
@@ -69,9 +69,9 @@
     {
       "id": "owner-handle",
       "note": "账号 / 仓库所有者标识（出现在公网地址里属正当信息）",
-      "total": 329,
+      "total": 286,
       "must_fix": 0,
-      "public_url": 329,
+      "public_url": 286,
       "loopback_ok": 0,
       "upstream": 0
     },
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 623,
+      "total": 616,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 537,
+      "loopback_ok": 530,
       "upstream": 86
     },
     {
@@ -151,6 +151,26 @@
     {
       "file": "tools/v4-deep-probe.js",
       "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deeplink.js",
+      "line": 26,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deeplink.js",
+      "line": 27,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deeplink.js",
+      "line": 28,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deeplink.js",
+      "line": 29,
       "rule": "win-abs-path"
     },
     {
@@ -234,6 +254,66 @@
       "rule": "win-abs-path"
     },
     {
+      "file": "tools/v4-printcmp.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-printcmp.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-printcmp.js",
+      "line": 22,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-printcmp.js",
+      "line": 23,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-render-gap.js",
+      "line": 19,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-render-gap.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-render-gap.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-render-gap.js",
+      "line": 22,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-scrollcheck.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-scrollcheck.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-scrollcheck.js",
+      "line": 22,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-scrollcheck.js",
+      "line": 23,
+      "rule": "win-abs-path"
+    },
+    {
       "file": "tools/v4-sem.js",
       "line": 25,
       "rule": "win-abs-path"
@@ -251,6 +331,26 @@
     {
       "file": "tools/v4-sem.js",
       "line": 28,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-shot.js",
+      "line": 17,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-shot.js",
+      "line": 18,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-shot.js",
+      "line": 19,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-shot.js",
+      "line": 20,
       "rule": "win-abs-path"
     }
   ],
@@ -560,7 +660,7 @@
       "upstream": 0
     },
     {
-      "file": "tools/v4-dom.js",
+      "file": "tools/v4-deeplink.js",
       "total": 4,
       "must_fix": 4,
       "public_url": 0,
@@ -568,7 +668,7 @@
       "upstream": 0
     },
     {
-      "file": "tools/v4-indent.js",
+      "file": "tools/v4-dom.js",
       "total": 4,
       "must_fix": 4,
       "public_url": 0,
@@ -582,60 +682,6 @@
     "statement": "未通过：仍存在必须修复的本机痕迹，见 must_fix 列表。"
   },
   "history": [
-    {
-      "at": "2026-10-26T10:30:45.884Z",
-      "files": 1361,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 522,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T10:45:56.147Z",
-      "files": 1374,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 527,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T10:46:14.250Z",
-      "files": 1375,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 528,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T10:46:35.936Z",
-      "files": 1375,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 528,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T11:08:11.215Z",
-      "files": 1405,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 536,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T11:08:57.276Z",
-      "files": 1405,
-      "must_fix": 24,
-      "public_url": 329,
-      "loopback_ok": 536,
-      "upstream": 86,
-      "clean": false
-    },
     {
       "at": "2026-10-26T11:09:57.367Z",
       "files": 2309,
@@ -669,6 +715,60 @@
       "must_fix": 28,
       "public_url": 329,
       "loopback_ok": 537,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:32:25.319Z",
+      "files": 1399,
+      "must_fix": 44,
+      "public_url": 329,
+      "loopback_ok": 529,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:32:54.805Z",
+      "files": 1399,
+      "must_fix": 44,
+      "public_url": 329,
+      "loopback_ok": 529,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:33:00.384Z",
+      "files": 1399,
+      "must_fix": 44,
+      "public_url": 329,
+      "loopback_ok": 529,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:33:21.783Z",
+      "files": 1399,
+      "must_fix": 44,
+      "public_url": 329,
+      "loopback_ok": 529,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:34:06.274Z",
+      "files": 1400,
+      "must_fix": 44,
+      "public_url": 329,
+      "loopback_ok": 530,
+      "upstream": 86,
+      "clean": false
+    },
+    {
+      "at": "2026-10-26T11:36:52.641Z",
+      "files": 1358,
+      "must_fix": 48,
+      "public_url": 286,
+      "loopback_ok": 530,
       "upstream": 86,
       "clean": false
     }
