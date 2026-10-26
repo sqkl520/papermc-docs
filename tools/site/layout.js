@@ -254,7 +254,42 @@ function sidebarHtml(site, prefix, active, toc) {
   // 抽屉内「本页目录」（红队 F3：<1024px 也要有真目录；与右栏同一 toc 数组）
   html += drawerTocHtml(toc);
   if (nav && nav.sections.length) {
-    for (const sec of nav.sections) {
+    /* ══════════ 批 5b：侧栏只渲染当前 topic 一棵树 ══════════
+     *
+     * 规则：`active.sectionId ? 1 : 3`
+     *   · 内容页 / 分区页 / 分类页（有 sectionId）→ 只渲染该分区那一棵
+     *   · 首页 / all-pages / snapshots / 404（无 sectionId）→ **保留全部 3 棵**
+     *
+     * 首页为什么必须保 3 棵（不是偷懒）：`verify-nav.js:check1` 的 sameIdx 断言
+     * 要求「index.html 侧栏 == sections/<id>.html（每个 section）」，它比对的是**侧栏**。
+     * 首页没有"当前 topic"，需要三棵树作为全站入口 —— 这是设计，不是妥协。
+     *
+     * 可达性实测零损失（`tools/b5x-measure.js` 的 BFS + 红队 F3 §4.1 的独立复现）：
+     *   从 index.html 出发 BFS：全边 144/145（只丢 404.html，它本就无人链接）
+     *   去掉另两棵树后：**仍然 144/145，丢失 0 页**
+     *   原因：每页都同时被「本分区侧栏 + 顶栏 3 tab + 正文交叉链接 + 分页」覆盖，
+     *        另两棵树是**冗余**。141 个内容页的入边构成：
+     *        sidebarSame+sidebarCross+article 116 页 / sidebarSame+sidebarCross 22 页 /
+     *        topbar+sidebarSame+sidebarCross+sidebarMisc 3 页 —— 没有一页只靠另两棵树。
+     *
+     * 跨分区入口（这是 5b 的**前置条件**，不是可选项）：
+     *   我们树上「某棵树内指向另一分区」的链接 = **0 个**
+     *   （tools/b5x-cross.js 扫全部 145 个产出 HTML 确认；上游那 3 条
+     *    `/paper/dev/component-api/*` 我们没有同构项）。
+     *   所以跨分区只靠两条：
+     *     · 窄屏（<1024）：抽屉顶部 `.side-secs` 的 3 个 pill
+     *     · 桌面（≥1024）：顶栏 `.sec-switch` 的 3 个 tab（批 5c 会把它的断点降到 1024）
+     *   这两条**都必须保留**，本改动一行未动它们。
+     *
+     * DOM 收益（诚实修正审计的 −60% 说法）：
+     *   侧栏 <a> 总数 210 → 162（`paper/dev/pdc`），202 → 154（`paper/adding-plugins`）；
+     *   **−24%**，不是 −60%。因为当前区那棵树本来就有 122 条链接，
+     *   另两棵树只有 48 条 —— 「三棵树」不是 DOM 膨胀的主因。
+     */
+    const shownSecs = a.sectionId
+      ? nav.sections.filter((sec) => sec.id === a.sectionId)
+      : nav.sections;
+    for (const sec of shownSecs) {
       const open = !a.sectionId || a.sectionId === sec.id;
       html += '<details class="side-sec" data-section="' + U.attr(sec.id) + '"' + (open ? ' open' : '') + '>'
         + '<summary class="side-section-title" title="' + U.attr(sec.title + ' · ' + sec.preorder.length + ' 页') + '"'
