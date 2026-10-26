@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-25T17:00:55.957Z",
+  "generated_at": "2026-10-26T11:13:13.976Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1126,
-    "scanned_text_files": 1053,
+    "files": 1409,
+    "scanned_text_files": 1336,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -15,13 +15,13 @@
     "ignored_paths": 4
   },
   "summary": {
-    "must_fix": 0,
+    "must_fix": 28,
     "public_url": 329,
-    "loopback_ok": 506,
+    "loopback_ok": 537,
     "upstream": 86,
     "suppressed_must_fix": 4,
-    "must_fix_files": 0,
-    "total_hits": 921
+    "must_fix_files": 7,
+    "total_hits": 980
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -33,8 +33,8 @@
     {
       "id": "win-abs-path",
       "note": "Windows 绝对路径（转义写法：盘符 + 双反斜杠，JSON / 源码字符串里常见）",
-      "total": 0,
-      "must_fix": 0,
+      "total": 28,
+      "must_fix": 28,
       "public_url": 0,
       "loopback_ok": 0,
       "upstream": 0
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 592,
+      "total": 623,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 506,
+      "loopback_ok": 537,
       "upstream": 86
     },
     {
@@ -112,7 +112,148 @@
       "upstream": 0
     }
   ],
-  "must_fix": [],
+  "must_fix": [
+    {
+      "file": "tools/v4-cfg.js",
+      "line": 25,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-cfg.js",
+      "line": 26,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-cfg.js",
+      "line": 27,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-cfg.js",
+      "line": 28,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deep-probe.js",
+      "line": 18,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deep-probe.js",
+      "line": 19,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deep-probe.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-deep-probe.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-dom.js",
+      "line": 27,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-dom.js",
+      "line": 28,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-dom.js",
+      "line": 29,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-dom.js",
+      "line": 30,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-indent.js",
+      "line": 24,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-indent.js",
+      "line": 25,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-indent.js",
+      "line": 26,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-indent.js",
+      "line": 27,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-kbd.js",
+      "line": 19,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-kbd.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-kbd.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-kbd.js",
+      "line": 22,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-nested-probe.js",
+      "line": 19,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-nested-probe.js",
+      "line": 20,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-nested-probe.js",
+      "line": 21,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-nested-probe.js",
+      "line": 22,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-sem.js",
+      "line": 25,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-sem.js",
+      "line": 26,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-sem.js",
+      "line": 27,
+      "rule": "win-abs-path"
+    },
+    {
+      "file": "tools/v4-sem.js",
+      "line": 28,
+      "rule": "win-abs-path"
+    }
+  ],
   "files_with_hits": [
     {
       "file": "sitemap.xml",
@@ -395,7 +536,7 @@
       "upstream": 0
     },
     {
-      "file": "tools/verify-mobile-a.js",
+      "file": "tools/upd-lib.js",
       "total": 4,
       "must_fix": 0,
       "public_url": 0,
@@ -403,133 +544,133 @@
       "upstream": 0
     },
     {
-      "file": "tools/verify-mobile-b.js",
+      "file": "tools/v4-cfg.js",
       "total": 4,
-      "must_fix": 0,
+      "must_fix": 4,
       "public_url": 0,
-      "loopback_ok": 4,
+      "loopback_ok": 0,
       "upstream": 0
     },
     {
-      "file": "tools/verify-mobile-c.js",
+      "file": "tools/v4-deep-probe.js",
       "total": 4,
-      "must_fix": 0,
+      "must_fix": 4,
       "public_url": 0,
-      "loopback_ok": 4,
+      "loopback_ok": 0,
       "upstream": 0
     },
     {
-      "file": "tools/b1a-final.js",
-      "total": 3,
-      "must_fix": 0,
+      "file": "tools/v4-dom.js",
+      "total": 4,
+      "must_fix": 4,
       "public_url": 0,
-      "loopback_ok": 3,
+      "loopback_ok": 0,
       "upstream": 0
     },
     {
-      "file": "tools/b1a-probe.js",
-      "total": 3,
-      "must_fix": 0,
+      "file": "tools/v4-indent.js",
+      "total": 4,
+      "must_fix": 4,
       "public_url": 0,
-      "loopback_ok": 3,
+      "loopback_ok": 0,
       "upstream": 0
     }
   ],
   "verdict": {
-    "clean": true,
-    "exit_code": 0,
-    "statement": "通过：仓库中不存在必须修复的本机痕迹。"
+    "clean": false,
+    "exit_code": 1,
+    "statement": "未通过：仍存在必须修复的本机痕迹，见 must_fix 列表。"
   },
   "history": [
     {
-      "at": "2026-10-25T13:08:56.196Z",
-      "files": 1122,
-      "must_fix": 6,
+      "at": "2026-10-26T10:30:45.884Z",
+      "files": 1361,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 506,
+      "loopback_ok": 522,
       "upstream": 86,
       "clean": false
     },
     {
-      "at": "2026-10-25T13:09:50.639Z",
-      "files": 1122,
-      "must_fix": 6,
+      "at": "2026-10-26T10:45:56.147Z",
+      "files": 1374,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 506,
+      "loopback_ok": 527,
       "upstream": 86,
       "clean": false
     },
     {
-      "at": "2026-10-25T13:10:51.071Z",
-      "files": 1120,
-      "must_fix": 0,
+      "at": "2026-10-26T10:46:14.250Z",
+      "files": 1375,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 504,
+      "loopback_ok": 528,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T13:11:35.407Z",
-      "files": 1120,
-      "must_fix": 0,
+      "at": "2026-10-26T10:46:35.936Z",
+      "files": 1375,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 504,
+      "loopback_ok": 528,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T14:09:15.161Z",
-      "files": 1128,
-      "must_fix": 0,
+      "at": "2026-10-26T11:08:11.215Z",
+      "files": 1405,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 513,
+      "loopback_ok": 536,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T15:20:02.822Z",
-      "files": 1122,
-      "must_fix": 0,
+      "at": "2026-10-26T11:08:57.276Z",
+      "files": 1405,
+      "must_fix": 24,
       "public_url": 329,
-      "loopback_ok": 505,
+      "loopback_ok": 536,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T15:35:28.610Z",
-      "files": 1122,
-      "must_fix": 0,
-      "public_url": 329,
-      "loopback_ok": 505,
-      "upstream": 86,
-      "clean": true
+      "at": "2026-10-26T11:09:57.367Z",
+      "files": 2309,
+      "must_fix": 352,
+      "public_url": 581,
+      "loopback_ok": 1121,
+      "upstream": 89,
+      "clean": false
     },
     {
-      "at": "2026-10-25T15:45:14.587Z",
-      "files": 1122,
-      "must_fix": 0,
+      "at": "2026-10-26T11:12:21.059Z",
+      "files": 1407,
+      "must_fix": 28,
       "public_url": 329,
-      "loopback_ok": 509,
+      "loopback_ok": 537,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T16:50:58.155Z",
-      "files": 1124,
-      "must_fix": 0,
+      "at": "2026-10-26T11:12:46.080Z",
+      "files": 1408,
+      "must_fix": 28,
       "public_url": 329,
-      "loopback_ok": 511,
+      "loopback_ok": 537,
       "upstream": 86,
-      "clean": true
+      "clean": false
     },
     {
-      "at": "2026-10-25T17:00:55.957Z",
-      "files": 1126,
-      "must_fix": 0,
+      "at": "2026-10-26T11:13:13.976Z",
+      "files": 1409,
+      "must_fix": 28,
       "public_url": 329,
-      "loopback_ok": 506,
+      "loopback_ok": 537,
       "upstream": 86,
-      "clean": true
+      "clean": false
     }
   ]
 }

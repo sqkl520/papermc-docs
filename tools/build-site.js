@@ -931,6 +931,14 @@ function writeEverything(state) {
       article = cfg.html;
       cfgIndex = configKeyIndexHtml(cfg.keys);
       p.cfgKeyCount = cfg.keys.length;
+      /* 批 4：再把嵌套列表重排成上游的 `.node` 树（说明文字收进默认关闭的 <details>）。
+         必须排在 buildConfigKeyIndex 之后 —— 索引依赖的 cfg-* id 由它先注入，
+         这里只是把这些 id 从 <li> 搬到 <section> 上（值不变）。 */
+      const tree = renderConfigNodeTree(article);
+      if (tree.stats) {
+        article = tree.html;
+        p.cfgTree = tree.stats;
+      }
     }
     const pager = L.pagerHtml(p.prev, p.next, prefix);
     const html = L.shell({
@@ -1235,6 +1243,232 @@ function configKeyIndexHtml(keys) {
     + '</nav>';
 }
 
+// ---------------------------------------------------------------------------
+// 批 4：配置参考页的 `.node` 树（照上游 DOM 文法重建）
+// ---------------------------------------------------------------------------
+
+/**
+ * 为什么需要它：上游这 5 个配置参考页把「键: 值」渲染成一棵树（`.node-root` > `section` >
+ * `.line` / `details>.line-leaf`+.block），**说明文字全部收进默认关闭的 `<details>`**。
+ * 我们镜像时退化成嵌套 `<ul>`，说明文字全量铺开 → world-configuration @1440 16,721px /
+ * @390 34,309px（40 屏盲滚）。上游同页 7,497 / 8,655。
+ *
+ * 做法（增量方案 B：**不重写 Markdown 渲染，只把已渲染的嵌套列表重新排布**）：
+ *   ① 定位正文最外层 `<ul>`，把它的 `<li>` 解析成节点树（`itemStack` 等价物）；
+ *   ② 每个 `<li>` 的 lead 按 `key / value / 描述` 拆开（`<code>key</code>: <code>value</code> — 描述`）；
+ *   ③ 有子键的 → 内部节点：`<section id>…<div class="line">…<div class="node">` 递归；
+ *      无子键的 → 叶子：`<details><summary class="line line-leaf">…<div class="block">描述</div></details>`；
+ *   ④ 无 key 的 `<li>`（枚举值 `ELLIPSOID` / `SAFE_REGEN` …，共 30 个）**原样保留**，不当节点。
+ *
+ * 五条硬约束（违反即门禁炸）：
+ *   ① **新 `<details>` 必须是裸标签**，不能带 `class="details-block"` ——
+ *      `verify-site.js:1279` 的 `artDetails` 只数 `class="details-block"`，
+ *      带上会让 `counts.detailsBlocks` 从 23 涨到 200+ → 严格对账直接 fail；
+ *   ② `<figure>` / `<pre>` 原样搬进 `.block`，**文本一字不动**（`check-site.js:115`
+ *      与 `verify-site.js:565-612` 逐块对围栏）；
+ *   ③ 既有 id **只搬不改**：`<li>` 上的 `cfg-*`（R3-4 索引目标）与 Starlight 原名
+ *      （`recoverListAnchors` 补的 `anticheat_anti_xray` 等，外部深链引用）统一移到
+ *      `<section id>` 上，值不变 → `.cfg-index` 的 122 条链接继续有效；
+ *   ④ 默认态必须 closed：不写 `open` 属性，并在构建期断言 `mainDetailsOpen === 0`；
+ *   ⑤ 只对「无 h2/h3 且有嵌套列表」的页生效（与 `buildConfigKeyIndex` 同一判定），
+ *      其余 135 页完全不受影响。
+ *
+ * 层级缩进靠 `.node` 嵌套的 `padding-left:1.25rem` 累加，**不用 `--depth` 变量**
+ * （`--depth` 只服务首页 `src-list`，两者不能混用）。
+ */
+const CFG_KEY_LEAD_RE = /^\s*(?:<p[^>]*>)?\s*<code[^>]*>([\s\S]*?)<\/code>/;
+
+/** 正文里已出现的 id（避免新注入重复） */
+function collectArticleIds(html) {
+  const s = new Set();
+  for (const m of html.matchAll(/\sid="([^"]*)"/g)) s.add(m[1]);
+  return s;
+}
+
+/** 最外层 <ul> 的 [start, end) 偏移（含首尾标签）；其祖先无 ul/ol */
+function outerUlRange(art) {
+  const re = /<(\/?)(ul|ol)\b[^>]*>/g;
+  let depth = 0, start = -1, m;
+  while ((m = re.exec(art)) !== null) {
+    if (!m[1]) {
+      depth++;
+      if (depth === 1) start = m.index;
+    } else {
+      depth--;
+      if (depth === 0) return { start, end: m.index + m[0].length };
+    }
+  }
+  return null;
+}
+
+/** 把 <ul> 区域解析成 <li> 节点树；node.body = 开标签之后到 </li> 之前 */
+function parseLiNodes(region) {
+  const re = /<(\/?)(li)\b([^>]*)>/g;
+  const stack = [];
+  const roots = [];
+  let m;
+  while ((m = re.exec(region)) !== null) {
+    if (!m[1]) {
+      const node = { attrs: m[3] || '', gt: m.index + m[0].length, children: [] };
+      (stack.length ? stack[stack.length - 1].children : roots).push(node);
+      stack.push(node);
+    } else {
+      const node = stack.pop();
+      if (node) { node.end = m.index; node.body = region.slice(node.gt, node.end); }
+    }
+  }
+  return roots;
+}
+
+/** body → lead（首个子列表之前）/ tail（子列表）/ after（子列表之后） */
+function splitLiBody(body) {
+  const i = body.search(/<ul\b|<ol\b/);
+  if (i === -1) return { lead: body, tail: '', after: '' };
+  const re = /<(\/?)(ul|ol)\b[^>]*>/g;
+  let depth = 0, end = -1, m;
+  while ((m = re.exec(body)) !== null) {
+    if (m.index < i) continue;
+    if (!m[1]) depth++;
+    else { depth--; if (depth === 0) { end = m.index + m[0].length; break; } }
+  }
+  if (end === -1) return { lead: body.slice(0, i), tail: body.slice(i), after: '' };
+  return { lead: body.slice(0, i), tail: body.slice(i, end), after: body.slice(end) };
+}
+
+/** 去掉 lead 的首个 <p> 包裹（Markdown 紧凑列表项会被包成 p）。
+ *  只摘「第一个 <p> 开标签 + 配对的第一个 </p>」，保留其后的兄弟块
+ *  （如 `<p><code>k</code>: 描述</p>\n<figure>` 要去掉 p 但保住 figure）。 */
+function unwrapParagraph(lead) {
+  const s = lead.trim();
+  const open = /^<p\b[^>]*>/.exec(s);
+  if (!open) return s;
+  const closeAt = s.indexOf('</p>');
+  if (closeAt === -1) return s.slice(open[0].length).trim();
+  return (s.slice(open[0].length, closeAt) + s.slice(closeAt + 4)).trim();
+}
+
+/** lead → { key, value, desc }；key 取行首 <code>，value 取紧跟的 <code>，其余是描述 */
+function parseCfgLead(lead) {
+  const s = unwrapParagraph(lead);
+  const km = /^<code[^>]*>([\s\S]*?)<\/code>/.exec(s);
+  if (!km) return { key: null, value: null, desc: '' };
+  const key = km[1].replace(/<[^>]+>/g, '').trim();
+  let rest = s.slice(km[0].length).replace(/^[\s]*(?::|&#58;)[\s]*/, '');
+  let value = null;
+  const vm = /^<code[^>]*>([\s\S]*?)<\/code>/.exec(rest);
+  if (vm) { value = vm[1]; rest = rest.slice(vm[0].length); }
+  rest = rest.replace(/^[\s]*[—–]{1,2}[\s]*/, '').replace(/^[\s]*---[\s]*/, '');
+  return { key, value, desc: rest.trim() };
+}
+
+/** 子 <ul> 的内层 HTML（枚举值等无 key 的 <li> 原样保留） */
+function innerListHtml(tail) {
+  const open = /^<ul\b[^>]*>/.exec(tail);
+  if (!open) return tail;
+  const body = tail.slice(open[0].length);
+  const closeAt = body.lastIndexOf('</ul>');
+  return closeAt === -1 ? body : body.slice(0, closeAt);
+}
+
+/**
+ * 把配置参考页正文的嵌套列表重排成 `.node` 树。
+ * @param {string} art 正文 HTML（已由 buildConfigKeyIndex 注入 cfg-* id）
+ * @returns {{html:string, stats:object|null}}
+ */
+function renderConfigNodeTree(art) {
+  if (/<h[23]\b/.test(art)) return { html: art, stats: null };
+  const range = outerUlRange(art);
+  if (!range) return { html: art, stats: null };
+  const roots = parseLiNodes(art.slice(range.start, range.end));
+  if (!roots.length) return { html: art, stats: null };
+  // 顶层多数项要带 <code>key</code> 才是配置参考页（bukkit-commands 那种导航列表跳过）
+  const keyed = roots.filter((n) => CFG_KEY_LEAD_RE.test(splitLiBody(n.body).lead)).length;
+  if (!keyed || keyed < Math.ceil(roots.length * 0.6)) return { html: art, stats: null };
+
+  const usedIds = collectArticleIds(art);
+  const stats = { nodes: 0, inner: 0, leaf: 0, keyless: 0, sections: 0, details: 0, ids: 0 };
+  const idOf = (node) => {
+    const m = /\sid="([^"]*)"/.exec(node.attrs);
+    return m ? m[1] : null;
+  };
+  const pathSeg = (key) => String(key)
+    .replace(/&lt;[^&]*?&gt;/g, 'entity_type')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+
+  const renderNode = (node, parentPath) => {
+    stats.nodes++;
+    const sp = splitLiBody(node.body);
+    const p = parseCfgLead(sp.lead);
+    const existing = idOf(node);
+
+    if (!p.key) {
+      // 无 key 的 <li>（枚举值）：原样保留，不生成 .node
+      stats.keyless++;
+      if (!node.children.length) return '<div class="cfg-raw">' + sp.lead + '</div>';
+      const kids = node.children.map((c) => renderNode(c, parentPath)).join('');
+      return '<div class="cfg-raw">' + sp.lead + '<div class="node">' + kids + '</div>' + sp.after + '</div>';
+    }
+
+    const hasKeyedChild = node.children.some((c) => CFG_KEY_LEAD_RE.test(splitLiBody(c.body).lead));
+    const isInner = node.children.length > 0 && hasKeyedChild;
+    /* 子节点的路径前缀**必须来自 key 路径**，不能来自 id：
+       R3-4 给顶层键注入的是 `cfg-<kebab>`（`cfg-spam-limiter`），若拿它当父路径，
+       子节点会变成 `cfg_spam_limiter_spam_exclusions`，与上游/既有深链
+       `commands_spam_exclusions` 对不上 → 锚点丢失。 */
+    const keyPath = (() => {
+      const seg = pathSeg(p.key);
+      if (!seg) return parentPath;
+      return parentPath ? parentPath + '_' + seg : seg;
+    })();
+    let id = existing;
+    if (!id && keyPath && !usedIds.has(keyPath)) { id = keyPath; usedIds.add(id); }
+    else if (id) usedIds.add(id);
+    if (id) stats.ids++;
+    stats.sections++;
+
+    const link = id ? '<a class="link link-inline" href="#' + U.attr(id) + '">#</a>' : '';
+
+    if (!isInner) {
+      // 叶子：<details>（裸标签）+ summary.line-leaf + block 描述
+      stats.leaf++;
+      stats.details++;
+      const desc = [p.desc, node.children.length ? innerListHtml(sp.tail) : '', sp.after]
+        .filter((x) => x && x.trim()).join('\n');
+      return '<section' + (id ? ' id="' + U.attr(id) + '"' : '') + '><details>'
+        + '<summary class="line line-leaf">'
+        + '<span class="key key-leaf">' + p.key + '</span>'
+        + '<span class="muted">: </span>'
+        + (p.value !== null ? '<span class="value">' + p.value + '</span>' : '')
+        + link
+        + '</summary>'
+        + (desc.trim() ? '<div class="block">' + desc.trim() + '</div>' : '')
+        + '</details></section>';
+    }
+
+    // 内部节点：section > line（+ 自身说明） > .node 递归
+    stats.inner++;
+    const kids = node.children.map((c) => renderNode(c, keyPath)).join('');
+    return '<section' + (id ? ' id="' + U.attr(id) + '"' : '') + '>'
+      + '<div class="line">'
+      + '<span class="key">' + p.key + '</span>'
+      + '<span class="muted">: </span>'
+      + (p.value !== null ? '<span class="value">' + p.value + '</span>' : '')
+      + link
+      + '</div>'
+      + (p.desc.trim() ? '<div class="block">' + p.desc.trim() + '</div>' : '')
+      + '<div class="node">' + kids + '</div>'
+      + (sp.after.trim() ? '<div class="block">' + sp.after.trim() + '</div>' : '')
+      + '</section>';
+  };
+
+  const body = roots.map((r) => renderNode(r, '')).join('');
+  stats.total = roots.length;
+  return {
+    html: art.slice(0, range.start) + '<div class="node node-root">' + body + '</div>' + art.slice(range.end),
+    stats,
+  };
+}
+
 /** rewrite href="X#frag" -> href="X" and add a visible marker (target page has no such anchor) */
 function degradeAnchor(html, hrefWithFrag, hrefWithoutFrag, titleText) {
   const needle = 'href="' + U.attr(hrefWithFrag) + '"';
@@ -1466,6 +1700,32 @@ function runSelfTest(state) {
     push(p, 'asset 相对路径可解析',
       fs.existsSync(path.resolve(path.dirname(outAbs), prefix + 'assets/site.css'))
       && fs.existsSync(path.resolve(path.dirname(outAbs), prefix + 'assets/search-index.js')), 'prefix=' + prefix);
+
+    /* 批 4 自检：.node 树的五条硬约束（多数是"不能变"的守卫，失败即说明回归） */
+    const artOnly = (html.match(/<article class="article"[\s\S]*<\/article>/) || [''])[0];
+    if (/class="node node-root"/.test(artOnly)) {
+      // ① 新 details 必须是裸标签：detailsBlocks 口径只认 class="details-block"
+      const bareDetails = (artOnly.match(/<details(?![^>]*\bclass=)[^>]*>/g) || []).length;
+      const blockDetails = (artOnly.match(/<details class="details-block"/g) || []).length;
+      push(p, '批4 · .node 树的 details 全为裸标签',
+        bareDetails > 0 && blockDetails === p.srcCounts.rawDetails,
+        '裸=' + bareDetails + ' details-block=' + blockDetails + ' markdown=' + p.srcCounts.rawDetails);
+      // ② 默认全收起（否则页高不变，等于白做）
+      const opened = (artOnly.match(/<details\b[^>]*\bopen\b/g) || []).length;
+      push(p, '批4 · .node 树 details 默认全收起', opened === 0, 'open=' + opened);
+      // ③ <pre>/<figure> 数量与重排前一致（文本不动由 verify-site 第 5 项逐块复核）
+      const treePres = (artOnly.match(/<pre[\s>]/g) || []).length;
+      push(p, '批4 · <pre> 总数不变', treePres === p.srcCounts.code,
+        'markdown=' + p.srcCounts.code + ' html=' + treePres);
+      // ④ 层级缩进靠 .node 嵌套，不引入 --depth 变量
+      push(p, '批4 · 缩进不用 --depth 变量', !/class="node[^"]*"[^>]*style="[^"]*--depth/.test(artOnly), '');
+      // ⑤ .cfg-index 的每条链接都要有对应 id
+      const cfgLinks = [...(artOnly.match(/<nav class="cfg-index"[\s\S]*?<\/nav>/)[0] || '').matchAll(/href="#([^"]+)"/g)].map((m) => m[1]);
+      const ids = new Set([...artOnly.matchAll(/\sid="([^"]*)"/g)].map((m) => m[1]));
+      const deadCfg = cfgLinks.filter((h) => !ids.has(h));
+      push(p, '批4 · .cfg-index 链接全部命中本页 id', deadCfg.length === 0,
+        cfgLinks.length + ' 条，死链 ' + deadCfg.length + (deadCfg.length ? '：' + deadCfg.slice(0, 3).join(',') : ''));
+    }
   }
 
   // site-wide invariants

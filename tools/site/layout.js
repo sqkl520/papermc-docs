@@ -123,14 +123,16 @@ function lightbox() {
 // sidebar — 源结构主导航
 // ---------------------------------------------------------------------------
 
-/** 侧栏里一条页面链接；data-search 同时含标题 / 中文摘要 / 源结构组路径（供过滤框使用） */
+/** 侧栏里一条页面链接；data-search 同时含标题 / 中文摘要 / 源结构组路径（供过滤框使用）。
+ *  批 1：badge（「组首页」/「根页」标签）视觉上不占行，改为并入 title —— 信息不丢，只是不再常显。 */
 function sidePageItem(opts) {
   const { href, label, search, active, badge } = opts;
+  const title = [opts.title, badge].filter(Boolean).join(' · ');
   return '<li><a href="' + U.attr(href) + '"'
     + (opts.cls ? ' class="' + U.attr(opts.cls) + '"' : '')
     + ' data-search="' + U.attr(search) + '"'
     + (active ? ' aria-current="page"' : '')
-    + (opts.title ? ' title="' + U.attr(opts.title) + '"' : '')
+    + (title ? ' title="' + U.attr(title) + '"' : '')
     + '><span class="ttl">' + U.escapeHtml(label) + '</span>'
     + (badge ? '<span class="tag">' + U.escapeHtml(badge) + '</span>' : '')
     + '</a></li>';
@@ -167,16 +169,27 @@ function sideGroupHtml(g, prefix, sec, ctx) {
   const homeMeta = g.homeKey ? sec.navForRel.get(g.home) : null;
   const homeHref = g.homeKey ? pageHref(prefix, sec.id, g.home) : '';
   const homeHay = sideSearchHay(g.homePage, g.label, (homeMeta && homeMeta.groupPath) || g.path.join(' > '), sec.title);
+  /* 批 1（侧栏行内降噪）：一个组标题行原来挤了 5 件东西 —— 组名 + 中文名 + 「组首页 →」pill
+     + 页数徽章 + 折叠三角。现在中文名与页数改由**本行的 title / aria-label 承载**，
+     视觉行只剩「组名 + 折叠三角」。
+     aria-label 用全量（组名 + 中文名 + 页数 + 组首页目标），读屏反而比改前多得到信息；
+     可见文本「Administration」是其子串，满足 WCAG 2.5.3（label in name）。
+     注意：<summary> 上的 aria-label 会覆盖子元素的无障碍名，故 pill 必须重述自身名字，
+     否则读屏把它读成「Administration 服务端管理 · 29 页」——见下方 pill 的 aria-label。 */
+  const groupTitle = [g.label, g.zh, (g.pageCount || 0) + ' 页'].filter(Boolean).join(' · ')
+    + (g.homeKey ? ' · 组首页：' + (g.homeTitle || g.label) : '');
   let html = '<details class="side-group" data-nav-key="' + U.attr(g.key) + '"'
     + ' data-nav-path="' + U.attr(g.path.join(' > ')) + '"' + open + '>'
-    + '<summary class="side-group-title">'
+    + '<summary class="side-group-title" title="' + U.attr(groupTitle) + '"'
+    + ' aria-label="' + U.attr(groupTitle) + '">'
     + '<span class="grp-name">' + U.escapeHtml(g.label) + '</span>'
     + (g.zh ? '<span class="grp-zh">' + U.escapeHtml(g.zh) + '</span>' : '')
     + (g.homeKey
       ? '<a class="side-home" href="' + U.attr(homeHref) + '" data-search="' + U.attr(homeHay) + '"'
+        + ' aria-label="组首页：' + U.attr(g.homeTitle || g.label) + '"'
         + ' title="组首页：' + U.attr(g.homeTitle || g.label) + '（上游仅渲染组标题，不输出 &lt;a&gt;）">组首页 →</a>'
       : '')
-    + '<span class="side-count">' + (g.pageCount || 0) + '</span>'
+    + '<span class="side-count" aria-hidden="true">' + (g.pageCount || 0) + '</span>'
     + '</summary><ul>';
   if (g.homeKey) {
     html += sidePageItem({
@@ -194,10 +207,13 @@ function sideGroupHtml(g, prefix, sec, ctx) {
 function sidebarHtml(site, prefix, active, toc) {
   const a = active || {};
   const nav = site.sourceNav;
+  /* 批 1：这里原有 <div class="side-legend">主导航 = 上游 docs.papermc.io 侧栏结构</div>。
+     它是**元信息**（解释这一列是什么），不是导航目标，也不帮助决定点哪一条 ——
+     实测 11.2px、首屏占 1 行且与紧随其后的「过滤框 + 分区标题」语义重复。
+     批 1 直接删除（连同 .side-legend 的 CSS 规则），侧栏首屏少 1 个非条目元素。 */
   let html = '<nav class="sidebar" id="sidebar" data-nav-drawer aria-label="文档导航">'
     + '<label class="visually-hidden" for="side-filter" hidden>过滤页面</label>'
-    + '<input class="side-filter" id="side-filter" type="search" placeholder="过滤：标题 / 摘要 / 源结构路径…" autocomplete="off">'
-    + '<div class="side-legend">主导航 = 上游 docs.papermc.io 侧栏结构</div>';
+    + '<input class="side-filter" id="side-filter" type="search" placeholder="过滤：标题 / 摘要 / 源结构路径…" autocomplete="off">';
   // 分区切换：≤1023.98px 顶栏那份隐藏，这里放进抽屉（契约 v2 §3）；data-search 保证侧栏过滤可命中
   if (nav && nav.sections.length) {
     html += '<div class="side-secs" role="group" aria-label="分区切换">'
@@ -213,9 +229,10 @@ function sidebarHtml(site, prefix, active, toc) {
     for (const sec of nav.sections) {
       const open = !a.sectionId || a.sectionId === sec.id;
       html += '<details class="side-sec" data-section="' + U.attr(sec.id) + '"' + (open ? ' open' : '') + '>'
-        + '<summary class="side-section-title">'
+        + '<summary class="side-section-title" title="' + U.attr(sec.title + ' · ' + sec.preorder.length + ' 页') + '"'
+        + ' aria-label="' + U.attr(sec.title + ' · ' + sec.preorder.length + ' 页') + '">'
         + '<span class="sec-name">' + U.escapeHtml(sec.title) + '</span>'
-        + '<span class="side-count">' + sec.preorder.length + '</span></summary>'
+        + '<span class="side-count" aria-hidden="true">' + sec.preorder.length + '</span></summary>'
         + '<div class="side-sec-body">';
       if (sec.rootKey) {
         const root = sec.navForRel.get(sec.rootRel);
@@ -234,22 +251,30 @@ function sidebarHtml(site, prefix, active, toc) {
         + '</ul></div></details>';
     }
   } else {
+    /* 批 1：这一分支（无 sourceNav 时的降级导航）也把页数从视觉行移进 title。 */
     for (const sec of site.sections) {
       html += '<div class="side-section" data-section="' + U.attr(sec.id) + '">'
-        + '<a class="side-section-title" href="' + libUrl(prefix, 'sections/' + sec.id + '.html') + '">'
-        + U.escapeHtml(sec.title) + '<span class="side-count">' + sec.pageCount + '</span></a></div>';
+        + '<a class="side-section-title" href="' + libUrl(prefix, 'sections/' + sec.id + '.html') + '"'
+        + ' title="' + U.attr(sec.title + ' · ' + sec.pageCount + ' 页') + '">'
+        + U.escapeHtml(sec.title) + '<span class="side-count" aria-hidden="true">' + sec.pageCount + '</span></a></div>';
     }
   }
   // 自建中文分类：降级为次要入口（折叠）
   const cats = site.categories || [];
   if (cats.length) {
+    /* 批 1：主题块的「N」与分类条目上的分区名 tag 同样非常显 —— 数字进 summary 的 title/aria-label，
+       分区名进条目 <a> 的 title。**结构一行未动**：<details class="side-cat"> 与 <summary> 保留，
+       verify-site.js:1044 的 /class="side-cat"/ 硬断言照旧命中。 */
     html += '<details class="side-cat" data-cat="taxonomy"' + (a.categoryId ? ' open' : '') + '>'
-      + '<summary>按主题浏览（自定义）<span class="side-count">' + cats.length + '</span></summary><ul>';
+      + '<summary title="按主题浏览（自定义）· ' + U.attr(String(cats.length)) + ' 类"'
+      + ' aria-label="按主题浏览（自定义）· ' + U.attr(String(cats.length)) + ' 类">按主题浏览（自定义）'
+      + '<span class="side-count" aria-hidden="true">' + cats.length + '</span></summary><ul>';
     for (const cat of cats) {
       const sec = site.sectionById.get(cat.section);
       html += '<li><a href="' + libUrl(prefix, 'categories/' + cat.id + '.html') + '"'
         + ' data-search="' + U.attr([cat.title, cat.description || '', (sec && sec.title) || '', '按主题浏览'].join(' ')) + '"'
         + (a.categoryId === cat.id ? ' class="active" aria-current="page"' : '')
+        + (sec ? ' title="' + U.attr(cat.title + ' · ' + sec.title) + '"' : '')
         + '><span class="ttl">' + U.escapeHtml(cat.title) + '</span>'
         + '<span class="tag">' + U.escapeHtml(sec ? sec.title : cat.section) + '</span></a></li>';
     }
@@ -287,11 +312,14 @@ function tocHtml(toc) {
   return html;
 }
 
-/** 抽屉内的「本页目录」（同一 toc 数组；≤1024px 显示，默认折叠以免撑长抽屉） */
+/** 抽屉内的「本页目录」（同一 toc 数组；≤1024px 显示，默认折叠以免撑长抽屉）。
+ *  批 1：条目数从视觉行移进 title/aria-label（`.side-count` 已统一 display:none）。 */
 function drawerTocHtml(toc) {
   if (!toc || !toc.length) return '';
   let html = '<details class="side-toc page-toc" id="drawer-toc" data-page-toc data-toc data-drawer-toc>'
-    + '<summary class="side-toc-title">本页目录<span class="side-count">' + toc.length + '</span></summary><ol>';
+    + '<summary class="side-toc-title" title="本页目录 · ' + U.attr(String(toc.length)) + ' 项"'
+    + ' aria-label="本页目录 · ' + U.attr(String(toc.length)) + ' 项">本页目录'
+    + '<span class="side-count" aria-hidden="true">' + toc.length + '</span></summary><ol>';
   for (const h of toc) {
     html += '<li class="lvl-' + h.level + '"><a href="#' + U.attr(h.id) + '">' + U.escapeHtml(h.text) + '</a></li>';
   }

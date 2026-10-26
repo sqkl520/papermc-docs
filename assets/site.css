@@ -208,7 +208,9 @@ html.nav-locked{scrollbar-gutter:stable}
 /* ---------- sidebar ---------- */
 .side-filter{width:100%;min-height:44px;padding:.4rem .55rem;border:1px solid var(--border);border-radius:8px;
   background:var(--bg);color:var(--fg);font-family:inherit;font-size:16px;margin-bottom:.35rem}
-.side-legend{font-size:.7rem;color:var(--fg-muted);margin:0 0 .5rem .4rem;line-height:1.3}
+/* 批 1（侧栏行内降噪）：原来这里有一条 .side-legend 规则。图例是「主导航 = 上游…」
+   这句元信息，不是导航目标，已于批 1 连同 DOM 一起删除（模板侧 sidebarHtml），
+   所以不再保留空规则，避免死 CSS 被批 3 的死规则普查判为 0 匹配。 */
 .side-section{margin-bottom:1rem}
 .side-section-title{display:flex;align-items:center;gap:.4rem;min-height:44px;padding:.35rem .4rem;font-weight:700;color:var(--fg);
   text-transform:uppercase;letter-spacing:.04em;font-size:.74rem}
@@ -255,6 +257,59 @@ summary.side-section-title:hover{background:var(--bg-elev);border-radius:7px}
 .side-group-title a.side-home{min-height:24px}
 .side-group-title .side-home:hover{text-decoration:none;background:var(--bg-elev);border-color:var(--border-strong)}
 .side-group-title .side-count,.side-sec>summary .side-count,.side-cat>summary .side-count{margin-left:auto}
+
+/* ============================================================================
+   批 1 —— 侧栏行内降噪（第一因 #1）
+   ----------------------------------------------------------------------------
+   问题（实测 @1440，首屏口径 §8.2）：11 个可点条目旁边陪着 38 个不可点的装饰
+   = 3.45 chrome/条目；同一视觉行里挤了 10 种字号（8.99 / 9.216 / 9.6768 /
+   10.56 / 10.88 / 11.2 / 12.48 / 12.8 / 13.44 / 14.08px），上游同行只有 2 种。
+
+   解法：把 5 类「非导航」元素从**视觉行**移开，DOM 一个不删、语义一点不丢 ——
+     · .side-count（计数徽章）→ 数字并入父级 title / aria-label
+     · .grp-zh（中文组名）   → 并入父级 title / aria-label
+     · .tag（根页 / 组首页）  → 并入所属 <a> 的 title
+     · .side-legend（图例）   → 模板已删（元信息，非导航）
+     · a.side-home（组首页 pill）→ 绝对定位到行右端，opacity:0，:hover/:focus-within 揭示
+   作用域一律加 .sidebar 前缀：<main> 里的 .tree-fold-title / .cat-anchorbar /
+   .section-head 也用 .side-count，那些是**正文**的计数，批 1 不动（首页 0 变化）。
+
+   三条不能破的红线（写在这里防以后"顺手"）：
+   1. a.side-home 的 min-height:24px 不动 —— WCAG 2.5.8 AA 最小命中区（R11 / P0-3）。
+      本块的绝对定位**不重置 min-height**，落到行右端后仍是 56x24。
+   2. a.side-home 不删、display 不设 none —— 它是「组首页索引页」的入口，
+      且 verify-nav.js:178 用 cheerio 静态读 summary>a.side-home 做 27/27 映射。
+      （批次内已审计：261 个 pill 的目标**全部**另有同名 .nav-home 条目，故视觉隐藏零损失。）
+   3. 折叠的 open/closed 一行未动 —— 那是批 5 的事；改了对齐 11%→65% 会让侧栏 +120% 长（R10）。
+   ============================================================================ */
+.sidebar .side-count{display:none}
+.sidebar .grp-zh{display:none}
+.sidebar .tag{display:none}
+/* pill：留在 DOM、留在流内的定位上下文，但视觉上让出整行 —— 组名因此可以占满宽度，
+   这也是截断 7→0 的直接原因（原来 91px 的组名要和 54px 的中文名 + 56px 的 pill 抢 289px）。 */
+.sidebar .side-group-title{position:relative}
+.sidebar .side-group-title a.side-home{position:absolute;right:.3rem;top:50%;transform:translateY(-50%);
+  opacity:0;pointer-events:none;transition:opacity .12s ease;background:var(--bg-soft);z-index:1}
+/* 揭示：鼠标悬停整行 / 键盘 Tab 进 pill（focus-visible）/ 行内任意子元素获焦。
+   :focus-within 覆盖「Tab 落到 pill 但 :focus-visible 未触发」的浏览器差异。 */
+.sidebar .side-group-title:hover a.side-home,
+.sidebar .side-group-title:focus-within a.side-home,
+.sidebar .side-group-title a.side-home:focus-visible{opacity:1;pointer-events:auto}
+/* 触摸设备：**不加任何兜底常显**。三条实测依据（不是省事）：
+   ① 常显会把抽屉首屏 chrome/条目 从 0.80 顶回 **1.30**，直接破本批 ≤1.0 验收线；
+   ② 这个 pill 是**完全冗余**的入口 —— 本批审计 9 个页面 261 个 pill，
+      其目标 261/261 都另有同名的 .nav-home 条目（组展开后第一行，44px 命中区、默认可见）；
+   ③ 上游 archive/paper/html 的 <summary> 里**根本没有 <a>**（实测 summary 内含 <a> 数 = 0），
+      即"组标题带 pill"本就是我们独有的噪音，隐藏它反而更接近上游。
+   可达性已用最坏情况证明：强制 pill 永久不可见（opacity:0 + pointer-events:none）时，
+   仍能从侧栏点 44px 的 .nav-home 进 /paper/admin/（tools/b1u-reach.js，2/2 PASS）。
+   注：Android 点按 summary 会触发 :focus-within 从而顺带揭示 pill（白送的）；
+   iOS Safari 点按不给焦点，该档靠 .nav-home —— 这也是不拿 :focus-within 当唯一保障的原因。 */
+/* 高对比度/强制色模式：opacity:0 的元素在强制色下可能仍被画成空框，直接按常显处理更安全。 */
+@media (forced-colors:active){
+  .sidebar .side-group-title a.side-home{opacity:1;pointer-events:auto;border:1px solid}
+}
+
 .side-sec a,.side-cat a,.side-group a{display:flex;gap:.4rem;align-items:center;min-height:44px;padding:.22rem .45rem;border-radius:7px;color:var(--fg-muted)}
 .side-sec a:hover,.side-cat a:hover,.side-group a:hover{background:var(--bg-elev);color:var(--fg);text-decoration:none}
 .side-sec a.active,.side-cat a.active,.side-group a.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
@@ -681,6 +736,48 @@ table.allpages td.lnk{margin-top:.1rem}
   .page-meta{font-size:.72rem;gap:.32rem;margin-bottom:.7rem}
   .page-meta .chip{padding:.1rem .4rem}
 }
+/* ---------- 批 2a：窄屏隐藏面包屑 + 收 page-meta（首屏导航占比） ----------
+   实测（390×844，paper/dev/dialogs）：顶栏 56 + 面包屑 44 + page-meta 44 + TOC 条 61
+   = 205px = 24.3%（红队长路径页 232px = 27.5%）。上游 390 档面包屑/chips **完全不存在**
+   （红队实测全文 breadcrumb 命中 0），上游同档 17.1%。
+
+   断点为什么是 1199.98 而不是 767.98：1024×768 的目标是 ≤20%，而 .toc-side 折叠条在
+   1024 仍是 61px、顶栏 56px。反事实实测（tools/b2m-counterfactual.js）：
+     · 只 @media(max-width:767.98) → 1024 的 h1Top 205 一格不动 = 26.7%（目标落空）
+     · @media(max-width:1199.98)   → 1024 的 h1Top 150 = 19.5%（达标）
+   1199.98 也正是文件里既有的「抽屉线」（见 :176 与 off-canvas 抽屉注释）：
+   该区间内 sidebars 是默认关闭的抽屉，与 390 属同一语义档，收敛规则理应同源。
+
+   为什么面包屑是 display:none 而不是「压成一行 12px」：
+   390 预算 = 18% × 844 = 152px，顶栏 56 + TOC 61 = 117 不可动（TOC 归批 5，顶栏受
+   verify-mobile C2「顶栏 ≤56px」约束），只剩 35px。压成 min-height:24px 的单行时
+   H1top 仍为 175px = 20.7%，≤160 与 ≤18% 两个目标同时破。故整行移除。
+   无障碍补偿（不是纯删）：① DOM 保留（verify-site.js:1047 的 /<nav class="crumbs"/
+   硬断言仍 PASS）；② 分区名 chip 保留，是面包屑隐藏后唯一可点的「上层定位」；
+   ③ H1 页标题紧随其后，视觉上即「我在哪」的叶子；④ ≥1200 侧栏常驻（带 aria-current）
+   时面包屑与完整 page-meta 原样回来。
+   ⚠️ 不用 sr-only（clip + overflow:hidden）替代：内部 <a> 会变成「被裁剪元素」，
+      撞 verify-mobile check=2 的 clippedUnexplained === 0 硬断言。
+
+   page-meta 只留 1 个 chip（分区名，:first-child）+「查看原文」；其余 chip 只不显示、
+   DOM 保留（verify-nav.js:253 用静态 HTML 解析 p.page-meta chip，不受 CSS 影响）。
+   作用域限定 :is(.article, .page-head) > .page-meta —— 全站 165 个已构建页里 .page-meta
+   的父元素只有 3 种（tools/b2m-meta-parents.js 实测）：article.article ×141 /
+   div.page-head ×22 / details.about-site ×1。前两种是页面头，属本批范围；
+   details.about-site 是页脚「关于本站」（源结构 SHA-256 / 生成时间，元信息而非导航），
+   不动它。
+   留下的 2 个触控目标收到 24×24（WCAG 2.5.8 AA 下限；44px 是 2.5.5 AAA）。本文件既有
+   口径同此（:782 的组首页 pill 24px、verify-mobile「navRowMin_ref: 24（WCAG 2.5.8 AA）」）。
+   收到 24px 不是为了省事，而是：只删 crumbs 时 390 navPx = 161px = 19.1%，仍破 ≤18%；
+   唯一还占位的可压项就是这个 44px 的 a.chip（其余 chip 已 display:none）。 */
+@media (max-width:1199.98px){
+  .crumbs{display:none}
+  :is(.article,.page-head)>.page-meta{margin-bottom:.7rem;gap:.4rem}
+  :is(.article,.page-head)>.page-meta>.chip{display:none}
+  :is(.article,.page-head)>.page-meta>.chip:first-child{display:inline-flex}
+  :is(.article,.page-head)>.page-meta>a.chip,
+  :is(.article,.page-head)>.page-meta>a.tbtn{min-height:24px;min-width:24px}
+}
 @media print{.to-top{display:none}}
 /* ---------- R3-4：配置键索引（长而无标题的配置参考页） ---------- */
 .cfg-index{margin:.9rem 0 1.4rem;padding:.7rem .85rem;border:1px solid var(--border);border-radius:var(--radius);
@@ -701,6 +798,38 @@ table.allpages td.lnk{margin-top:.1rem}
 .article ul>li[id^="cfg-"]:target{background:var(--accent-soft);border-radius:6px;outline:1px solid var(--accent);outline-offset:2px}
 @media (max-width:520px){
   .cfg-key{font-size:.76rem;min-height:26px;padding:.12rem .42rem}
+}
+/* ---------- 批 4：配置参考页 .node 树（照上游 DOM 文法；上游 198 个 details 全 closed） ---------- */
+/* 层级缩进靠 .node 嵌套的 padding-left 累加（1.25rem × 深度），**不用 --depth 变量**
+   —— --depth 只服务首页 src-list 的树，两者不能混用，否则缩进互相打架。
+   令牌映射：上游 --sl-text-xs→12.5px、--sl-color-gray-3→--fg-muted、--sl-color-gray-5/-6→
+   --border/--bg-elev、--sl-color-text-accent→--accent、--sl-color-text→--fg。
+   刻意不引入任何 --sl-* 名字：我们的深/浅色主题由 --bg/--fg/--accent 切换，混用会破主题。 */
+.node{padding-left:1.25rem;font-size:12.5px;line-height:1.6;font-family:var(--mono)}
+.node-root{padding:1rem;border:1px solid var(--border);background:var(--bg-soft);contain:paint}
+.line{word-break:break-all;margin:0}
+.line-leaf{cursor:pointer;list-style:none}
+.key{white-space:pre-wrap;color:var(--fg-muted)}
+.key-leaf{color:var(--accent)}
+.value{white-space:pre-wrap;color:var(--fg)}
+.muted{color:var(--fg-muted)}
+.link{color:var(--accent);transition:opacity .2s;opacity:0;margin-left:.25rem}
+.line:hover .link{opacity:1}
+@media (hover:none){.link{opacity:.5}}
+.block{margin:.5rem 0 .5rem 1.25rem;padding:.75rem;line-height:1.5;font-size:13.5px;
+  background:var(--bg-elev);border:1px solid var(--border);border-left:5px solid var(--accent)}
+.block>p:first-child{margin-top:0}
+.block>p:last-child{margin-bottom:0}
+.block ul{margin:.4em 0;padding-left:1.4em}
+summary::marker,summary::-webkit-details-marker{display:none}
+.cfg-raw{padding-left:1.25rem;font-size:13.5px;line-height:1.5;color:var(--fg-muted);word-break:break-all}
+.node-root section{scroll-margin-top:calc(var(--topbar-h) + 20px)}
+.node-root section:target{background:var(--accent-soft);border-radius:4px;outline:1px solid var(--accent);outline-offset:2px}
+/* 窄屏：竖向空间最稀缺，行高与缩进各收一档（390 档 258 行 × 20px→16.875px 省 806px）。
+   桌面 1.6 接近上游 1.75；窄屏 1.35 —— 长键名本来就会换行，1.35 仍高于中文正文下限。 */
+@media (max-width:520px){
+  .node{line-height:1.35;padding-left:.85rem}
+  .node-root{padding:.8rem}
 }
 .info-footer{display:flex;flex-direction:column;gap:.35rem;margin-top:2rem;border-top:1px solid var(--border);padding-top:.9rem}
 .info-footer code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85em}

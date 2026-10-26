@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-25T16:58:27.980Z",
+  "generated_at": "2026-10-26T11:05:09.331Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -389,11 +389,11 @@
     "imgInArticle": 89,
     "imgExternal": 1,
     "imgMissing": 0,
-    "anchorsAll": 40824,
+    "anchorsAll": 41499,
     "anchorsExternal": 1433,
     "anchorsUnmirrored": 25,
     "anchorsInternalPage": 31235,
-    "anchorsFragmentOnly": 3302,
+    "anchorsFragmentOnly": 3977,
     "anchorsUnresolved": 4,
     "uniqueExternalHrefs": 783
   },
@@ -494,7 +494,7 @@
   "outputs": {
     "index": {
       "output": "index.html",
-      "bytes": 137981
+      "bytes": 145484
     },
     "notFound": {
       "output": "404.html",
@@ -511,18 +511,18 @@
     },
     "allPages": {
       "output": "all-pages.html",
-      "bytes": 185957,
+      "bytes": 193460,
       "rows": 141
     },
     "snapshots": {
       "output": "snapshots.html",
-      "bytes": 171614,
+      "bytes": 179117,
       "rows": 141
     },
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 65002
+        "bytes": 75050
       },
       "js": {
         "output": "assets/site.js",
@@ -546,7 +546,7 @@
     "sectionCount": 3,
     "siteDir": "repo-root (GitHub Pages /papermc-docs/)",
     "pageLayout": "<section>/<rel>.html（rel 直接展开，URL 与上游 docs.papermc.io 逐段一致）",
-    "totalBytes": 17130576
+    "totalBytes": 18538706
   },
   "pages": [
     {
@@ -640,7 +640,7 @@
           "text": "If nothing is logged"
         }
       ],
-      "bytes": 103329,
+      "bytes": 110916,
       "warnings": 0
     },
     {
@@ -688,7 +688,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92253,
+      "bytes": 99756,
       "warnings": 0
     },
     {
@@ -736,7 +736,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92527,
+      "bytes": 100030,
       "warnings": 0
     },
     {
@@ -805,7 +805,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 95586,
+      "bytes": 103173,
       "warnings": 0
     },
     {
@@ -853,7 +853,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91927,
+      "bytes": 99430,
       "warnings": 0
     },
     {
@@ -901,7 +901,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92432,
+      "bytes": 99935,
       "warnings": 0
     },
     {
@@ -975,7 +975,7 @@
           "text": "Transparent huge pages"
         }
       ],
-      "bytes": 105763,
+      "bytes": 113350,
       "warnings": 0
     },
     {
@@ -1049,7 +1049,7 @@
           "text": "FAQ, common pitfalls and support"
         }
       ],
-      "bytes": 127753,
+      "bytes": 135340,
       "warnings": 2
     },
     {
@@ -1208,7 +1208,7 @@
           "text": "Low CPU usage"
         }
       ],
-      "bytes": 123804,
+      "bytes": 131393,
       "warnings": 1
     },
     {
@@ -1277,7 +1277,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 95529,
+      "bytes": 103116,
       "warnings": 0
     },
     {
@@ -1325,7 +1325,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 90791,
+      "bytes": 98294,
       "warnings": 0
     },
     {
@@ -1373,7 +1373,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 94471,
+      "bytes": 101974,
       "warnings": 0
     },
     {
@@ -1421,7 +1421,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 94302,
+      "bytes": 101805,
       "warnings": 0
     },
     {
@@ -1485,7 +1485,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 96473,
+      "bytes": 104060,
       "warnings": 0
     },
     {
@@ -1533,7 +1533,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93438,
+      "bytes": 100941,
       "warnings": 0
     },
     {
@@ -1581,7 +1581,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92808,
+      "bytes": 100311,
       "warnings": 0
     },
     {
@@ -1629,7 +1629,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92633,
+      "bytes": 100136,
       "warnings": 0
     },
     {
@@ -1677,7 +1677,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92691,
+      "bytes": 100194,
       "warnings": 0
     },
     {
@@ -1725,7 +1725,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93789,
+      "bytes": 101292,
       "warnings": 0
     },
     {
@@ -1773,7 +1773,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92405,
+      "bytes": 99908,
       "warnings": 0
     },
     {
@@ -1821,7 +1821,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92534,
+      "bytes": 100037,
       "warnings": 0
     },
     {
@@ -1900,7 +1900,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 106399,
+      "bytes": 113986,
       "warnings": 0
     },
     {
@@ -2024,7 +2024,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 110349,
+      "bytes": 117938,
       "warnings": 0
     },
     {
@@ -2148,7 +2148,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 111353,
+      "bytes": 118942,
       "warnings": 0
     },
     {
@@ -2287,7 +2287,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 109686,
+      "bytes": 117275,
       "warnings": 0
     },
     {
@@ -2381,7 +2381,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 103572,
+      "bytes": 111159,
       "warnings": 0
     },
     {
@@ -2435,7 +2435,7 @@
           "text": "Quick overview"
         }
       ],
-      "bytes": 105030,
+      "bytes": 112617,
       "warnings": 0
     },
     {
@@ -2574,7 +2574,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 111144,
+      "bytes": 118733,
       "warnings": 0
     },
     {
@@ -2668,7 +2668,7 @@
           "text": "In-game preview"
         }
       ],
-      "bytes": 102633,
+      "bytes": 110220,
       "warnings": 0
     },
     {
@@ -2747,7 +2747,7 @@
           "text": "Registry key types"
         }
       ],
-      "bytes": 109674,
+      "bytes": 117261,
       "warnings": 0
     },
     {
@@ -2831,7 +2831,7 @@
           "text": "Example: Filtering by user input"
         }
       ],
-      "bytes": 112851,
+      "bytes": 120438,
       "warnings": 0
     },
     {
@@ -2925,7 +2925,7 @@
           "text": "Custom arguments"
         }
       ],
-      "bytes": 111555,
+      "bytes": 119142,
       "warnings": 0
     },
     {
@@ -2994,7 +2994,7 @@
           "text": "Chaining ‘then’ method calls together"
         }
       ],
-      "bytes": 117669,
+      "bytes": 125256,
       "warnings": 0
     },
     {
@@ -3083,7 +3083,7 @@
           "text": "Example: Ice-cream argument"
         }
       ],
-      "bytes": 122056,
+      "bytes": 129643,
       "warnings": 0
     },
     {
@@ -3152,7 +3152,7 @@
           "text": "Logic separation"
         }
       ],
-      "bytes": 110280,
+      "bytes": 117867,
       "warnings": 0
     },
     {
@@ -3211,7 +3211,7 @@
           "text": "Additional support"
         }
       ],
-      "bytes": 97148,
+      "bytes": 104735,
       "warnings": 0
     },
     {
@@ -3295,7 +3295,7 @@
           "text": "Further reference"
         }
       ],
-      "bytes": 109124,
+      "bytes": 116711,
       "warnings": 0
     },
     {
@@ -3369,7 +3369,7 @@
           "text": "Restricting your commands"
         }
       ],
-      "bytes": 105394,
+      "bytes": 112981,
       "warnings": 0
     },
     {
@@ -3468,7 +3468,7 @@
           "text": "Final code"
         }
       ],
-      "bytes": 122776,
+      "bytes": 130365,
       "warnings": 0
     },
     {
@@ -3532,7 +3532,7 @@
           "text": "The new Paper way"
         }
       ],
-      "bytes": 104728,
+      "bytes": 112315,
       "warnings": 0
     },
     {
@@ -3601,7 +3601,7 @@
           "text": "Pointers"
         }
       ],
-      "bytes": 99002,
+      "bytes": 106589,
       "warnings": 0
     },
     {
@@ -3670,7 +3670,7 @@
           "text": "ResourceBundle"
         }
       ],
-      "bytes": 99438,
+      "bytes": 107025,
       "warnings": 0
     },
     {
@@ -3769,7 +3769,7 @@
           "text": "LegacyComponentSerializer"
         }
       ],
-      "bytes": 112651,
+      "bytes": 120240,
       "warnings": 0
     },
     {
@@ -3848,7 +3848,7 @@
           "text": "Code"
         }
       ],
-      "bytes": 104522,
+      "bytes": 112109,
       "warnings": 0
     },
     {
@@ -3912,7 +3912,7 @@
           "text": "Implementing cancellation"
         }
       ],
-      "bytes": 106781,
+      "bytes": 114368,
       "warnings": 0
     },
     {
@@ -3986,7 +3986,7 @@
           "text": "Storing data on the holder"
         }
       ],
-      "bytes": 106298,
+      "bytes": 113885,
       "warnings": 0
     },
     {
@@ -4160,7 +4160,7 @@
           "text": "Matching items without certain data components"
         }
       ],
-      "bytes": 117789,
+      "bytes": 125378,
       "warnings": 0
     },
     {
@@ -4249,7 +4249,7 @@
           "text": "Client timeouts"
         }
       ],
-      "bytes": 104573,
+      "bytes": 112160,
       "warnings": 0
     },
     {
@@ -4418,7 +4418,7 @@
           "text": "Reading payloads with adventure-nbt"
         }
       ],
-      "bytes": 145566,
+      "bytes": 153155,
       "warnings": 0
     },
     {
@@ -4527,7 +4527,7 @@
           "text": "Use cases"
         }
       ],
-      "bytes": 116561,
+      "bytes": 124150,
       "warnings": 0
     },
     {
@@ -4591,7 +4591,7 @@
           "text": "Stopping the pathfinding"
         }
       ],
-      "bytes": 99063,
+      "bytes": 106650,
       "warnings": 0
     },
     {
@@ -4660,7 +4660,7 @@
           "text": "Retaining passengers"
         }
       ],
-      "bytes": 99106,
+      "bytes": 106693,
       "warnings": 0
     },
     {
@@ -4739,7 +4739,7 @@
           "text": "Event cancellation"
         }
       ],
-      "bytes": 105376,
+      "bytes": 112963,
       "warnings": 0
     },
     {
@@ -4819,7 +4819,7 @@
           "text": "Entity scheduler"
         }
       ],
-      "bytes": 101054,
+      "bytes": 108641,
       "warnings": 0
     },
     {
@@ -4867,7 +4867,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92347,
+      "bytes": 99850,
       "warnings": 0
     },
     {
@@ -4971,7 +4971,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 116464,
+      "bytes": 124053,
       "warnings": 0
     },
     {
@@ -5030,7 +5030,7 @@
           "text": "Unregistering a listener"
         }
       ],
-      "bytes": 97772,
+      "bytes": 105359,
       "warnings": 0
     },
     {
@@ -5129,7 +5129,7 @@
           "text": "Components"
         }
       ],
-      "bytes": 103544,
+      "bytes": 111133,
       "warnings": 0
     },
     {
@@ -5193,7 +5193,7 @@
           "text": "Miscellaneous"
         }
       ],
-      "bytes": 95974,
+      "bytes": 103561,
       "warnings": 0
     },
     {
@@ -5267,7 +5267,7 @@
           "text": "Getting the current Minecraft version"
         }
       ],
-      "bytes": 101648,
+      "bytes": 109235,
       "warnings": 2
     },
     {
@@ -5351,7 +5351,7 @@
           "text": "Verifying that the datapack loaded correctly"
         }
       ],
-      "bytes": 110607,
+      "bytes": 118194,
       "warnings": 0
     },
     {
@@ -5435,7 +5435,7 @@
           "text": "Why does this exist?"
         }
       ],
-      "bytes": 107110,
+      "bytes": 114697,
       "warnings": 0
     },
     {
@@ -5509,7 +5509,7 @@
           "text": "Persistent inventory views"
         }
       ],
-      "bytes": 104449,
+      "bytes": 112036,
       "warnings": 0
     },
     {
@@ -5557,7 +5557,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92266,
+      "bytes": 99769,
       "warnings": 0
     },
     {
@@ -5621,7 +5621,7 @@
           "text": "Removing a goal"
         }
       ],
-      "bytes": 105492,
+      "bytes": 113079,
       "warnings": 0
     },
     {
@@ -6085,7 +6085,7 @@
           "text": "Splash particles"
         }
       ],
-      "bytes": 185553,
+      "bytes": 193142,
       "warnings": 0
     },
     {
@@ -6219,7 +6219,7 @@
           "text": "ItemMeta"
         }
       ],
-      "bytes": 123103,
+      "bytes": 130692,
       "warnings": 0
     },
     {
@@ -6293,7 +6293,7 @@
           "text": "Configurate"
         }
       ],
-      "bytes": 108093,
+      "bytes": 115680,
       "warnings": 0
     },
     {
@@ -6377,7 +6377,7 @@
           "text": "MessageRaw"
         }
       ],
-      "bytes": 117243,
+      "bytes": 124830,
       "warnings": 0
     },
     {
@@ -6541,7 +6541,7 @@
           "text": "provides"
         }
       ],
-      "bytes": 112069,
+      "bytes": 119658,
       "warnings": 0
     },
     {
@@ -6655,7 +6655,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 114090,
+      "bytes": 121679,
       "warnings": 0
     },
     {
@@ -6719,7 +6719,7 @@
           "text": "Omitted stacktraces"
         }
       ],
-      "bytes": 98227,
+      "bytes": 105814,
       "warnings": 0
     },
     {
@@ -6778,7 +6778,7 @@
           "text": "ShapelessRecipe"
         }
       ],
-      "bytes": 100053,
+      "bytes": 107640,
       "warnings": 0
     },
     {
@@ -6857,7 +6857,7 @@
           "text": "Modifying existing entries"
         }
       ],
-      "bytes": 108841,
+      "bytes": 116428,
       "warnings": 0
     },
     {
@@ -6956,7 +6956,7 @@
           "text": "Obsolete API"
         }
       ],
-      "bytes": 100997,
+      "bytes": 108586,
       "warnings": 0
     },
     {
@@ -7065,7 +7065,7 @@
           "text": "Using a delay of 0 ticks"
         }
       ],
-      "bytes": 113857,
+      "bytes": 121446,
       "warnings": 0
     },
     {
@@ -7154,7 +7154,7 @@
           "text": "Compiling to Spigot mappings"
         }
       ],
-      "bytes": 108189,
+      "bytes": 115776,
       "warnings": 0
     },
     {
@@ -7278,7 +7278,7 @@
           "text": "Database tools"
         }
       ],
-      "bytes": 114356,
+      "bytes": 121945,
       "warnings": 0
     },
     {
@@ -7332,7 +7332,7 @@
           "text": "Unsupported Java detected, what do I do?!"
         }
       ],
-      "bytes": 92202,
+      "bytes": 99789,
       "warnings": 0
     },
     {
@@ -7421,7 +7421,7 @@
           "text": "Next steps"
         }
       ],
-      "bytes": 97137,
+      "bytes": 104724,
       "warnings": 0
     },
     {
@@ -7469,7 +7469,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 90215,
+      "bytes": 97718,
       "warnings": 0
     },
     {
@@ -7568,7 +7568,7 @@
           "text": "To CraftBukkit or Spigot"
         }
       ],
-      "bytes": 101038,
+      "bytes": 108627,
       "warnings": 0
     },
     {
@@ -7642,7 +7642,7 @@
           "text": "Afterword"
         }
       ],
-      "bytes": 99722,
+      "bytes": 107309,
       "warnings": 0
     },
     {
@@ -7706,7 +7706,7 @@
           "text": "Configuration"
         }
       ],
-      "bytes": 95083,
+      "bytes": 102670,
       "warnings": 0
     },
     {
@@ -7800,7 +7800,7 @@
           "text": "Troubleshooting"
         }
       ],
-      "bytes": 97360,
+      "bytes": 104947,
       "warnings": 0
     },
     {
@@ -7859,7 +7859,7 @@
           "text": "Timings"
         }
       ],
-      "bytes": 94903,
+      "bytes": 102490,
       "warnings": 0
     },
     {
@@ -7907,7 +7907,7 @@
         "fencePairs": 3
       },
       "headings": [],
-      "bytes": 95717,
+      "bytes": 103220,
       "warnings": 0
     },
     {
@@ -7955,7 +7955,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 101805,
+      "bytes": 117527,
       "warnings": 14
     },
     {
@@ -8003,7 +8003,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 96486,
+      "bytes": 108111,
       "warnings": 0
     },
     {
@@ -8051,7 +8051,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 93815,
+      "bytes": 102408,
       "warnings": 0
     },
     {
@@ -8255,7 +8255,7 @@
           "text": "-w, --level-name, --world <name>"
         }
       ],
-      "bytes": 107756,
+      "bytes": 115345,
       "warnings": 0
     },
     {
@@ -8434,7 +8434,7 @@
           "text": "version"
         }
       ],
-      "bytes": 112881,
+      "bytes": 120470,
       "warnings": 0
     },
     {
@@ -8503,7 +8503,7 @@
           "text": "Inheritance"
         }
       ],
-      "bytes": 103465,
+      "bytes": 111052,
       "warnings": 0
     },
     {
@@ -8551,7 +8551,7 @@
         "fencePairs": 2
       },
       "headings": [],
-      "bytes": 119658,
+      "bytes": 158204,
       "warnings": 0
     },
     {
@@ -8620,7 +8620,7 @@
           "text": "Cyclic plugin loading"
         }
       ],
-      "bytes": 95682,
+      "bytes": 103269,
       "warnings": 0
     },
     {
@@ -8699,7 +8699,7 @@
           "text": "Paper permissions"
         }
       ],
-      "bytes": 116711,
+      "bytes": 124298,
       "warnings": 0
     },
     {
@@ -8747,7 +8747,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 113785,
+      "bytes": 136060,
       "warnings": 1
     },
     {
@@ -8795,7 +8795,7 @@
         "fencePairs": 3
       },
       "headings": [],
-      "bytes": 123703,
+      "bytes": 175262,
       "warnings": 10
     },
     {
@@ -9084,7 +9084,7 @@
           "text": "MINECRAFT_MANAGEMENT_TLS_KEYSTORE_PASSWORD"
         }
       ],
-      "bytes": 126596,
+      "bytes": 134185,
       "warnings": 3
     },
     {
@@ -9158,7 +9158,7 @@
           "text": "whitelist.json"
         }
       ],
-      "bytes": 100141,
+      "bytes": 107728,
       "warnings": 1
     },
     {
@@ -9206,7 +9206,7 @@
         "fencePairs": 5
       },
       "headings": [],
-      "bytes": 147441,
+      "bytes": 220228,
       "warnings": 14
     },
     {
@@ -9270,7 +9270,7 @@
           "text": "Step 3. Update Paper"
         }
       ],
-      "bytes": 96721,
+      "bytes": 104308,
       "warnings": 0
     },
     {
@@ -9344,7 +9344,7 @@
           "text": "Further considerations"
         }
       ],
-      "bytes": 108752,
+      "bytes": 116339,
       "warnings": 0
     },
     {
@@ -9392,7 +9392,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92284,
+      "bytes": 99787,
       "warnings": 0
     },
     {
@@ -9440,7 +9440,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92012,
+      "bytes": 99515,
       "warnings": 0
     },
     {
@@ -9504,7 +9504,7 @@
           "text": "Reference"
         }
       ],
-      "bytes": 94211,
+      "bytes": 101798,
       "warnings": 0
     },
     {
@@ -9552,7 +9552,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92568,
+      "bytes": 100071,
       "warnings": 0
     },
     {
@@ -9656,7 +9656,7 @@
           "text": "/velocity:callback"
         }
       ],
-      "bytes": 98262,
+      "bytes": 105851,
       "warnings": 0
     },
     {
@@ -9730,7 +9730,7 @@
           "text": "Hypothetical BungeeCord API-based Velocity"
         }
       ],
-      "bytes": 100851,
+      "bytes": 108438,
       "warnings": 0
     },
     {
@@ -9819,7 +9819,7 @@
           "text": "query section"
         }
       ],
-      "bytes": 104208,
+      "bytes": 111795,
       "warnings": 0
     },
     {
@@ -9867,7 +9867,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 98604,
+      "bytes": 106107,
       "warnings": 0
     },
     {
@@ -9936,7 +9936,7 @@
           "text": "Getting your plugin’s directory"
         }
       ],
-      "bytes": 104187,
+      "bytes": 111774,
       "warnings": 0
     },
     {
@@ -9984,7 +9984,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91960,
+      "bytes": 99463,
       "warnings": 0
     },
     {
@@ -10058,7 +10058,7 @@
           "text": "Registering a command"
         }
       ],
-      "bytes": 116922,
+      "bytes": 124509,
       "warnings": 0
     },
     {
@@ -10197,7 +10197,7 @@
           "text": "Conclusion"
         }
       ],
-      "bytes": 118315,
+      "bytes": 125904,
       "warnings": 0
     },
     {
@@ -10261,7 +10261,7 @@
           "text": "External dependencies"
         }
       ],
-      "bytes": 98045,
+      "bytes": 105632,
       "warnings": 0
     },
     {
@@ -10360,7 +10360,7 @@
           "text": "Using ResultedEvent"
         }
       ],
-      "bytes": 118471,
+      "bytes": 126060,
       "warnings": 0
     },
     {
@@ -10408,7 +10408,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 92235,
+      "bytes": 99738,
       "warnings": 0
     },
     {
@@ -10456,7 +10456,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91870,
+      "bytes": 99373,
       "warnings": 0
     },
     {
@@ -10520,7 +10520,7 @@
           "text": "API"
         }
       ],
-      "bytes": 93552,
+      "bytes": 101139,
       "warnings": 0
     },
     {
@@ -10579,7 +10579,7 @@
           "text": "Audience operations are not fully supported"
         }
       ],
-      "bytes": 96621,
+      "bytes": 104208,
       "warnings": 0
     },
     {
@@ -10663,7 +10663,7 @@
           "text": "BungeeCord channel compatibility"
         }
       ],
-      "bytes": 109606,
+      "bytes": 117193,
       "warnings": 0
     },
     {
@@ -10727,7 +10727,7 @@
           "text": "New asynchronous event system"
         }
       ],
-      "bytes": 95036,
+      "bytes": 102623,
       "warnings": 0
     },
     {
@@ -10801,7 +10801,7 @@
           "text": "Obtaining tasks from a plugin"
         }
       ],
-      "bytes": 101601,
+      "bytes": 109188,
       "warnings": 0
     },
     {
@@ -10860,7 +10860,7 @@
           "text": "Fields"
         }
       ],
-      "bytes": 104791,
+      "bytes": 112378,
       "warnings": 0
     },
     {
@@ -10964,7 +10964,7 @@
           "text": "Plugins unable to modify messages or commands"
         }
       ],
-      "bytes": 105865,
+      "bytes": 113454,
       "warnings": 0
     },
     {
@@ -11048,7 +11048,7 @@
           "text": "Configuring your servers"
         }
       ],
-      "bytes": 103828,
+      "bytes": 111415,
       "warnings": 0
     },
     {
@@ -11117,7 +11117,7 @@
           "text": "💬 Our Discord"
         }
       ],
-      "bytes": 92750,
+      "bytes": 100337,
       "warnings": 0
     },
     {
@@ -11171,7 +11171,7 @@
           "text": "Migrating from Velocity 1.0.x to Velocity 1.1.0"
         }
       ],
-      "bytes": 92178,
+      "bytes": 99765,
       "warnings": 0
     },
     {
@@ -11265,7 +11265,7 @@
           "text": "Configuring legacy forwarding for Fabric"
         }
       ],
-      "bytes": 102933,
+      "bytes": 110520,
       "warnings": 1
     },
     {
@@ -11419,7 +11419,7 @@
           "text": "VELOCITY_FORWARDING_SECRET"
         }
       ],
-      "bytes": 106985,
+      "bytes": 114574,
       "warnings": 0
     },
     {
@@ -11498,7 +11498,7 @@
           "text": "Other important security advice"
         }
       ],
-      "bytes": 99916,
+      "bytes": 107503,
       "warnings": 0
     },
     {
@@ -11607,7 +11607,7 @@
           "text": "Other implementations"
         }
       ],
-      "bytes": 99803,
+      "bytes": 107392,
       "warnings": 0
     },
     {
@@ -11711,7 +11711,7 @@
           "text": "OpenJ9"
         }
       ],
-      "bytes": 103233,
+      "bytes": 110822,
       "warnings": 0
     },
     {
@@ -11800,7 +11800,7 @@
           "text": "Standards and mod support"
         }
       ],
-      "bytes": 99188,
+      "bytes": 106775,
       "warnings": 0
     },
     {
@@ -11854,7 +11854,7 @@
           "text": "Reference"
         }
       ],
-      "bytes": 91710,
+      "bytes": 99297,
       "warnings": 0
     },
     {
@@ -11902,7 +11902,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 91761,
+      "bytes": 99264,
       "warnings": 0
     },
     {
@@ -11971,7 +11971,7 @@
           "text": "What commands does Folia disable?"
         }
       ],
-      "bytes": 95345,
+      "bytes": 102932,
       "warnings": 0
     },
     {
@@ -12019,7 +12019,7 @@
         "fencePairs": 0
       },
       "headings": [],
-      "bytes": 89840,
+      "bytes": 97343,
       "warnings": 0
     },
     {
@@ -12153,7 +12153,7 @@
           "text": "Server shutdown process"
         }
       ],
-      "bytes": 112823,
+      "bytes": 120412,
       "warnings": 0
     },
     {
@@ -12332,7 +12332,7 @@
           "text": "Region tick end (markNotTicking)"
         }
       ],
-      "bytes": 113160,
+      "bytes": 120749,
       "warnings": 0
     }
   ],
@@ -12551,6 +12551,6 @@
     }
   ],
   "timing_ms": {
-    "total": 5754
+    "total": 8687
   }
 }
