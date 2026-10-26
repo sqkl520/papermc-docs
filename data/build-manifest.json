@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T14:23:34.620Z",
+  "generated_at": "2026-10-26T14:27:19.937Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -524,7 +524,7 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 83288
+        "bytes": 84892
       },
       "js": {
         "output": "assets/site.js",
@@ -12550,6 +12550,6 @@
   "mustFixCount": 0,
   "mustFix": [],
   "timing_ms": {
-    "total": 6637
+    "total": 9012
   }
 }
