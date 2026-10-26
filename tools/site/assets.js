@@ -357,7 +357,9 @@ a.chip{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
    其中 cli-arguments 的 31 个 h5 是**唯一小节层级**（h2-h4 全为 0），
    读者扫视时它们比正文更不像标题。这里拆开 h5 与 h6：h5 提到 17px 并恢复主色。 */
 .article h5{font-size:1.0625rem;color:var(--fg)}
-.article h6{font-size:.95rem;color:var(--fg-muted)}
+/* 批 3（3a）：.article h6 删除 —— 全站 177 页 **0 个 h6 标签**（Markdown 侧从未产出 6 级标题）。
+   注意保留上面那条 .article h2,h3,h4,h5,h6 的组规则：
+   它同时命中 h2–h5（那是活的），删掉会连带改变活标题的外边距。 */
 .heading-anchor{opacity:0;margin-left:.4rem;color:var(--fg-muted);text-decoration:none;font-weight:400}
 .article h2:hover .heading-anchor,.article h3:hover .heading-anchor,.article h4:hover .heading-anchor{opacity:1}
 .article p{margin:.75em 0}
@@ -486,20 +488,19 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .hero{padding:1.4rem 0 .2rem}
 .hero h1{font-size:2rem;margin:.2rem 0 .4rem}
 .hero p{color:var(--fg-muted);max-width:76ch;margin:.2rem 0}
-.task-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:.7rem;margin:1rem 0 1.2rem}
-.task-card{display:block;border:1px solid var(--border);border-radius:var(--radius);padding:.8rem .95rem;background:var(--bg-soft);color:var(--fg)}
-.task-card:hover{border-color:var(--accent);text-decoration:none}
-.task-card .kicker{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-muted)}
-.task-card .t{display:block;font-weight:700;margin:.15rem 0 .25rem;font-size:1rem}
-.task-card .d{display:block;color:var(--fg-muted);font-size:.82rem;line-height:1.45}
-.section-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:.8rem;margin:1rem 0 1.4rem}
+/* 批 3（3a 死规则普查）：这里原有 4 组从未渲染的卡片族 CSS ——
+   .task-cards / .task-card(.kicker/.t/.d) / .section-cards / .cards+.card(h3/p/.meta/a.card-link)。
+   实测证据（tools/b3f-dead.js：177 个已构建页 × 4 视口 querySelectorAll 累计 0 命中；
+   tools/b3f-verify-dead.js：layout.js / build-site.js / SITE_JS 三处源码 0 处产出）。
+   这几个组件在批 2b 删掉首页 tree-fold 后已彻底无家可归，故整族删除，不保留空壳。 */
 .cat-anchorbar{display:flex;flex-wrap:wrap;gap:.35rem;margin:.6rem 0 1.4rem;padding:.6rem .7rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-soft)}
 .cat-anchorbar a{font-size:.8rem;padding:.12rem .5rem;border:1px solid var(--border);border-radius:999px;background:var(--bg)}
-.pager-hint{color:var(--fg-muted);font-size:.8rem}
-.stats{display:flex;flex-wrap:wrap;gap:.6rem;margin:1rem 0 1.6rem}
-.stat{flex:1 1 130px;border:1px solid var(--border);border-radius:var(--radius);padding:.6rem .8rem;background:var(--bg-soft)}
-.stat b{display:block;font-size:1.35rem;line-height:1.2;font-variant-numeric:tabular-nums}
-.stat span{font-size:.78rem;color:var(--fg-muted)}
+/* 批 3（3a）：.pager-hint 删除 —— 177 页 × 4 视口 0 命中，三处源码 0 处产出。 */
+/* 批 3（3a）：.stats / .stat / .stat b / .stat span 删除 ——
+   渲染侧唯一产出者是 layout.js 的 statsHtml()，而该函数**只有定义与 module.exports 导出、
+   全仓 0 个调用点**（tools/b3f-verify-dead.js 实测），故这两个选择器自始未渲染过一次。
+   注意 .stat b 的 1.35rem=21.6px 曾被误当作"统计数字过大"的证据（R3-1 已删 9 张统计卡），
+   现在连规则一起清掉，避免将来有人照它复刻。 */
 .banner{border-left:4px solid var(--warning);background:var(--bg-soft);border:1px solid var(--border);border-left-width:4px;
   border-radius:10px;padding:.7rem .9rem;margin:1rem 0;font-size:.9rem}
 .banner b{color:var(--fg)}
@@ -512,16 +513,12 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .cat-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(260px,100%),1fr));gap:.4rem;list-style:none;margin:0;padding:0}
 .cat-links a{display:flex;gap:.45rem;align-items:baseline;padding:.4rem .6rem;border:1px solid var(--border);border-radius:9px;background:var(--bg-soft);color:var(--fg)}
 .cat-links a:hover{border-color:var(--accent);text-decoration:none}
-.cat-links .ord{font-size:.75em;color:var(--fg-muted);min-width:1.5em;font-variant-numeric:tabular-nums}
+/* 批 3（3a）：.cat-links .ord 删除 —— 0 命中，且 pageCard() 只产出 .ttl/.pth/.sum，从不产出 .ord。 */
 .cat-links .ttl{font-weight:600;font-size:.92rem}
 .cat-links .sum{display:block;color:var(--fg-muted);font-size:.78rem;font-weight:400;line-height:1.4;
   margin-top:.15rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(300px,100%),1fr));gap:.8rem;margin:1.2rem 0}
-.card{border:1px solid var(--border);border-radius:var(--radius);padding:.85rem 1rem;background:var(--bg-soft)}
-.card h3{margin:.1rem 0 .35rem;font-size:1.05rem}
-.card p{margin:.2rem 0 .5rem;color:var(--fg-muted);font-size:.85rem}
-.card .meta{font-size:.75rem;color:var(--fg-muted);display:flex;gap:.6rem;flex-wrap:wrap}
-.card a.card-link{font-weight:600}
+/* 批 3（3a）：.cards / .card(h3/p/.meta/a.card-link) 整族删除 —— 177 页 × 4 视口 0 命中，
+   layout.js / build-site.js / SITE_JS 三处源码均 0 处产出。 */
 .tax-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr));gap:.5rem}
 .tax-list li{border:1px solid var(--border);border-radius:10px;padding:.5rem .7rem;background:var(--bg-soft)}
 .tax-list .sum{color:var(--fg-muted);font-size:.8rem}
@@ -628,7 +625,11 @@ table.allpages td.lnk{margin-top:.1rem}
   table.snapshots tr{padding:.42rem .55rem;margin:0 0 .4rem}
 }
 
-.crumbs .crumb-zh{color:var(--fg-muted);opacity:.75;font-size:.92em;margin-left:.15em}
+/* 批 3（3a）：.crumbs .crumb-zh 删除 —— 0 命中。
+   为什么它是死的：crumbsHtml()（layout.js:331-339）只在 item.zh 为真时产出 .crumb-zh，
+   而全仓 4 个 crumbsHtml() 调用点（分区页 / all-pages / 分类页 / snapshots）传入的 items
+   **都没有 zh 字段**，所以这个 span 从未被渲染。这条同时是 §2.3 的 em #18，
+   按规划「既 0 匹配、又用 em → 直接删规则，不要改成 rem」。 */
 .cat-links .pth{font-size:.7rem}
 
 /* search dialog */
