@@ -165,7 +165,35 @@ function sideNodesHtml(nodes, prefix, sec, ctx) {
 }
 
 function sideGroupHtml(g, prefix, sec, ctx) {
-  const open = ctx.openGroupKeys.has(g.key) ? ' open' : '';
+  /* ══════════ 批 5a（5a）：折叠规则 open ⇔ (depth ≠ 4) ∨ 含当前页 ══════════
+   *
+   * 为什么不是字面的 `depth ≠ 3`（上游口径）：
+   *   上游侧栏的 `ulDepth` 到 3 是最深组层，所以"第 3 层关"= "最深一层关"。
+   *   我们的树是 **5 层**（d1×6 / d2×14 / d3×8 / d4×3），最深**组**层是 **4**
+   *   （`Basics` / `Arguments` / `Miscellaneous`，三个全在 Paper 的 `Command API` 里）。
+   *   → 对齐的是**思想**（最深一层默认关、其余开），不是字面数字。
+   *   若照抄 depth≠3：Paper 的 7 个 d3 组会全关（用户要多点 7 次），
+   *   而 3 个 d4 组会「open 但父 d3 关着」→ 开了也看不见，逻辑上无意义。
+   *
+   * 另一半条件 `∨ 含当前页` 是**不可省的**（红队 A 的翻车 #1）：
+   *   上游 2,360 样本的真判定式是 `(ulDepth≠3) ∨ 含当前页`，误判 0；
+   *   只用 depth 而丢掉"含当前页"会误判 44/2360，且**恰好折掉当前页所在组**
+   *   —— 用户看不到自己所在的章节，是最刺眼的回归。
+   *   我们的 `pdc` / `dialogs` / `velocity/tuning` / `world-configuration`
+   *   当前页都在 depth-3 组内，丢掉这半个条件就会翻车。
+   *
+   * 实测收益（`tools/b5x-fold.js` 用 data/source-nav.json 反事实模拟）：
+   *   Paper 树可见行 min/med/max：现状 4/23/34 → 本规则 **87/87/95**
+   *   展开组数（无当前页时）：0 → **18**（总 20 组）
+   *   Velocity：7/9/11 → 32/32/32（全展开，因它最深组层只有 2）
+   *
+   * 状态来源：`build-site.js:752` 的 `p.navGroupKeys = meta.groupKeys`（当前页祖先链），
+   * `nav.js:353` 的 `groupKeys: ancestors.map((g) => g.key)`。
+   * `g.depth` 来自 `nav.js:214` 的 `depth: p.length`（组嵌套深度，从 1 起）。
+   */
+  const isAncestorOfCurrentPage = ctx.openGroupKeys.has(g.key);
+  const byDepth = g.depth !== 4;                       // 最深**组**层（=4）默认关，其余开
+  const open = (byDepth || isAncestorOfCurrentPage) ? ' open' : '';
   const homeMeta = g.homeKey ? sec.navForRel.get(g.home) : null;
   const homeHref = g.homeKey ? pageHref(prefix, sec.id, g.home) : '';
   const homeHay = sideSearchHay(g.homePage, g.label, (homeMeta && homeMeta.groupPath) || g.path.join(' > '), sec.title);

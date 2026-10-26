@@ -786,18 +786,11 @@ table.allpages td.lnk{margin-top:.1rem}
 .host-card:hover{border-color:var(--accent);background:var(--bg-soft)}
 .host-card .hc-title{font-size:var(--fs-md);font-weight:700}
 .host-card .hc-desc{font-size:var(--fs-sm);color:var(--fg-muted);line-height:1.5}
-/* 完整目录：默认折叠（原来 5,753px = 首页 78% 全铺开，且 97.9% 与侧栏重复） */
-.tree-fold{margin:1rem 0 1.4rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-soft)}
-.tree-fold>.tree-fold-title{display:flex;align-items:center;gap:.5rem;min-height:48px;padding:0 .9rem;
-  cursor:pointer;font-weight:700;font-size:var(--fs-md);list-style:none;color:var(--fg)}
-.tree-fold>.tree-fold-title::-webkit-details-marker{display:none}
-.tree-fold>.tree-fold-title::before{content:"";width:0;height:0;flex:0 0 auto;
-  border-left:5px solid currentColor;border-top:4px solid transparent;border-bottom:4px solid transparent;
-  transition:transform .15s ease;color:var(--fg-muted)}
-.tree-fold[open]>.tree-fold-title::before{transform:rotate(90deg)}
-.tree-fold>.tree-fold-title .side-count{margin-left:auto;font-size:var(--fs-sm);color:var(--fg-muted);font-variant-numeric:tabular-nums}
-.tree-fold:not([open])>*:not(summary){display:none}
-.tree-fold[open]>section.src-tree{margin:.4rem .7rem 1rem}
+/* 批 5a 清理：这里原有 10 条 .tree-fold 规则（批 1/R3-1 为首页「完整目录」折叠块写的）。
+   批 2b 已把首页的 tree-fold 模板整体删除（layout.js 的 overviewPage 改为 3 行 .sec-index），
+   实测扫描全部 165 个产出 HTML，tree-fold 命中 **0 次** → 这 10 条已是死规则，随批 5a 一并删除。
+   ⚠️ 注意 .src-tree **不是**死规则：sections/<id>.html 仍由 treeSectionHtml() 产出它，保留。
+   删除依据：tools/b5x-* 的静态扫描 + b3f-verify-dead.js 的「生成器产出 vs CSS 规则」对账。 */
 /* 页脚里的「关于本站（维护者信息）」——原来占首页尾部 150px */
 .about-site{margin:0 0 .5rem}
 .about-site>summary{cursor:pointer;font-size:var(--fs-sm);color:var(--fg-muted);min-height:24px;display:flex;align-items:center}
