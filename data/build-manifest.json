@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T12:50:45.183Z",
+  "generated_at": "2026-10-26T14:23:34.620Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -477,8 +477,8 @@
   "search": {
     "entries": 141,
     "bodyCapBytes": 524288,
-    "jsonBytes": 823963,
-    "jsBytes": 824071,
+    "jsonBytes": 834784,
+    "jsBytes": 834892,
     "attempts": [
       {
         "cap": 524288,
@@ -488,6 +488,8 @@
     "underCap": true,
     "truncatedPages": 0,
     "aliases": 32,
+    "precomputedPhrases": 690,
+    "pagesWithPhrases": 141,
     "jsonPath": "search-index.json",
     "jsPath": "assets/search-index.js"
   },
@@ -522,7 +524,7 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 76567
+        "bytes": 83288
       },
       "js": {
         "output": "assets/site.js",
@@ -534,12 +536,12 @@
       },
       "searchJs": {
         "output": "assets/search-index.js",
-        "bytes": 824071
+        "bytes": 834892
       }
     },
     "searchIndexJson": {
       "output": "search-index.json",
-      "bytes": 823963
+      "bytes": 834784
     },
     "pageCount": 141,
     "categoryCount": 17,
@@ -12336,11 +12338,10 @@
       "warnings": 0
     }
   ],
-  "warningCount": 50,
+  "warningCount": 49,
   "warningsByKind": {
     "fragment-recovered": 47,
-    "fragment-unresolved": 2,
-    "selftest-ranker-load": 1
+    "fragment-unresolved": 2
   },
   "warnings": [
     {
@@ -12544,13 +12545,11 @@
       "from": "paper:dev/internals/index",
       "target": "paper:dev/userdev/index",
       "frag": "1205-and-beyond"
-    },
-    {
-      "kind": "selftest-ranker-load",
-      "message": "无法载入内置排序函数用于自测：window is not defined"
     }
   ],
+  "mustFixCount": 0,
+  "mustFix": [],
   "timing_ms": {
-    "total": 7103
+    "total": 6637
   }
 }

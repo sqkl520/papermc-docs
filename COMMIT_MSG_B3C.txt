@@ -1,0 +1,61 @@
+feat(ui): 批 3c —— 处置 21 处 em（碎片字号 15 级全消，单页 24→20 级）
+
+批 3 五步中的第三步：按 ups-plan §2.3 逐条处置 21 处 `em`。
+`em` 的语义是「相对父级」，同一规则在不同父字号下派生出不同 px —— 这是「碎片级」的根源。
+
+## 处置结果（21 = 8 改 rem + 7 保留 + 3 删 font-size + 1 删死声明 + 2 已由 3a 删）
+
+### 改 rem 令牌（8 条）—— 消除跨父级派生
+| 选择器 | 原值 | 改为 | 原来会派生成 |
+|---|---|---|---|
+| `kbd` | `.75em` | `var(--fs-xs)` 12.5 | 12（正文内）/ 10.8（表格内） |
+| `.toc-side .toc-count` | `.85em` | `var(--fs-2xs)` 11.5 | 随 TOC 父字号变 |
+| **`.side-count`** | `.72em` | `var(--fs-2xs)` 11.5 | **11.52/9.68/8.99/9.216 四个值** |
+| `.article code` | `.86em` | `var(--fs-sm)` 13.5 | h2 里 24.8（比正文还大） |
+| `.page-footer code` | `.95em` | `var(--fs-xs)` 12.5 | 11.86 |
+| `.cfg-key code` | `.94em` | `var(--fs-sm)` 13.5 | 15.04（**子比父 12.8 大 17%**） |
+| `.cfg-key .cfg-n` | `.72em` | `var(--fs-2xs)` 11.5 | 随 cfg-key 变 |
+| `.info-footer code` | `.85em` | `var(--fs-xs)` 12.5 | 13.6 |
+
+### 保留 em（7 条）—— 装饰性缩放，语义正确
+`a.external::after`（外链箭头必须随正文缩放，否则标题里的箭头会大得离谱）、
+`.topbar #theme-toggle>.theme-icon`、
+以及 5 个折叠三角/图标：`.side-toc>summary::before`、`summary.side-section-title::before`、
+`.side-cat>summary::before`、`.side-group-title::before`、`.alert-title::before`。
+
+### 删 font-size（3 条）—— TOC 层级靠 padding，不靠字号（上游做法）
+`.side-toc .lvl-5`、`.toc-side .lvl-4`、`.toc-side .lvl-5`。
+其中 `.93em`(lvl-5) 比 `.95em`(lvl-4) 还小 → **层级倒置**（越深字越小却仍加粗）。
+
+### 删死声明（1 条）
+`.toc-side .toc-title::before{font-size:.75em}` —— 被同选择器的下一条规则完全覆盖
+（`content:""` + `font-size:0` + border 画三角，a11y 修复），从未生效。
+
+### 3a 已删（2 条）
+`.cat-links .ord`、`.crumbs .crumb-zh` —— 既 0 匹配又用 em，按规划直接删规则不改 rem。
+
+## 实测（3b → 3c）
+| 指标 | 3b | 3c | 变化 |
+|---|---:|---:|---|
+| 单页 1440 字号（严格/宽松） | 24 / 25 | **20 / 21** | **−4 / −4** |
+| 全站字号并集级数 | 48 | **34** | **−14** |
+| `em` 声明所在规则 | 19 | **7** | −12（=保留的 7 条装饰类） |
+| `font-size` 声明数 | 137 | **133** | −4（删 3 个 font-size + 1 死声明） |
+| 去重原始值 | 44 | **42** | −2 |
+| 截断 `.grp-zh`/`.grp-name` | 0 | **0** | 不变 |
+| 横向溢出 4 视口 × 10 页 | 40/40 零 | **40/40 零** | 不变 |
+
+**15 个碎片级全部消失**：`9.216 / 9.792 / 9.84 / 10.2 / 10.608 / 11.61 / 11.696 /
+11.856 / 12.032 / 12.2016 / 12.384 / 12.464 / 14.0352 / 14.62 / 15.9616`。
+新增 1 级 `11.5`（`--fs-2xs`，由 `.side-count` 与 `.toc-count` 归一产生）。
+
+这直接印证了 §2.3 的收益判断：「`collisions` 里 5 条碎片级中 3 条直接来自
+`.side-count` 的三重派生 / `.article code` / `.cfg-key code`」—— 改完碎片归零。
+
+## 视觉变化（本步首次有可见变化，逐条已核）
+- `kbd` 9.84 → **12.5**（可读性净改善，上游 12px）
+- `.side-count` 8.99~11.52 → **11.5** 统一；侧栏计数徽标在批 1 已 `display:none`，
+  仅在 `<main>` 内的 `.tree-fold-title`/`.cat-anchorbar` 计数上可见
+- `.article code` 13.76 → **13.5**（行内 code 微缩 0.26px）
+- `.cfg-key code` 15.04 → **13.5**（修「子比父大」）
+- TOC 深层条目不再随层级缩小（层级倒置修复）

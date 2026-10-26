@@ -1,0 +1,53 @@
+feat(ui): 批 3a —— 删 13 条零渲染死规则（font-size 声明 145→137）
+
+批 3 五步中的第一步：纯减法，视觉零变化（实测前后单页 1440 字号级数不变）。
+
+## 改了什么（tools/site/assets.js，SITE_CSS）
+整族删除 5 个从未渲染的组件 + 3 条孤立死规则：
+
+| 族 / 规则 | 证据 |
+|---|---|
+| `.task-cards` / `.task-card`(+`.kicker`/`.t`/`.d`) | 177 页 × 4 视口 0 命中；layout/build/SITE_JS 三处源码 0 产出 |
+| `.section-cards` | 同上 |
+| `.cards` / `.card`(+`h3`/`p`/`.meta`/`a.card-link`) | 同上 |
+| `.stats` / `.stat` / `.stat b` / `.stat span` | 同上（见下） |
+| `.pager-hint` | 同上 |
+| `.article h6` | 全站 0 个 h6 标签 |
+| `.cat-links .ord` | `pageCard()` 只产出 .ttl/.pth/.sum，从不产出 .ord |
+| `.crumbs .crumb-zh` | `crumbsHtml()` 4 个调用点传的 items 都没有 zh 字段 |
+
+## 判定口径（两条证据链一致才删）
+1. **浏览器链** `tools/b3f-dead.js`：177 个已构建页 × 4 视口（320/390/800/1440）
+   跑 `querySelectorAll`，累计命中 = 0。
+2. **静态链** `tools/b3f-static.js` / `b3f-verify-dead.js`：已构建 HTML 原文 +
+   `layout.js` / `build-site.js` / `SITE_JS` 三处源码，全部 0 处产出。
+
+⚠️ 「0 匹配」与「匹配但不可见」是两件事，本批只删**前者**。伪元素另需剥壳判定
+（首轮不剥壳时 9 条活的 `::before` 规则被误判为死，已修正）。
+
+## 三个**没有**删的（判定为活，与规划清单不一致，以实测为准）
+- `.stat b` / `.stat span`：`statsHtml()` 在 layout.js:482 定义、:896 导出，
+  **全仓 0 个调用点** —— 这是死函数。但两条规则所在族的容器 `.stats`/`.stat`
+  在源码里仍有 1 处字面量，且 R3-1 的历史注释引用它们，故按族保留外壳、只删有
+  font-size 的两条。**这一条与规划「删 11 条」不同，我是按实测删的。**
+- `.cfg-raw`：build-site.js:1407/1409 有条件产出。实测 Markdown 源里有 **1506 个
+  无 key 列表项**（tools/b3f-keyless.js），该分支可达 → 保留。
+- `.sr-*`（4 条）：由 SITE_JS 运行期 innerHTML 注入，静态 DOM 恒 0 命中但不是死规则 → 保留。
+
+## 实测数据
+| 指标 | 改前 | 改后 |
+|---|---:|---:|
+| `font-size` 声明数 | 145 | **137** |
+| 去重原始值 | 45 | **44** |
+| em 声明所在规则 | 21 | **19** |
+| 单页 1440 字号（严格/宽松） | 24 / 25 | **24 / 25（不变）** |
+| 截断 `.grp-name`+`.grp-zh` | 0 | **0** |
+| 横向溢出 320/360/390/414 × 10 页 | 40/40 零 | **40/40 零** |
+
+单页口径：`paper/dev/dialogs` @1440，文本承载元素、排除伪元素与 svg。
+严格口径额外排除 `opacity:0`（批 1 起 `a.side-home` 是 `opacity:0`），
+宽松口径 = 主 Agent 口径；两者差 1 级（11.2px 全部来自 `a.side-home`）。
+
+## 新增只读探针（tools/b3f-*.js，不参与构建）
+`b3f-cssmap` 规则台账、`b3f-dead` 死规则普查、`b3f-static`/`b3f-verify-dead` 静态双证、
+`b3f-keyless` 可达性、`b3f-measure` 验收口径、`b3f-diag` 口径对账、`b3f-lint` 反引号守卫。

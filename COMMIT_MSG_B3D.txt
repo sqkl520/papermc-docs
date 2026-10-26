@@ -1,0 +1,66 @@
+feat(ui): 批 3d —— 108 条声明替换为 var(--fs-*)（单页 24→10 级，h1 28.8→34）
+
+批 3 五步中的第四步，**本批视觉变化最大的一步**。
+
+## 改了什么
+`tools/site/assets.js` SITE_CSS 里 **108 条 font-size 声明**替换为 14 级令牌之一。
+`font-size` 声明总数 133 → **133（不变）**，其中 **116 条已是 `var(--fs-*)`**。
+
+替换由 `tools/b3f-apply3d.js` 按「规则（选择器）」定位 + body 区间内替换，
+不用逐条手工 edit —— 原因：`.78rem` / `.95rem` 这类字面值在文件里重复十几次，
+手工改极易改错行。脚本自带三重自检（语法 / 声明计数不变 / 偏移逐条校验）。
+
+## 三个**刻意不动**的（硬约束，已逐条复核）
+| 类别 | 具体 | 依据 |
+|---|---|---|
+| **输入框 16px** | `.side-filter` / `.hero-search #hero-search` / `.filter-bar input` / `.search-box input` | `verify-mobile.js:961` 的 `inputFonts` 逐项列出 `cls:fontSize`，动则 C1 fail |
+| **顶栏内部** | `.topbar .brand-name`(1rem=16) / `.tbtn`(13.12) / `.sidebar-toggle`(1.05rem=16.8) / `.theme-icon` | R9：`.brand` 已 139px 宽，改大会让 390 档顶栏溢出；C2 断言顶栏 ≤56px |
+| **保留的 7 条 em** | 折叠三角 ×5 + 外链箭头 + 主题图标 | 装饰性缩放必须随父级（3c 已判定） |
+
+另有 `font-size:0`（border 三角）×1、`inherit` ×2 不参与令牌化。
+
+## ⚠️ 一个必须记录的返工：CJK 可读性
+**首轮映射把 `.grp-zh` 归到了 `--fs-2xs`(11.5)，违反 §2.4。**
+§2.4 原文：「`--fs-2xs`(11.5) 在中文语境下**只允许承载数字/拉丁**；本方案中文下限 12.5px；
+`.grp-zh`（纯中文）**必须走 `--fs-xs`(12.5)**，这会与 `upz-ladder.json` 的 bucket 归属冲突
+—— **以本文为准**。」
+
+我写了 `tools/b3f-cjk.js` 做**实证审计**（14 页样本、所有 `<details>` 展开、逐选择器统计
+渲染文本是否含 CJK），查出 **15 个选择器**在用 11.5px 承载中文：
+`.chip` / `.code-copy` / `.page-meta` / `.pager .dir` / `.pth` / `.grp-zh` / `.side-home` /
+`.side-section-title` / `.tag` / `.tg-count` / `.tg-home` / `.tg-zh` / `.toc-side .toc-title` /
+`.code-title::after`（「↔ 可横向滚动」）。
+→ 全部升到 `--fs-xs`(12.5)，`--fs-2xs` 只保留在 **13 个纯拉丁/数字**选择器上
+（`.code-lang` / `.sr-path` / `.sr-chip` / `.src-rel` / `td.num` / `.cfg-n` / `.pager .pth` 等）。
+复测违规数 = **0**。
+
+## 实测（3c → 3d）
+| 指标 | 3c | 3d | 目标 |
+|---|---:|---:|---|
+| 单页 1440 字号（严格/宽松，最大值） | 20 / 21 | **10 / 10** | ≤14 ✓ |
+| h1 | 28.8 | **34** | 34（移动）✓ |
+| h2 / h3 / h4 | 22.4 / 18.56 / 16.32 | **28 / 24 / 19** | 28/24/19（移动）✓ |
+| h1/body 对比度比 | 1.80× | **2.13×** | 2.13× ✓ |
+| `.grp-zh` 字号 | 10.88 | **12.5** | §2.4 中文下限 ✓ |
+| 截断 `.grp-name` | 0 | **0** | 0 ✓ |
+| 横向溢出 4 视口×10 页 | 40/40 零 | **40/40 零** | 0 ✓ |
+| 390 h1 行数 | 1 | **1** | 1 ✓ |
+
+**逐页字号级数**：index 10 / dialogs 10 / world-configuration 7 / pdc 9 / sections-paper 9 /
+all-pages 6 / velocity-tuning 10 / command-api 8。全部 ≤14，含宽松口径。
+
+## 本步「必须专门复测」的两项（主 Agent 点名）
+1. **`.grp-zh` 截断**（红队 B 警告 5→9）→ `tools/b3f-grpzh.js` 做**反事实**测试
+   （强制 `display:inline` 后数截断）：**0 / 31**，12.5px 也不会截断。
+   注意：批 1 已把 `.sidebar .grp-zh` 设为 `display:none`，所以「可见截断」恒为 0 ——
+   那是结构性消除，我用反事实把两者分开测，避免用假绿交差。
+2. **顶栏未被令牌化**：`.brand-name` 仍 16px、顶栏可见 `.tbtn` 仍 13.12px、
+   `.sidebar-toggle` 仍 16.8px（三个值都与改前逐字节相同）。
+
+## 门禁（本步全量）
+`check-site` **PASS** · `verify-site` **15/15** · `privacy` **PASS** ·
+`verify-artifacts` 产物=源逐字节一致 · `verify-mobile` 见下条说明。
+
+> `verify-mobile` 首跑出现 `fingerprint 不稳定` 与 3 项 FAIL，原因是**我在它运行期间改动了
+> 3e 的 CSS**（它自己报出 `tools/site/assets.js: 5ebc94008ab8 → 0b3984289804`）。
+> 这一跑作废，3e 提交后再跑一次干净的。
