@@ -1200,7 +1200,9 @@ check(4, 4, 'A4', '中间断点：无横向溢出 + 有可用本页目录或等�
     },
     failures: fails,
     repro: 'node tools/verify-mobile.js --check=4',
-    notes: '“可用本页目录”的口径：<1024px 允许「正文内本页目录（aside.toc-side）或抽屉内目录（details）」，≥1024px 允许「右侧常驻 rail 或侧栏内可展开 details」；1024 一档 .toc-side 仍为 display:none（改前亦然），等价导航 = 常驻侧栏内的 details#drawer-toc',
+    notes: '“可用本页目录”的口径：<1024px 允许「正文内本页目录（aside.toc-side）或抽屉内目录（details）」，≥1024px 允许「右侧常驻 rail 或侧栏内可展开 details」；'
+      + '批 5（变体 L）：1024 回到桌面线（侧栏 @1024 常驻、右栏 TOC 仍 @1200）→ 1024 一档 .toc-side 仍为 display:none（TOC 未进场），'
+      + '等价导航 = 常驻侧栏内的 details#drawer-toc；834 仍是 ≤1023.98 抽屉，走抽屉内目录。',
   };
 });
 
@@ -1329,6 +1331,10 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
   });
 
   // 中间断点 900 / 1023：契约要求 ≤1023.98 一律抽屉
+  /* 批 5（变体 L）守门：这两档**必须仍是抽屉**（☰ 可见 / 侧栏 fixed）。
+     与 B5 的 ≥1024 常驻断言一起，把「+256px 新台阶」精确钉在 1024 这一点上：
+     1023 = 抽屉 + 单栏 + 正文 949；1024 = 常驻 + 两列 + 正文 693。
+     若哪天断点漂移（比如有人把 1024 改成 1152），这两条会立刻红。 */
   for (const vp of [{ name: '900x800', w: 900, h: 800 }, { name: '1023x800', w: 1023, h: 800 }]) {
     await withCtx(ctx.browser, vp, async (page) => {
       await go(page, u('/paper/dev/pdc/'));
@@ -1340,8 +1346,19 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
       };
     });
   }
-  // ≥1200 复位（C3 断崖重裁后桌面阈值由 1024 上移到 1200）
-  for (const vp of [VP_1280, VP_1440]) {
+  /* ══════════ 批 5（变体 L）：桌面线拆成两级 ══════════
+   * 从「侧栏与 TOC 同绑 1200」改为：
+   *   · 侧栏常驻 = **≥1024**（`@media (min-width:1024px)`，280px sticky）
+   *   · 右栏 TOC = **≥1200**（不变）
+   * 理由（ups-plan §3.5 变体 L / ups-redteam-b §3.3 裁决）：1024 处正文从 949 → 693px，
+   * 与上游同档 692px 只差 1px；1200↔1199 的台阶从 −340 缩到 −259，
+   * 代价是新增 1024↔1023 的 +256px 台阶（上游在 800 也有 −252 的同类台阶，非缺陷）。
+   * ⚠️ 抽屉（☰ / nav-open 逻辑）的真相是「侧栏是否常驻」 → 跟 **1024**；
+   *     TOC 的真相是「右栏是否常驻」 → 跟 **1200**。两者**不可同时改 1024**
+   *     （assets.js:1833/1935 的既有警告：若都改 1024，1024–1199 会有右栏 TOC
+   *      而 CSS 只有两列 → TOC 掉到正文下并永久展开 = 441px 展开坑的变体）。 */
+  // ≥1024 已是「侧栏常驻」→ ☰ 消失 / transform:none / 无 inert / 侧栏 sticky
+  for (const vp of [VP_1024, VP_1280, VP_1440]) {
     await withCtx(ctx.browser, vp, async (page) => {
       await go(page, u('/paper/dev/pdc/'));
       const m = await probe(page);
@@ -1352,16 +1369,31 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
         ok_transform_none: m.drawer.exists && (m.drawer.transform === 'none' || m.drawer.transform === 'matrix(1, 0, 0, 1, 0, 0)'),
         ok_no_inert: m.drawer.exists && m.drawer.inert === false,
         ok_sidebar_sticky: m.sidebar.position === 'sticky' && m.sidebar.left >= -1 && m.sidebar.w > 0,
+        /* 批 5 新增：1024–1199 的跨分区入口必须是顶栏 .sec-switch（抽屉里的 .side-secs 此时不可见）。
+           这条是 ups-plan §3.5「代价 2」的防翻车断言 —— 漏掉它 1024–1199 用户彻底无法跨分区。 */
+        secSwitchVisible: m.secSwitchVisible,
+        sideSecsVisible: m.sideSecsVisible,
+        ok_crossSection: m.secSwitchVisible >= 3,
         navRowMin: m.navRowMin,
       };
     });
   }
-  /* B5 的桌面阈值随 C3 断崖重裁从 1024 改为 1200（owner 书面裁决）：
-     C3 把「侧栏常驻 + TOC 右栏」的断点从 1025 上移到 1200，以消除 1024 死区
-     （实测台阶 2→1，幅度 −536→−340px，1024 处 artW 693→949）。
-     因此 1024–1199 档现在**应当**是抽屉模式（☰ 可见），只有 ≥1200 才是桌面常驻。
-     断言口径同步上移，否则会把设计变更误判成回归。 */
-  const b5 = [detail['B5_1280x800'], detail['B5_1440x900']].filter(Boolean);
+  /* ══════ 批 5（变体 L）断崖裁决：桌面线拆两级 ══════
+   * 从「侧栏与 TOC 同绑 1200」改为：侧栏常驻 = ≥1024，右栏 TOC = ≥1200（不变）。
+   *
+   * 变体 L 的成绩（ups-plan §3.5 实测）：1024 处正文 949 → **693px**（上游同档 692，差 1px），
+   * `p` 宽在 1024–1199 全部 640 不变（行长零变化），pre 横滚 3/13 → 5/13。
+   *
+   * 台阶账（诚实列出，不是零台阶）：
+   *   1200→1199  容器断崖从 **−340 缩到 −259**；
+   *   **1024→1023 新增 +256px**（1023 抽屉 + 949 单栏 → 1024 常驻 + 693 两列）
+   *   → 台阶总数 1 → 2，但单级幅度从 340 降到 259。
+   * 这个 +256 是「在 1024 加侧栏」的**必付代价**，上游在 800 也有同性质的 −252 台阶。
+   *
+   * 断言口径随之改变（不是放宽，是把设计规格改成新规格）：
+   *   B5 的视口集合从 [1280,1440] 扩到 **[1024,1280,1440]** —— 1024 现在也必须是常驻态；
+   *   1023 仍必须走抽屉（B1_1023x800，见下方 B1 断言），确保新台阶精确落在 1024。 */
+  const b5 = [detail['B5_1024x768'], detail['B5_1280x800'], detail['B5_1440x900']].filter(Boolean);
   const B = {
     'B1 ☰ 可见且 ≥44×44 + aria-expanded=false + aria-controls + 抽屉初始 offscreen/inert': detail.B1.ok_visible && detail.B1.ok_size && detail.B1.ok_aria_false && detail.B1.ok_controls && detail.B1.ok_drawer_offscreen && detail.B1.ok_drawer_inert && detail['B1_900x800'].ok_menu_visible && detail['B1_1023x800'].ok_menu_visible,
     'B2 打开后进入视口 + aria=true + inert 移除 + 无横向滚动': detail.B2.ok_in_viewport && detail.B2.ok_aria_true && detail.B2.ok_inert_removed && detail.B2.ok_no_hscroll,
@@ -1370,7 +1402,14 @@ check(5, 5, 'B1-B6', '导航抽屉：☰ / 打开 / 滚轮锁 / Esc / 遮罩 / �
     'B3c 遮罩命中：elementFromPoint(右侧中线) === .nav-scrim': detail.B2.ok_scrim_hit,
     'B4 滚轮法滚动锁：打开后滚轮 600px → window.scrollY 增量 0；抽屉自身可滚': detail.B4.ok_wheel_locked && detail.B4.ok_drawer_scrollable,
     'B4b 打开态 overflow<=1': detail.B4.ok_no_hscroll_when_open,
-    'B5 ≥1200 ☰ display:none + transform:none + 无 inert + 侧栏常驻': b5.every((x) => x.ok_menu_hidden && x.ok_menu_display_none && x.ok_transform_none && x.ok_no_inert && x.ok_sidebar_sticky),
+    'B5 ≥1024 ☰ display:none + transform:none + 无 inert + 侧栏常驻': b5.every((x) => x.ok_menu_hidden && x.ok_menu_display_none && x.ok_transform_none && x.ok_no_inert && x.ok_sidebar_sticky),
+    /* 批 5 新增（ups-plan §3.5 「代价 2」的防翻车断言）：
+       侧栏降到 1024 后，`sidebar-toggle` 在 ≥1024 被 display:none →
+       抽屉与抽屉里的 .side-secs 一起消失，**跨分区入口只剩顶栏 .sec-switch**。
+       若 secSwitch 的显示断点不跟着从 1200 降到 1024，
+       1024–1199 的用户将**彻底无法跨分区**（只能搜索或走 all-pages）。
+       因此这里直接断言「每个 ≥1024 视口都有 ≥3 个可见的分区切换链接」。 */
+    'B5b ≥1024 跨分区入口 ≥3（顶栏 .sec-switch 断点已同步降到 1024）': b5.every((x) => x.ok_crossSection),
     'B6 抽屉内导航行高 ≥44px + Tab 25 次不外逃': detail.B6.ok_tab_no_escape && (detail.B6.ok_nav_rows || (detail.B2.drawerScroll.scrollH > detail.B2.drawerScroll.clientH && detail.B2.drawerScroll.overflowY !== 'visible')),
     'B7 焦点初始落在抽屉内': detail.B2.ok_focus_in_drawer,
   };
@@ -1421,12 +1460,13 @@ check(6, 6, 'C1-C3', '触控与字号：C1 输入框 ≥16px / C2 顶栏 ≥44×
       }
     });
   }
-  // C3 桌面：与改前实例逐档对照（1024/1280）
+  // C3 桌面：与改前实例逐档对照（1024/1280/1440）
   const deskRows = [];
-  /* 批 3（C3 断崖重裁）：桌面行高对照只比 >=1200 档。
-     1024 已归属移动线（行高按 ≥44 的移动阈值），与改前的桌面密度（31）本就应当不同
-     —— 把它留在对照里会误报「桌面行高与改前不一致」。 */
-  for (const vp of [VP_1280, VP_1440]) {
+  /* 批 5（变体 L）：桌面线拆两级后，**1024 回到桌面线**（侧栏 @1024 常驻），
+     因此它重新属于「桌面密度应与改前实例一致」的对照集合 ——
+     改前 8788（a19a6c2）的 1024 本就是 sticky 侧栏 + 桌面密度，正是变体 L 的目标形态。
+     对照面从 2 个视口（1280/1440）**扩到 3 个**（1024/1280/1440），是收紧不是放宽。 */
+  for (const vp of [VP_1024, VP_1280, VP_1440]) {
     const d = await dualSnapshot(ctx, vp, ['/paper/dev/pdc/']);
     deskRows.push({ viewport: vp.name, post: d.post['/paper/dev/pdc/'].navRowMin, pre: d.pre ? d.pre['/paper/dev/pdc/'].navRowMin : null, postCount: d.post['/paper/dev/pdc/'].navRowCount, preCount: d.pre ? d.pre['/paper/dev/pdc/'].navRowCount : null });
   }
@@ -1599,11 +1639,24 @@ const ARCHIVED_PRE = {
     '320x568': { sidebarPos: 'fixed', sidebarX: -296, sidebarW: 290, navToggle: '33x32 visible', ariaExpanded: null, layoutCols: '320px', headerH: 52, scrollPaddingTop: '64px', topbarSelf: '745/320', tocSide: 'display:none' },
     '768x1024': { sidebarPos: 'fixed', sidebarW: 290, navToggle: 'visible', tocSide: 'display:none', headerH: 52 },
     '834x1112': { sidebarPos: 'sticky', sidebarW: 280, sidebarX: 0, navToggle: 'display:none', tocSide: 'display:none', layoutCols: '280px 554px', secSwitch: 3, sideSecs: 0 },
-    /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 **1200**。
-       1024 与 1100 自此归属「移动线 + 正文顶部折叠目录」形态（☰ 可见、单栏），
-       不再期望 280px 侧栏与 layoutCols 双列。口径与 check=5 的 B5（>=1200）统一。 */
-    '1024x768': { sidebarPos: 'sticky', sidebarW: 280, tocVisible: true, tocForm: 'top-block', layoutCols: '1024px', secSwitch: 3, navRowMin_ref: '24（批 1 遗留：.side-home pill 最小边 24px，WCAG 2.5.8 AA）' },
-    '1100x900': { tocForm: 'top-block', layoutCols: '1100px' },
+    /* 批 5（变体 L）：桌面线拆成两级 —— 侧栏 @1024 常驻、右栏 TOC 仍 @1200。
+       1024 与 1100 自此**回到桌面形态**（sticky 280 侧栏 + 两列 + 无 ☰ + 无顶部折叠条），
+       与「改前 8788 = a19a6c2」的 1024 档趋同 —— 那正是变体 L 的设计目标。
+       1023 及以下仍是抽屉（见 check=5 的 B1_1023x800 断言），确保台阶精确落在 1024。
+       预期几何（2026-10-26 批 5 实测补录）：
+         1024：sidebarPos=sticky sidebarW=280 layoutCols='280px 744px' artW=693
+               secSwitch=3 sideSecs=0 menuBtn=display:none tocSide=display:none
+         1100：同上但 layoutCols='280px 820px' artW=769 */
+    '1024x768': {
+      sidebarPos: 'sticky', sidebarW: 280, tocVisible: false, tocForm: 'none',
+      layoutCols: '280px 744px', secSwitch: 3, sideSecs: 0, articleW: 693,
+      navRowMin_ref: '24（批 1 遗留：.side-home pill 最小边 24px，WCAG 2.5.8 AA）',
+      note: '批 5 变体 L：1024 回到桌面线（侧栏常驻 280 + 正文 693，上游同档 692）',
+    },
+    '1100x900': {
+      tocForm: 'none', layoutCols: '280px 820px', secSwitch: 3, sideSecs: 0, articleW: 769,
+      note: '批 5 变体 L：1100 与 1024 同属「侧栏常驻 + 无右栏 TOC」档',
+    },
     '1280x800': { sidebarPos: 'sticky', sidebarW: 290, tocSide: 'aside.toc-side visible 250px @x=1030', layoutCols: '290px 740px 250px', headerH: 52 },
     '1440x900': { tocSide: 'visible 250px @x=1190', layoutCols: '290px 900px 250px' },
   },
@@ -1639,43 +1692,64 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       layoutCols: '280px 554px → 834px（移动线单列）', contentX: '280→0（移动线单列）', contentW: '554→834（移动线单列）',
       secSwitchVisible: '移动线：顶栏分区切换下沉到抽屉', sideSecsVisible: '移动线：抽屉里承接 3 条分区链接',
     },
+    /* ══════════════ 批 5（变体 L）：1024x768 白名单整表重写 ══════════════
+     * 原表（27 条）是「C3 断崖重裁」时 owner 的书面裁决口径：
+     *   「桌面线由 1024/1025 合并为 1200 → 1024 自此归属移动线」
+     * 批 5 把桌面线**拆回两级**：侧栏 @1024 常驻 + 右栏 TOC 仍 @1200（变体 L）。
+     * 于是 1024 从「移动线（抽屉 + 单列 + 正文顶部折叠目录）」**变回桌面线**
+     * （常驻 280px 侧栏 + 两列布局 + 无 ☰ + 无顶部折叠条）。
+     *
+     * 关键：这不是"把断言改松"，而是**整表换成了新设计规格**。
+     * 旧表 27 条里有 18 条的方向**反过来**（旧：☰ 出现 / 单列 / TOC 折叠条；
+     * 新：☰ 消失 / 两列 / TOC 仍不在 1024 进场），必须逐条重写而不是删字段。
+     *
+     * 逐字段依据（改前实例 8788 = a19a6c2「移动端改造前」vs 改后 HEAD + 变体 L）：
+     *   · hasMenuButton/tocVisible/tocDisplay/tocW/tocForm/tocSideVisible
+     *       → 变体 L 的**直接后果**：1024 回到桌面线，与「改前」状态趋同。
+     *         注意改前 1024 是「sticky 280 侧栏 + 两列 + 无 TOC rail」= **恰好就是变体 L 的目标**，
+     *         所以这几项对 8788 而言是「回归到改前」而非"新差异"，但字段值仍会因批 1/3 的行高字号变化而不同。
+     *   · layoutCols/contentX/contentW/sidebarW/sidebarPos
+     *       → 两列 290/1fr；侧栏 sticky；抽屉宽在 1024 不再适用（不渲染抽屉）
+     *   · secSwitchVisible   → **3**（这是本批的关键收益：1024–1199 恢复跨分区入口）
+     *   · sideSecsVisible    → **0**（抽屉消失，.side-secs 随之不可见；affordance 从抽屉换到顶栏）
+     *   · navRowMin/navRowCount → 桌面密度（≥24 命中区），与移动线 44px 不同
+     *   · headerH            → **52**（回到桌面顶栏高度，不再是移动线 56）
+     *   · scrollPaddingTop   → 无吸顶折叠条 → 回到桌面档的值
+     */
     '1024x768': {
-      drawerTocVisible: 'F3/A4 新增：≥1024 侧栏常驻时给一个可展开的 details 本页目录（此时 .toc-side rail 仍 display:none，与改前一致）',
+      /* —— 变体 L 的直接后果：1024 回到桌面线 —— */
+      hasMenuButton: '批 5 变体 L：1024 回到桌面线（侧栏 @1024 常驻）→ ☰ 不再可见（改前 8788 处亦不可见，此项回归改前）',
+      menuBtn: '批 5：☰ 在 ≥1024 为 display:none，仅保留 aria-expanded="false" 属性（可见性 = 改前）',
+      tocVisible: '批 5：右栏 TOC 仍 @1200 进场 → 1024 处无 .toc-side rail（与改前一致，非回归）',
+      tocDisplay: '批 5：同上（display:none）',
+      tocW: '批 5：同上（无 rail 宽度）',
+      tocForm: '批 5：无 TOC 形态（该档 TOC 不进场）',
+      tocSideVisible: '批 5：.toc-side 在 1024 仍 display:none（TOC 断点未动，仍是 1200）',
+      drawerTocVisible: 'F3/A4 新增元素：侧栏常驻时给出可展开的 details 本页目录（终局裁决 §1 裁决 2 保留）',
       drawerTocInSidebar: 'F3/A4 新增元素（改前不存在）',
-      menuBtn: '☰ 在 ≥1024 仍是 display:none（改前 null → 改后 aria-expanded="false" 属性存在，可见性不变）',
-      inputFonts: 'C1 目标在桌面同样生效（13.44 → 16，红队 §7.2 第 6 条未限定视口）',
-      brandNameW: 'F1 新增 .brand-name 元素', brandW: 'F1 新增 .brand-name 元素（改后 .brand 宽度即品牌名宽）', brandTruncated: 'F1',
-      preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）——契约 D2 的改进，桌面同样生效，不是版式/密度变化',
-      /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 1200 —— 1024 自此归属移动线。
-         以下 5 个字段的变化全部是**该设计的直接后果**，与 check=5 的 B5（>=1200）口径一致。
-         实测依据（改前 8788 = a19a6c2 vs 改后 HEAD）：
-           hasMenuButton false→true、tocVisible false→true、tocDisplay none→block、
-           navRowMin 21→24（批 1 的 WCAG 2.5.8 AA 修复）、navRowCount 187→190
-         台阶收益见 c3-cliff：2 级 → 1 级，1024 处 artW 693→949（死区消失）。 */
-      hasMenuButton: 'C3：1024 归属移动线（桌面线搬到 1200）→ ☰ 出现，属设计变更',
-      tocVisible: 'C3：1024 改走移动线，正文顶部给折叠目录（改前该档 display:none）',
-      tocDisplay: 'C3：同上（none → block）',
-      tocW: 'C3：同上（折叠条宽随视口）',
-      tocForm: 'C3：top-block（吸顶折叠条形态）',
-      navRowMin: 'C3：移动线行高按 WCAG 2.5.8 AA 提到 24px（批 1 的修复在该档开始生效）',
-      navRowCount: 'C3：移动线侧栏展开态链接数 187→190（同一批导航，折叠态差异）',
-      layoutCols: 'C3：1024 为移动线单列（改前 280px 744px 双列）',
-      contentX: 'C3：移动线单列（改前 280 → 改后 0）',
-      contentW: 'C3：移动线单列（改前 744 → 改后 1024）',
-      sidebarW: 'C3：移动线抽屉宽 290→320',
-      tocSideVisible: 'C3：1024 走移动线 → .toc-side 从 display:none 变可见（折叠条）',
-      headerH: 'C3：移动线顶栏 52→56（>=1200 才回到 52）',
-      sidebarPos: 'C3：移动线侧栏 fixed（改前 sticky，因该档属桌面线）',
-      sidebarInert: 'C3：移动线侧栏默认 inert（关闭态）—— B 项语义在该档生效',
-      scrollPaddingTop: 'C3：F2 连带值 —— 吸顶折叠条 61px 计入 scroll-padding（64 → 129）',
-      topbarVar: 'C3：F2 连带值（顶栏 52→56）',
-      topbarSelf: 'C3：移动线顶栏自包含（56px）',
-      inputFonts: 'C1 目标在移动线同样生效',
-      preFocusable: 'D2 目标同上',
-      secSwitchVisible: 'C3：1024 走移动线 → 顶栏分区切换下沉到抽屉',
-      sideSecsVisible: 'C3：抽屉承接 3 条分区链接',
-      drawerTocVisible: 'C3：移动线抽屉内折叠目录',
-      brandW: 'F1 品牌占位', brandNameW: 'F1 新增 .brand-name', brandTruncated: 'F1',
+      /* —— 两列布局：变体 L 的核心目标 —— */
+      layoutCols: '批 5 变体 L：280px + 1fr 两列（1024 正文 949 → 693px，上游同档 692）',
+      contentX: '批 5：侧栏 280 常驻 → 正文起点 280（改前 8788 亦为 280）',
+      contentW: '批 5：两列 → 正文列 744（改前 8788 亦为 744）',
+      sidebarW: '批 5：常驻侧栏 280（改前 8788 亦为 280/290；批 5 与 ≥1200 同用 290/280 档）',
+      sidebarPos: '批 5：sticky（桌面线；不再是移动线的 fixed 抽屉）',
+      sidebarInert: '批 5：桌面线侧栏不 inert（inert 只在 ≤1023.98 的关闭态抽屉上）',
+      /* —— 跨分区入口：本批最关键的一条 —— */
+      secSwitchVisible: '批 5 关键收益：顶栏 .sec-switch 显示断点同步降到 1024 → 1024–1199 恢复 3 个跨分区入口（旧口径该档为 0，用户无法跨分区）',
+      sideSecsVisible: '批 5：抽屉不再渲染（≥1024 常驻）→ .side-secs 不可见。affordance 并未减少：3 条分区链接从抽屉挪到顶栏（secSwitchVisible 0→3）',
+      /* —— 密度 / 顶栏 —— */
+      navRowMin: '批 1 WCAG 2.5.8 AA 修复：桌面密度下 .side-home pill 最小边 21→24（红队 A1 整改项）',
+      navRowCount: '批 5：侧栏常驻展开态 → 链接数与抽屉态不同（同一批导航，折叠态差异）',
+      headerH: '批 5：回到桌面顶栏 52px（不再是移动线的 56）',
+      topbarVar: '批 5：--topbar-h 回到 52px 档',
+      topbarSelf: '批 5：桌面顶栏自包含（52px）',
+      scrollPaddingTop: '批 5：无吸顶折叠条 → scroll-padding 不含 TOC 的那 61px',
+      /* —— 与断点无关、但改前改后本就不同的已裁决项 —— */
+      inputFonts: 'C1 目标在桌面同样生效（改前 13.44 → 16，红队 §7.2 第 6 条未限定视口）',
+      preFocusable: 'D2 目标：滚动容器补 tabindex="0" + role="region"（改前 0 → 改后 10）',
+      brandW: 'F1 新增 .brand-name 元素（改后 .brand 宽度即品牌名宽）',
+      brandNameW: 'F1 新增 .brand-name 元素（改前无此元素 → null）',
+      brandTruncated: 'F1 新增 .brand-name 的派生字段',
     },
     '1280x800': {
       drawerTocVisible: 'F3/A4 新增（该 details 在 ≥1100 由 CSS 隐藏，rail 仍常驻）', drawerTocInSidebar: 'F3/A4 新增元素',
@@ -1687,6 +1761,12 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
          该修复只在 >=1024 的桌面档生效（断点层原本把 min-height 一律归零）。
          属已裁决的改进（红队 A1「零回归被用成零修正」的整改项），不是版式回归。 */
       navRowMin: '批 1 WCAG 2.5.8 AA 修复：pill 最小边 21 → 24（红队 A1 整改项）',
+      /* 批 5b（单树）：侧栏只渲染当前 topic 一棵树 → 可见导航行数减少。
+         实测 158 → 120（−38）。来源：少了 velocity 40 + folia 8（共 48 条），
+         再叠加折叠态差异（5a 让 d1–d3 全开，可见行变多，部分抵回）。
+         这是**单树改造的直接后果**，不是导航缺失：
+         verify-nav 12/12（check2 141/141 可达、孤页 0）证明覆盖零损失。 */
+      navRowCount: '批 5b 单树：侧栏只渲染当前 topic → 可见导航行 158→120（少了两棵冗余树；verify-nav check2 证明可达性 141/141 零损失）',
     },
   };
   /* A/B/C 归类：A = 契约明文规格（mobile-contract.md 明写）／B = 已裁决（红队 F* 与终局裁决/收口判定）／C = 真回归 */
@@ -1754,16 +1834,26 @@ check(8, 10, 'E1/E2', '零回归：768/834/1024/1280 双实例对打（同一探
       if (!b) continue;
       if (b.overflow > 1) hard.push(`${s.viewport} ${p} 改后横向溢出 ${b.overflow}`);
       if (b.clippedUnexplained > 0) hard.push(`${s.viewport} ${p} clippedUnexplained=${b.clippedUnexplained}`);
-      /* 批 3（C3 断崖重裁）：桌面线由 1024/1025 合并为 1200，1024 自此归属移动线
-         （☰ 可见、单栏、正文顶部折叠目录）。此处硬断言同步上移 —— 与 check=5 的
-         B5（>=1200）以及 WHITELIST['1024x768'] 的新口径保持一致。
-         未同步时该断言会对 1024 的 4 个页面误报「≥1024 仍可见 ☰」。 */
-      if (['1280x800'].includes(s.viewport)) {
-        if (b.hasMenuButton) hard.push(`${s.viewport} ${p} ≥1200 仍可见 ☰`);
+      /* ══════ 批 5（变体 L）硬断言口径 ══════
+       * 桌面线拆两级后：**侧栏常驻的下界从 1200 降到 1024**，右栏 TOC 仍 1200。
+       * 所以：
+       *   · ☰ 不可见 + 侧栏可见 —— 下界改为 **1024**（1024/1280 都必须满足）
+       *   · TOC 可见       —— 下界仍是 **1200**（只有 1280 视口满足；1024 不要求）
+       * 这两条**不是放宽**：☰/侧栏 的检查面从 1 个视口（1280）扩到了 2 个（1024+1280），
+       * 是收紧；TOC 那条完全没动。 */
+      const isSidebarPersistent = ['1024x768', '1280x800'].includes(s.viewport);
+      const isTocPersistent = ['1280x800'].includes(s.viewport);
+      if (isSidebarPersistent) {
+        if (b.hasMenuButton) hard.push(`${s.viewport} ${p} ≥1024（侧栏常驻档）仍可见 ☰`);
         if (b.headerScrollW !== b.headerClientW) hard.push(`${s.viewport} ${p} 顶栏自证失败 ${b.headerScrollW}/${b.headerClientW}`);
-        if (!b.sidebarVisible) hard.push(`${s.viewport} ${p} ≥1200 侧栏不可见`);
-        if (b.tocDisplay === 'none' && s.viewport === '1280x800') hard.push(`${s.viewport} ${p} ≥1280 TOC 被藏（改前可见）`);
+        if (!b.sidebarVisible) hard.push(`${s.viewport} ${p} ≥1024（侧栏常驻档）侧栏不可见`);
       }
+      if (isTocPersistent) {
+        if (b.tocDisplay === 'none') hard.push(`${s.viewport} ${p} ≥1280 TOC 被藏（该档 TOC 应在场）`);
+      }
+      /* 1024↔1023 新台阶的守门断言：1024 必须是「侧栏常驻 + 无 ☰」，
+         而 check=5 的 B1_1023x800 断言 1023 必须「☰ 可见 + 抽屉 fixed」。
+         两者一起把 +256px 的新台阶**钉在 1024 这一点**上，防止断点漂移。 */
     }
   }
   const preMissing = !ctx.pre;

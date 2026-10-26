@@ -971,13 +971,120 @@ summary::marker,summary::-webkit-details-marker{display:none}
   table.allpages td.lnk{margin:0;white-space:nowrap}
   table.allpages td.lbl a,table.allpages td.lnk a,table.snapshots td a{display:inline;min-height:0}
 }
-/* 批 3（C3 断崖）：**桌面线 = 1200**。
+/* ══════════════════════════════════════════════════════════════════════════
+   批 5c（变体 L）：桌面线**拆成两级**
+     · 侧栏常驻  = **≥1024px**（本块，280px sticky 两列）
+     · 右栏 TOC  = **≥1200px**（下面的原块，保持不变）
+   ══════════════════════════════════════════════════════════════════════════
+
+   为什么拆（ups-plan §3.5 / ups-redteam-b §3.3 裁决）：
+   C3 把侧栏与 TOC 同绑 1200 后，1024–1199 是「无侧栏 + 单栏」，正文流式撑到 949px。
+   实测变体 L 让 1024 的正文变成 **693px**（上游同档 **692px**，差 1px）——
+   这是全部方案里与上游最贴近的一个点。p 宽在 1024–1199 全部 640 不变（行长零变化），
+   pre 横滚 3/13 → 5/13（远好于降到 800 的 10/13）。
+
+   台阶账（诚实列出，不是零台阶）：
+     1200→1199  容器断崖从 **−340 缩到 −259**（1024–1199 已是「侧栏 280 + 正文」两列）
+     **1024→1023 新增 +256px**（1023 抽屉 + 949 单栏 → 1024 常驻 + 693 两列）
+     → 台阶总数 1 → 2，但单级幅度从 340 降到 259。上游在 800 也有同性质的 −252 台阶。
+
+   ⚠️ 三条必须同步（漏一条就翻车）：
+     ① 抽屉的真相是「侧栏是否常驻」→ matchMedia 用 min-width:1024px（本块）
+     ② TOC 的真相是「右栏是否常驻」→ matchMedia 仍用 min-width:1200px（**不要改**）
+        若两者都改 1024，1024–1199 会有右栏 TOC 而 CSS 只有两列
+        → TOC 掉到正文下方并永久展开（= 441px 展开坑的变体）
+     ③ secSwitch 的显示断点必须降到 1024。因为在 ≥1024 时
+        .sidebar-toggle 被 display:none → 抽屉与抽屉里的 .side-secs 一起消失，
+        跨分区入口**只剩顶栏 .sec-switch**。不降到 1024 的话
+        1024–1199 用户**彻底无法跨分区**（这是 ups-plan §3.5「代价 2」）。
+*/
+@media (min-width:1024px){
+  /* —— 布局：侧栏进场，两列。**1024 档侧栏用 280px（不是 290）** ——
+     这是变体 L 的实测取值（ups-plan §3.5 的表格里 L 变体侧栏就是 280px）：
+       1024 = 280（侧栏）+ 744（content 列）− 51.2（content 左右 padding 1.6rem×2）
+            → article = 692.8 ≈ **693**，上游同档 **692**（差 1px）。
+     若用 290：1024 − 290 − 51.2 = 682.8 ≈ 683，比上游窄 9px、低于验收下限 690。
+     ⚠️ 只在 1024–1199 用 280；≥1200 仍用 290（那块有右栏 250，版式 290/1fr/250
+        与改造前 >=1201 逐项一致，不动）。所以 1199→1200 会有 +10px 的列宽变化，
+        那是「TOC 进场」这一档自带的，不是新台阶。 */
+  .layout{grid-template-columns:280px minmax(0,1fr)}
+  /* ⚠️ 必须同时写「.layout.has-toc」：base 里「.layout.has-toc{grid-template-columns:minmax(0,1fr)}」
+     （选择器特异性 0,2,0）会压过单独一条「.layout」（0,1,0）。只写「.layout」的话
+     1024–1199 仍是单栏 —— 实测 layoutCols 仍为 "1024px"、正文仍 949，本块等于没生效。
+     **但这里给的是两列、不是三列**：TOC 要到 1200 才进场。
+     若在这里给三列，1024–1199 会出现「第三列有宽度但 .toc-side 仍是折叠面板」的错位
+     （那正是 1200 块里 .toc-side{display:block} 才该做的事）。 */
+  .layout.has-toc{grid-template-columns:280px minmax(0,1fr)}
+
+  /* —— 侧栏：从 off-canvas 抽屉复位为常驻（与 ≥1200 同款） —— */
+  .sidebar{position:sticky;top:var(--topbar-h);left:auto;width:auto;height:auto;
+    max-height:calc(100vh - var(--topbar-h));transform:none;transition:none;box-shadow:none;z-index:auto;
+    border-right:1px solid var(--border);padding:.8rem .7rem 2rem;background:var(--bg-soft);font-size:var(--fs-md)}
+  /* 侧栏常驻 → 遮罩与 ☰ 都不需要；.side-secs 是抽屉专用，一并隐藏 */
+  .nav-scrim,.side-secs,.sidebar-toggle{display:none}
+
+  /* —— 顶栏分区切换：**这是 5c 的关键连带项** ——
+     ≥1024 时抽屉消失，「.side-secs」（窄屏唯一的跨分区入口）随之不可见，
+     所以「.sec-switch」必须在这里就 display:flex，否则 1024–1199 无法跨分区。
+     （CSS 里 base 是 display:none，原本只在 ≥1200 块里打开。） */
+  .topbar .sec-switch{display:flex}
+
+  /* —— 顶栏高度回落到桌面档 52px（与 ≥1200 一致） —— */
+  :root{--topbar-h:52px}
+  .topbar{gap:.75rem;padding:0 1rem}
+  .topbar .tbtn{height:32px;min-height:32px;min-width:0;padding:0 .6rem}
+  .tbtn{height:32px;min-height:32px;min-width:0;padding:0 .6rem}
+
+  /* —— 正文区：桌面内边距与封顶 —— */
+  .content{padding:1.4rem 1.6rem 3rem;max-width:1000px;order:0}
+
+  /* —— 桌面密度（页面链接 ≈31px；44px 只保留在 ≤1023.98 抽屉里）——
+     这一组与 ≥1200 块里的同名声明完全一致：1024–1199 应当与 ≥1200 同密度，
+     因为两者都是「侧栏常驻」形态，区别只在 TOC 是否进场。 */
+  .side-sec a[data-search],.side-cat a[data-search],.side-group a[data-search]{min-height:0;align-items:baseline}
+  .side-group-title,.side-cat>summary,.side-section-title,summary.side-section-title,a.side-section-title{min-height:0}
+  .side-group-title a.side-home{min-height:24px;display:inline-flex;align-items:center}
+  .side-toc a{min-height:0;display:block}
+  .side-toc>summary.side-toc-title{min-height:0}
+  /* 侧栏常驻后，抽屉内那份「本页目录」不再需要（TOC 在 ≥1200 由右栏承担；
+     1024–1199 没有右栏，所以这一档**保留** .side-toc 作为等价导航 —— 见下一条注释） */
+  .crumbs a{display:inline;min-height:0;min-width:0}
+  a.chip{display:inline-block;min-height:0;min-width:0}
+  .tg-home{min-width:0;display:inline;min-height:0}
+  .code-copy{min-height:28px;min-width:28px}
+  .details-summary{display:block;min-height:0}
+  .side-filter{min-height:32px;height:32px;padding:0 .55rem}
+  .filter-bar input{min-height:34px;height:34px;padding:0 .7rem}
+  .hero-search #hero-search{min-height:38px;height:38px;padding:0 .8rem}
+
+  /* ⚠️ 1024–1199 的 TOC 形态（变体 L 唯一需要特殊对待的地方）：
+     这一档**没有右栏**（TOC 仍 @1200 进场）。若不显式声明，「.toc-side」作为
+     「.layout」的第三个 grid item（order:1）会掉进第一行的第二列 ——
+     实测宽度被压成 **280px**，既不是右栏也不是顶部折叠条，形态错误。
+     正确做法（与 C3 之前的 1024 档一致、也与 ARCHIVED_PRE 记录一致）：
+       **隐藏 .toc-side**，由常驻侧栏里的 details.side-toc（drawerTocHtml 产出）
+       承担等价导航 —— 这正满足 verify-mobile A4 的「有可用本页目录或**等价导航**」。
+     ≥1200 时 .toc-side 复位为常驻右栏（见下面的 1200 块）。 */
+  .toc-side{display:none}
+  /* 与上面配套：content 占满第二列；order 归零使 grid 不因 toc 隐藏而错序 */
+  .content{order:0}
+  /* 侧栏常驻后抽屉消失，抽屉内那份 .side-toc 必须**保留并可见** —— 它就是
+     1024–1199 的等价导航来源。≥1200 才隐藏它（那时有右栏）。 */
+  .side-toc{display:block}
+}
+
+/* 批 3（C3 断崖）：**桌面线 = 1200**（批 5c 后这是**右栏 TOC 的进场线**）。
    原先这里是 @media (min-width:1024px)（只进侧栏、不进 TOC），紧接着一个
    @media (min-width:1025px)（才进 TOC）。两级台阶就是这么产生的：
      1023→1024  artW 972→693（−279，侧栏进场但 TOC 没进 = 1024 死区）
      1024→1025  artW 693→434（−259，TOC 再进场）
-   两块现在合到同一阈值 1200，得到**单级台阶**（1199→1200，−340），
-   1024 死区消失（1024 处 artW 693→949）。
+   批 3 把两块合到 1200；**批 5c 又把侧栏那半拆回 1024**（见上面的中间块），
+   但 TOC 仍留在 1200 —— 所以现在 1024–1199 是「侧栏常驻 + 无右栏」，
+   这正是变体 L 的形态。
+   ⚠️ 本块里凡是「侧栏复位」类声明都与上面 1024 块**重复**（CSS 层叠后等价），
+      保留它们是为了：① 与历史注释对得上；② 若将来把 1024 块整体回滚，
+      ≥1200 的行为不受影响（自包含）。真正只在 ≥1200 生效的只有三样：
+      「.layout.has-toc」三列 / 「.toc-side」复位 / 「.side-toc{display:none}」。
    ⚠️ 阈值只能与下面的 JS（drawer 的 matchMedia / syncToc / syncTocOffset）一起改，
       只改 CSS 会让 1024–1199 的抽屉逻辑与版式脱钩。 */
 @media (min-width:1200px){
@@ -1899,8 +2006,13 @@ const SITE_JS = `/* PaperMC docs offline library — front-end behaviour (no dep
     var side = doc.getElementById('sidebar');
     var scrim = doc.getElementById('nav-scrim') || doc.querySelector('[data-nav-scrim], .nav-scrim, .nav-overlay');
     if (!toggle || !side) return;
-    /* 批 3（C3）：与 CSS 的 @media (min-width:1200px) 严格同源，改一处必须改另一处。 */
-    var wide = window.matchMedia('(min-width:1200px)');
+    /* 批 5c（变体 L）：抽屉的真相是「**侧栏**是否常驻」→ 跟 **1024**。
+       ⚠️ 与 TOC 的 matchMedia（下面 syncToc 的 tocWide）**不同源**，这是刻意的：
+       侧栏 @1024 常驻、右栏 TOC 仍 @1200。若两者都写 1024，1024–1199 会出现
+       「JS 认为 TOC 是右栏（不去移除 open）但 CSS 只有两列」→ TOC 掉到正文下方
+       并永久展开（= 441px 展开坑的变体）。
+       与 CSS 的 @media (min-width:1024px) 严格同源，改一处必须改另一处。 */
+    var wide = window.matchMedia('(min-width:1024px)');
     var supportsGutter = !!(window.CSS && window.CSS.supports && window.CSS.supports('scrollbar-gutter', 'stable'));
     function isWide() { return wide.matches; }
     function isOpen() { return doc.body.classList.contains('nav-open'); }
