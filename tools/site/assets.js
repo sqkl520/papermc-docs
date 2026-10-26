@@ -144,7 +144,10 @@ img.external-img{max-width:100%;height:auto}
   border:1px solid var(--border);border-radius:8px;background:var(--bg-soft);color:var(--fg);font-size:.82rem;cursor:pointer;
   font-family:inherit;flex:0 0 auto;text-align:center}
 .tbtn:hover{border-color:var(--border-strong);color:var(--accent)}
-kbd{border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:5px;padding:0 .28em;font-family:var(--mono);font-size:.75em;color:var(--fg-muted);background:var(--bg-elev)}
+/* 批 3（3c）kbd：.75em → var(--fs-xs) 12.5px。
+   原来 .75em 在正文(16)算出 12、在表格(14.4)算出 10.8 —— 同一规则派生 2 个值。
+   §2.4 明确：9.84px 的中文 kbd 不可读，上游 kbd=12px —— 这是全站唯一「抄上游反而更好」的地方。 */
+kbd{border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:5px;padding:0 .28em;font-family:var(--mono);font-size:var(--fs-xs);color:var(--fg-muted);background:var(--bg-elev)}
 .sidebar-toggle{display:inline-flex;width:44px;padding:0;font-size:1.05rem}
 /* 手机端顶栏：只留 ☰ / 品牌 / 搜索 / 主题；分区切换收进抽屉（契约 v2 §3） */
 .topbar .sec-switch{display:none}
@@ -232,7 +235,9 @@ html.nav-locked{scrollbar-gutter:stable}
 .toc-fold:not([open])>ol{display:none}
 /* 展开后限高，长目录（83 项）不撑满全屏 */
 .toc-fold[open]>ol{display:block;max-height:min(45vh,calc(100vh - var(--topbar-h) - 96px));overflow-y:auto;padding:0 .5rem .5rem}
-.toc-side .toc-title::before{content:"▸";font-size:.75em;color:var(--fg-muted);transition:transform .15s}
+/* 批 3（3c）删除死声明：这里原有 .toc-side .toc-title::before{content:"▸";font-size:.75em;...}，
+   但它**被下面那条同选择器规则完全覆盖**（content:"" + font-size:0 + border 画三角，a11y 修复），
+   所以 .75em 从未生效 —— 纯死声明，按 §2.3 #4 删除。 */
 /* a11y（b1-a11y F-6 / SC 4.1.2）：上面那条的 "▸" 会被并入可访问名（AX 树实测
    DisclosureTriangle name="▸ 本页目录 5"）。改用 border 画的纯装饰三角 —— 不进 AX 树。 */
 .toc-side .toc-title::before{content:"";width:0;height:0;flex:0 0 auto;font-size:0;
@@ -240,7 +245,8 @@ html.nav-locked{scrollbar-gutter:stable}
   transition:transform .15s}
 @media (prefers-reduced-motion:reduce){.toc-side .toc-title::before{transition:none}}
 .toc-fold[open]>summary.toc-title::before{transform:rotate(90deg)}
-.toc-side .toc-count{margin-left:auto;font-size:.85em;font-variant-numeric:tabular-nums}
+/* 批 3（3c）：.85em → var(--fs-2xs)。计数值应为固定小档，不该随 TOC 父字号变。 */
+.toc-side .toc-count{margin-left:auto;font-size:var(--fs-2xs);font-variant-numeric:tabular-nums}
 /* 抽屉内的本页目录（同一 toc 数组，默认折叠，避免撑长抽屉） */
 .side-toc{margin:0 0 .7rem;border:1px solid var(--border);border-radius:10px;background:var(--bg)}
 .side-toc>summary.side-toc-title{display:flex;align-items:center;gap:.4rem;min-height:44px;padding:.2rem .5rem;cursor:pointer;list-style:none;font-weight:600;font-size:.82rem;color:var(--fg)}
@@ -253,7 +259,9 @@ html.nav-locked{scrollbar-gutter:stable}
 .side-toc a:hover{background:var(--bg-elev);color:var(--fg);text-decoration:none}
 .side-toc .lvl-3{padding-left:.7rem}
 .side-toc .lvl-4{padding-left:1.3rem}
-.side-toc .lvl-5{padding-left:1.9rem;font-size:.95em}
+/* 批 3（3c）：.side-toc .lvl-5 的 font-size(.95em) 删除 —— TOC 层级靠 padding 表达，
+   不靠字号（上游做法）。原 .95em 叠在父级 .84rem 上算出 12.77px，是碎片级之一。 */
+.side-toc .lvl-5{padding-left:1.9rem}
 /* 抽屉内的分区切换（顶栏那份 <1024 隐藏） */
 .side-secs{display:flex;flex-wrap:wrap;gap:.3rem;margin:0 0 .6rem}
 .side-secs a{display:inline-flex;align-items:center;min-height:44px;padding:.1rem .7rem;border:1px solid var(--border);
@@ -376,7 +384,11 @@ summary.side-section-title:hover{background:var(--bg-elev);border-radius:7px}
 .side-sec a.active,.side-cat a.active,.side-group a.active{background:var(--accent-soft);color:var(--accent);font-weight:600}
 .side-group-title a.side-home{display:inline-flex;align-items:center;padding:0 .35em}
 .side-sec a .ttl,.side-cat a .ttl,.side-group a .ttl{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.side-count{margin-left:auto;font-size:.72em;color:var(--fg-muted);font-variant-numeric:tabular-nums}
+/* 批 3（3c）关键修复：.72em → var(--fs-2xs)。
+   这一个类在组标题(父 13.44)、分区标题(父 12.48)、树折叠标题(父 14.72) 里
+   算出 **3 个不同 px**（11.52 / 9.68 / 8.99 及 9.216 等变体）—— 是"碎片级"的最大来源。
+   改 rem 后恒为 11.5px，且按 §2.4 只承载**数字**（不是中文），11.5 可辨。 */
+.side-count{margin-left:auto;font-size:var(--fs-2xs);color:var(--fg-muted);font-variant-numeric:tabular-nums}
 .tag{margin-left:auto;font-size:.66rem;color:var(--fg-muted);border:1px solid var(--border);border-radius:999px;
   padding:0 .4em;white-space:nowrap;flex:0 0 auto}
 .nav-home a .ttl,.side-sec a.nav-home .ttl{font-style:normal}
@@ -425,7 +437,9 @@ a.chip{display:inline-flex;align-items:center;min-height:44px;min-width:44px}
 .article li>ul,.article li>ol{margin:.2em 0}
 .article blockquote{margin:1rem 0;padding:.4rem 1rem;border-left:4px solid var(--border-strong);color:var(--fg-muted);background:var(--bg-soft);border-radius:0 8px 8px 0}
 .article hr{border:0;border-top:1px solid var(--border);margin:1.8rem 0}
-.article code{font-family:var(--mono);font-size:.86em;background:var(--bg-elev);border:1px solid var(--border);border-radius:5px;padding:.05em .3em}
+/* 批 3（3c）：.86em → var(--fs-sm)。行内 code 在 h2(28.8) 里会算成 24.8px —— 比正文还大，
+   这是 em 用于「层级字号」的典型误用。上游 --sl-text-code-sm 恒 13px，这里取 13.5。 */
+.article code{font-family:var(--mono);font-size:var(--fs-sm);background:var(--bg-elev);border:1px solid var(--border);border-radius:5px;padding:.05em .3em}
 .article a code{color:inherit}
 .article pre code{background:none;border:0;padding:0;font-size:.85rem}
 
@@ -512,7 +526,8 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .page-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--fg-muted);
   display:flex;flex-wrap:wrap;gap:.35rem 1rem;align-items:center;min-width:0}
 .page-footer>*{min-width:0}
-.page-footer code{font-family:var(--mono);font-size:.95em;overflow-wrap:anywhere}
+/* 批 3（3c）：.95em → var(--fs-xs)。页脚哈希该是固定档（原 .95em 叠在 12.48 上算出 11.86，不直观）。 */
+.page-footer code{font-family:var(--mono);font-size:var(--fs-xs);overflow-wrap:anywhere}
 .page-footer a{overflow-wrap:anywhere}
 .page-footer .sha{font-family:var(--mono);overflow-wrap:anywhere}
 
@@ -526,8 +541,11 @@ img.external-image{max-width:100%;height:auto;border-radius:8px;border:1px dashe
 .toc-side a:hover{color:var(--fg);text-decoration:none;background:var(--bg-soft)}
 .toc-side a.active{color:var(--accent);border-left-color:var(--accent);background:var(--bg-soft);font-weight:600}
 .toc-side .lvl-3{padding-left:.7rem}
-.toc-side .lvl-4{padding-left:1.3rem;font-size:.95em}
-.toc-side .lvl-5{padding-left:1.9rem;font-size:.93em}
+/* 批 3（3c）：TOC lvl-4 / lvl-5 的 font-size 全部删除 —— TOC 层级靠 padding 表达，不靠字号。
+   原 .95em / .93em 叠在常驻右栏父级 .82rem 上算出 12.46 / 12.20，制造两个碎片级；
+   且 lvl-5(.93) 比 lvl-4(.95) 还小 → 层级倒置（越深字越小却仍加粗）。 */
+.toc-side .lvl-4{padding-left:1.3rem}
+.toc-side .lvl-5{padding-left:1.9rem}
 .toc-empty{color:var(--fg-muted)}
 
 /* overview pages */
@@ -852,9 +870,11 @@ table.allpages td.lnk{margin-top:.1rem}
   font-size:.8rem;line-height:1.5;min-height:28px}
 .cfg-key:hover{border-color:var(--accent);color:var(--accent);background:var(--bg-elev)}
 .cfg-key:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.cfg-key code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.94em;background:none;
+/* 批 3（3c）：.cfg-key 的 code 从 .94em → var(--fs-sm)。
+   原来 .cfg-key 是 12.8px，而 code 子元素 .94em 算出 15.04 → **子比父大 17%**，视觉错乱。 */
+.cfg-key code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs-sm);background:none;
   border:0;padding:0;color:inherit}
-.cfg-key .cfg-n{font-size:.72em;color:var(--fg-muted);opacity:.8;font-variant-numeric:tabular-nums}
+.cfg-key .cfg-n{font-size:var(--fs-2xs);color:var(--fg-muted);opacity:.8;font-variant-numeric:tabular-nums}
 /* 被索引指向的配置项：滚动落点要避开吸顶顶栏/折叠条，且高亮一下便于确认 */
 .article ul>li[id^="cfg-"]{scroll-margin-top:calc(var(--topbar-h) + 12px + var(--toc-offset,0px) + 8px)}
 .article ul>li[id^="cfg-"]:target{background:var(--accent-soft);border-radius:6px;outline:1px solid var(--accent);outline-offset:2px}
@@ -894,7 +914,8 @@ summary::marker,summary::-webkit-details-marker{display:none}
   .node-root{padding:.8rem}
 }
 .info-footer{display:flex;flex-direction:column;gap:.35rem;margin-top:2rem;border-top:1px solid var(--border);padding-top:.9rem}
-.info-footer code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.85em}
+/* 批 3（3c）：.85em → var(--fs-xs)。 */
+.info-footer code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:var(--fs-xs)}
 
 /* ==========================================================================
    Mobile-first 断点层（契约 v2 §1）
