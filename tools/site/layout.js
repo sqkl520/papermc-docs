@@ -574,16 +574,20 @@ function overviewPage(site, stats, opts) {
      .stat b 21.6px 比入口卡标题 20px 还大）。只保留「页面数」——它已在搜索框
      placeholder 里（heroSearchHtml 早已带 stats.pages），不另设卡片。 */
 
-  /* R3-1：目录树从「5,753px 全铺开」改为「默认折叠的 <details>」。
-     ❌ 不删：390/320 档侧栏是 off-canvas（x=−326），抽屉 193 条里只显示 15 条、
-     到深层页需展开 2–3 次 —— 折叠的成本是 0，收益（页高 −78%）与删除等价。 */
+  /* 批 2b（ups-plan §5.2 / §7 批 2b）：原 `tree-fold` 是首页 `<main>` 的 89.0%
+     （37,968 / 42,764 字符、141 条链接），而 <details> 默认 closed → **对首屏贡献 0、
+     对 DOM 贡献 89%**；且它是 `treeSectionHtml` 的第二份树（与侧栏 `sidebarHtml`
+     不同模板、`sameSet=false`，差异无任何断言覆盖）。
+     裁决（方案 b）：降级为 3 行分区入口（~380 字符 / 3 链接）。
+     全站地图由 `all-pages.html`（141 行 + 页内过滤）与侧栏（≥1200px 常驻 / 窄屏抽屉）承接。
+     ⚠ 删它安全：`verify-nav.js:401` 的 sameIdx 取的是**侧栏**（navFromIndex），不是这里。 */
   if (secs.length) {
-    content += '<details class="tree-fold" id="tree">'
-      + '<summary class="tree-fold-title">完整目录（按上游分组）'
-      + '<span class="side-count">' + secs.reduce((n, s) => n + (s.preorder ? s.preorder.length : (s.pageCount || 0)), 0) + '</span>'
-      + '</summary>';
-    for (const sec of secs) content += treeSectionHtml(sec, prefix, { heading: 2, linkTitle: true });
-    content += '</details>';
+    content += '<div class="sec-index">' + secs.map((sec) => {
+      const pages = sec.preorder ? sec.preorder.length : (sec.pageCount || 0);
+      return '<a class="sec-item" href="' + U.attr(prefix + sec.id + '/index.html') + '">'
+        + '<span class="si-name">' + U.escapeHtml(SECTION_CARD_TITLE[sec.id] || (sec.title + ' 文档')) + '</span>'
+        + '<span class="si-count">' + pages + ' 页</span></a>';
+    }).join('') + '</div>';
   }
 
   content += '<div class="section-head" id="tax"><h2>按主题浏览（' + site.categories.length + ' 类）</h2></div>';

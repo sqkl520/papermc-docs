@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-26T11:36:40.919Z",
+  "generated_at": "2026-10-26T12:50:45.183Z",
   "generator": "tools/build-site.js",
   "mode": "taxonomy",
   "sourceNav": {
@@ -389,10 +389,10 @@
     "imgInArticle": 89,
     "imgExternal": 1,
     "imgMissing": 0,
-    "anchorsAll": 41499,
+    "anchorsAll": 41361,
     "anchorsExternal": 1433,
     "anchorsUnmirrored": 25,
-    "anchorsInternalPage": 31235,
+    "anchorsInternalPage": 31100,
     "anchorsFragmentOnly": 3977,
     "anchorsUnresolved": 4,
     "uniqueExternalHrefs": 783
@@ -494,7 +494,7 @@
   "outputs": {
     "index": {
       "output": "index.html",
-      "bytes": 145484
+      "bytes": 100430
     },
     "notFound": {
       "output": "404.html",
@@ -522,7 +522,7 @@
     "assets": {
       "css": {
         "output": "assets/site.css",
-        "bytes": 75050
+        "bytes": 76567
       },
       "js": {
         "output": "assets/site.js",
@@ -546,7 +546,7 @@
     "sectionCount": 3,
     "siteDir": "repo-root (GitHub Pages /papermc-docs/)",
     "pageLayout": "<section>/<rel>.html（rel 直接展开，URL 与上游 docs.papermc.io 逐段一致）",
-    "totalBytes": 18538706
+    "totalBytes": 18493652
   },
   "pages": [
     {
@@ -12551,6 +12551,6 @@
     }
   ],
   "timing_ms": {
-    "total": 8470
+    "total": 7103
   }
 }

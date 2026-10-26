@@ -966,3 +966,21 @@ summary::marker,summary::-webkit-details-marker{display:none}
   }
   .code-block,.code-pre{border:1px solid #ccc;box-shadow:none}
 }
+
+/* ---------- 批 2b：首页「分区入口」条（替代原 tree-fold 折叠目录） ---------- */
+/* 为什么需要：原首页 tree-fold 占 <main> 89.0%（37,968 字符 / 141 链接），
+   而它是默认 closed 的 <details> —— 对首屏贡献 0、对 DOM 贡献 89%。
+   裁决（ups-plan §5.3 方案 b）：降级为 3 个分区入口（3 链接 / ~380 字符）。
+   全站地图不丢：all-pages.html（141 行 + 页内过滤）与侧栏（≥1200px 常驻 / 窄屏抽屉）承接。
+   行高 44px：与 .entry-card / .host-card 同档触屏命中区（WCAG 2.5.8 AA 要求 24px，
+   44px 是 2.5.5 AAA 的常用实现值），三列时桌面总高仍低于被它替换的 tree-fold（含外边距）。
+   ⚠ 本组规则只作用于 <main>（.sec-index 只由 overviewPage 产出），不改侧栏。 */
+.sec-index{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(230px,100%),1fr));
+  gap:.5rem;margin:1rem 0 1.2rem}
+.sec-index .sec-item{display:flex;align-items:center;gap:.55rem;min-height:44px;padding:.5rem .85rem;
+  border:1px solid var(--border);border-radius:.55rem;background:var(--bg);text-decoration:none;color:var(--fg);
+  transition:border-color .15s ease,background .15s ease}
+.sec-index .sec-item:hover{border-color:var(--accent);background:var(--bg-soft)}
+.sec-index .si-name{font-weight:700;font-size:.95rem;line-height:1.4}
+.sec-index .si-count{margin-left:auto;font-size:.84rem;color:var(--fg-muted);font-variant-numeric:tabular-nums;
+  white-space:nowrap}
