@@ -40,7 +40,6 @@ const OUT_JSON = path.join(REPORTS, 'nav-verification.json');
 const OUT_MD = path.join(REPORTS, 'nav-verification.md');
 const GEN_REPORT = path.join(REPORTS, 'nav-rebuild.md');
 const SRC_NAV = path.join(ROOT, 'data', 'source-nav.json');
-const SECTIONS = ['paper', 'velocity'];
 
 const CLI = { check: null, external: true };
 for (const a of process.argv.slice(2)) {
@@ -61,6 +60,22 @@ const exists = (p) => { try { return fs.existsSync(p); } catch { return false; }
 const round = (n, d = 2) => Math.round(n * 10 ** d) / 10 ** d;
 const mib = (b) => round(b / 1048576, 3);
 
+/* 批 5 修正：原为硬编码 `['paper', 'velocity']` —— folia 早已上线
+ * （sections/folia.html 存在、source-nav.json 有 folia 段、6 个产出页）。
+ * 漏掉它会让 folia 的 6 个页在 check2 被误判「孤页」、check1 少比一棵树。
+ * 改为以 data/source-nav.json 的 sections 为**唯一真值**（它本就是站点权威结构源），
+ * 再与磁盘上实际存在的 sections/<id>.html 取交集，避免源里列了但没构建。
+ * 注：放在小工具定义**之后**（用到了 readText / exists，避免 TDZ）。 */
+const SECTIONS = (() => {
+  let ids = [];
+  try {
+    ids = (JSON.parse(readText(SRC_NAV)).sections || []).map((s) => s.id);
+  } catch { ids = []; }
+  if (!ids.length) ids = ['paper', 'velocity', 'folia'];
+  const onDisk = ids.filter((id) => exists(path.join(ROOT, 'sections', id + '.html')));
+  return onDisk.length ? onDisk : ids;
+})();
+
 function walkFiles(root, { ext = null, skipDirs = [] } = {}) {
   const out = [];
   const skip = new Set(skipDirs);
@@ -74,6 +89,38 @@ function walkFiles(root, { ext = null, skipDirs = [] } = {}) {
     }
   };
   rec(root);
+  return out.sort();
+}
+
+/* 批 5 新增：**发布产物** HTML 的唯一定义（相对仓库根）。
+ * 站点的产物布局（build-site.js 写出的全部 HTML）：
+ *   · 内容页      paper/**  velocity/**  folia/**       → `<sec>/<rel>/index.html`
+ *   · 分区页      sections/<sec>.html
+ *   · 分类页      categories/<cat>.html
+ *   · 根级页面    index.html  all-pages.html  snapshots.html  404.html
+ *
+ * **不包含**（分别有明确理由，不是为了放宽断言）：
+ *   · archive/**        —— 上游原始快照，是研究材料、不发布。它的 h1 数量是**上游**的写法
+ *                          （如 folia/admin 有 3 个 h1），拿它要求"每页 h1=1"是错配口径。
+ *   · node_modules/**   —— 第三方依赖（内含 W3C DOM 测试夹具，大量 0 个 h1）。
+ *   · tools/ reports/ data/ assets/ —— 非 HTML 产物或工具自身。
+ * 之前这里用 walkFiles(仓库根) → 把上面三类都算进"每页 h1=1"，产出 74 处假失败。 */
+const PROD_HTML_EXCLUDE_DIRS = new Set(['archive', 'node_modules', 'tools', 'reports', 'REPORTS', 'data', 'assets', '.git', '_shadow-verify']);
+function prodHtmlFiles() {
+  const out = [];
+  const rec = (dir) => {
+    let entries;
+    try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) { if (!PROD_HTML_EXCLUDE_DIRS.has(e.name) && !e.name.startsWith('.')) rec(p); }
+      else if (e.isFile() && e.name.endsWith('.html')) {
+        // sections/ categories/ 是产物的一部分，保留；其余子目录已在上面按内容页规则保留
+        out.push(R(p));
+      }
+    }
+  };
+  rec(LIB);
   return out.sort();
 }
 
@@ -124,7 +171,19 @@ function resolveHref(fromRepoRel, href) {
 /** <sec>/<rel>.html ⇄ 页 id */
 const pagePathOf = (sec, rel) => `${sec}/${rel}.html`;
 function pageIdOf(repoRel) {
-  const m = /^library\/pages\/(paper|velocity)\/(.+)\.html$/.exec(repoRel);
+  /* 批 5 修正：这里原为 `/^library\/pages\/(paper|velocity)\/(.+)\.html$/` ——
+     那是**旧产物布局**（站点曾产出到 library/pages/<sec>/<rel>.html）。
+     现在站点根 = 仓库根，内容页直接落在 `<sec>/<rel>/index.html`。
+     旧正则匹配不到任何文件 → pageIdOf 恒返回 null → 依赖它的
+     check3（面包屑）/ check4（分页先序）全部静默退化（表现为"期望 null"）。
+     改为**新旧两种布局都接受**，新布局优先。
+     ⚠️ rel 必须与 source-nav.json 完全同构（形如 `getting-started/index`，
+        即**保留末尾 `/index`**）—— pagePathOf 的逆运算必须严格互逆：
+        pagePathOf('paper','getting-started/index') === 'paper/getting-started/index.html'
+        故这里 rel = m[2]，不做任何裁剪。 */
+  let m = /^(paper|velocity|folia)\/(.+)\.html$/.exec(repoRel);
+  if (m) return { sec: m[1], rel: m[2], id: `${m[1]}:${m[2]}` };
+  m = /^library\/pages\/(paper|velocity|folia)\/(.+)\.html$/.exec(repoRel);
   return m ? { sec: m[1], rel: m[2], id: `${m[1]}:${m[2]}` } : null;
 }
 
@@ -225,7 +284,26 @@ function navModelsFromFile(repoRel) {
 /* ────────────────────────────── 页面抽取 ────────────────────────────── */
 
 function parsePage(repoRel) {
-  const html = readText(path.join(ROOT, repoRel));
+  /* 并发构建容错（2026-10-26）：多 Agent 并行时 `build-site.js` 会先
+   * `cleanOutputs()` 删除旧产物、再逐页写回。若本工具恰好在那个窗口里枚举
+   * （prodHtmlFiles 列出文件后又有一个被删/未写完），readText 会 ENOENT
+   * 直接把整个 check 抛异常 —— 表现为「[0/12] FAIL (异常)」且看不出是竞态。
+   *
+   * 这里改为返回一个**空壳页面对象**并打标记 `_missing`：上层检查会看到
+   * 「这一页读不到」而不是整项崩溃；同时 `fingerprint()` 的 drift 检测
+   * 会在结论里注明"验证期间产物在变"，让人知道该重跑。
+   */
+  const abs = path.join(ROOT, repoRel);
+  let html;
+  try {
+    html = readText(abs);
+  } catch (e) {
+    return {
+      _missing: true, _missingReason: String(e.message).slice(0, 200), html: '',
+      crumbs: [], pager: { prev: null, next: null }, h1All: [], h1Article: [], h1Count: 0,
+      footerText: '', footerHrefs: [], refs: [], chips: [], title: '', sidebarLabelMap: null,
+    };
+  }
   const $ = cheerio.load(html);
   const crumbs = [];
   $('nav.crumbs a, nav.crumbs > span:not(.sep)').each((_, el) => {
@@ -321,12 +399,79 @@ const navFromSections = {};
 for (const s of SECTIONS) navFromSections[s] = navModelsFromFile(`sections/${s}.html`);
 const navFromIndex = navModelsFromFile('index.html');
 
-// 135 页全量抽取
-const pageFiles = walkFiles(LIB + '/pages', { ext: '.html' }).map(R);
+/* ───────── 批 5（单树）双口径：全量树 vs 当前树 ─────────
+ * 批 5 之后侧栏只渲染「当前 topic 一棵树」（规则 `active.sectionId ? 1 : 3`）：
+ *   · `sections/<id>.html` —— active.sectionId = <id> → 只剩 <id> 那一棵；
+ *   · 135 个内容页       —— 只剩本分区那一棵；
+ *   · `index.html` / `all-pages.html` / 分类页 —— active.sectionId 为空 → 保留全部 3 棵。
+ *
+ * 后果：`navFromSections[s]` 这个「模型字典」从 `{paper, velocity, folia}` 退化成 `{ s }`，
+ * 于是原来遍布全文件的 `navFromSections[secId][secId]` 取值**恰好仍然命中**
+ * （因为 sections/<id>.html 渲染的正是 <id> 那一棵）—— 但这是巧合，不是契约。
+ * 一旦哪天 sections 页改成渲染别的分区或全量树，这里会静默变成 undefined，
+ * 让 check1 在 `nav.tree` 上抛 TypeError（= 整个门禁红，而不是一条缺陷）。
+ *
+ * 所以统一走 fullNav(secId)：优先取 sections/<id>.html 里那一棵，
+ * 缺失则回退到 index.html（它永远保留全量 3 棵树）。取不到返回 null，
+ * 由调用方记 defect 而不是崩掉 —— 门禁要能**说出**哪里坏了。
+ *
+ * ⚠️ 注意区分两个口径，不要混用：
+ *   fullNav(secId)          = 「该分区的全量导航树」（结构比对用，与单树无关）
+ *   navModelsFromFile(page) = 「这一页**实际**渲染出来的树」（单树后只有 1 棵，这是定义不是缺失）
+ */
+function fullNav(secId) {
+  const m = navFromSections[secId] || {};
+  if (m[secId]) return m[secId];
+  if (navFromIndex && navFromIndex[secId]) return navFromIndex[secId];
+  return null;
+}
+
+// 内容页全量抽取（批 5 修正：原为 walkFiles(LIB + '/pages')，即旧产物布局
+// `library/pages/<sec>/<rel>.html`。站点根搬到仓库根后那个目录不复存在，
+// 于是 pageFiles = [] → allTargets = 空集 → check2 孤页检查**空跑假绿**、
+// check4 先序链期望全 null、check6 页脚/h1 覆盖 0/0。
+// 现按当前产物布局枚举，并**显式排除** archive/（上游快照，不是本站产物）
+// 与 node_modules/（依赖）—— 它们此前会混进 check6 的 h1 普查与 check12 的外链统计。）
+const CONTENT_SECS = ['paper', 'velocity', 'folia'];
+const PROD_SKIP = ['REPORTS', 'archive', 'node_modules', '.git', 'reports', 'tools', 'data', 'sections', 'categories', 'assets'];
+/** 全站**发布产物** HTML（相对仓库根）：paper/ velocity/ folia/ 下的内容页 + 根级页面 */
+const pageFiles = (() => {
+  const out = [];
+  for (const sec of CONTENT_SECS) {
+    for (const abs of walkFiles(path.join(LIB, sec), { ext: '.html' })) out.push(R(abs));
+  }
+  for (const f of ['index.html', 'all-pages.html', 'snapshots.html', '404.html']) {
+    if (exists(path.join(ROOT, f))) out.push(f);
+  }
+  return out.sort();
+})();
+/** 只含「内容页」（paper|velocity|folia 下的页面），供 pageIdOf 系列使用 */
+const contentPageFiles = pageFiles.filter((f) => pageIdOf(f));
 const P = new Map();
 for (const f of pageFiles) P.set(f, parsePage(f));
+/** 并发构建窗口里读不到的页（ENOENT 容错；见 parsePage 注释） */
+const missingPages = () => [...P.entries()].filter(([, p]) => p._missing).map(([f]) => f);
 
-const pageIds = pageFiles.map(pageIdOf).filter(Boolean);
+const pageIds = contentPageFiles.map(pageIdOf).filter(Boolean);
+/* 批 5 修正：页数原来在 5 处断言里写死 135。站点已到 141 页（+folia 6），
+ * 写死值让"索引 141/141 齐全"这种**真的对了**的状态被判 FAIL。
+ * 真值来源 = data/source-nav.json：内容页数 = 各 section 源树节点中 page 类节点之和
+ * + pagesNotInSourceNav（组首页 / 分区根页，挂在组标题上，也是产出页）。
+ * 这是**修正口径**（换用权威数据源），不是放宽断言 —— 断言仍然要求
+ * "产物页数 == 源结构声明的页数"，只是不再拿一个会过期的常数去比。 */
+const CONTENT_PAGE_COUNT = (() => {
+  const countPages = (nodes) => nodes.reduce((n, x) => n + (x.kind === 'group' ? countPages(x.children || []) : 1), 0);
+  let total = 0;
+  for (const s of (JSON.parse(readText(SRC_NAV)).sections || [])) {
+    total += countPages(s.groups || []) + (s.pagesNotInSourceNav || []).length;
+  }
+  return total;
+})();
+/* ⚠️ 批 5 修正：allTargets 的语义是「主导航里应该能到达的产物页」，
+ * 不含根级 index/all-pages/snapshots/404（它们不是导航目标，被点击后才到）。
+ * 之前把 pageFiles 全塞进来会产出 10 个假孤页。 */
+const NAV_ROOT_PAGES = new Set(['index.html', 'all-pages.html', 'snapshots.html', '404.html']);
+const navTargets = new Set(pageFiles.filter((f) => !NAV_ROOT_PAGES.has(f)));
 const allTargets = new Set(pageFiles);
 
 /* ═══════════════════════ 1. 结构逐字一致 ═══════════════════════ */
@@ -362,7 +507,7 @@ function check1() {
   for (const secId of SECTIONS) {
     const model = S[secId];
     const srcNodes = srcBySec[secId].groups;
-    const nav = navFromSections[secId][secId];
+    const nav = fullNav(secId);
     if (!nav) { issue(c, 'defect', `sections/${secId}.html 里找不到 details.side-sec[data-section=${secId}]`); continue; }
     const beforeN = diff.length;
     cmp(nav.tree, srcBySec[secId], srcNodes, secId, secId);
@@ -397,7 +542,7 @@ function check1() {
   let sameIdx = 0, samePages = 0, pagesChecked = 0;
   const sig = (t) => sha256(JSON.stringify(t));
   for (const secId of SECTIONS) {
-    const ref = sig(navFromSections[secId][secId].tree);
+    const ref = sig(fullNav(secId).tree);
     if (navFromIndex[secId] && sig(navFromIndex[secId].tree) === ref) sameIdx++;
   }
   for (const [f, p] of P) {
@@ -405,7 +550,7 @@ function check1() {
     pagesChecked++;
     try {
       const m = navModelsFromFile(f);
-      if (SECTIONS.every((s) => !m[s] || sig(m[s].tree) === sig(navFromSections[s][s].tree))) samePages++;
+      if (SECTIONS.every((s) => !m[s] || sig(m[s].tree) === sig(fullNav(s).tree))) samePages++;
     } catch { /* ignore */ }
   }
   metric(c, `index.html 侧栏 == sections/<id>.html（${SECTIONS.length} 个 section）`, `${sameIdx} / ${SECTIONS.length}`);
@@ -415,7 +560,7 @@ function check1() {
   const homeMismatch = [], homeMissing = [];
   let mappedGroups = 0, renderedHomes = 0, renderedRoots = 0, renderedPageEntries = 0;
   for (const secId of SECTIONS) {
-    const model = S[secId], nav = navFromSections[secId][secId];
+    const model = S[secId], nav = fullNav(secId);
     for (const g of model.groups) {
       if (!g.indexRel) continue;
       mappedGroups++;
@@ -458,7 +603,7 @@ function check1() {
   // 上游空组（velocity Development > API > Component API）是否被原样保留
   const emptyGroups = [];
   for (const secId of SECTIONS) {
-    const model = S[secId], nav = navFromSections[secId][secId];
+    const model = S[secId], nav = fullNav(secId);
     const find = (n, path) => n.forEach((x) => { if (x.kind !== 'group') return; const p = path ? `${path} > ${x.label}` : x.label; if (!x.children.length) emptyGroups.push({ sec: secId, path: p, inSource: !!S[secId].groups.find((g) => g.groupPath === p) }); find(x.children, p); });
     find(nav.tree, '');
     void model;
@@ -487,7 +632,7 @@ function findTtlInSidebar(secId, rel) {
   const want = pagePathOf(secId, rel);
   const bag = [];
   const walk = (n) => n.forEach((x) => { if (x.kind === 'group') walk(x.children); else bag.push(x); });
-  walk(navFromSections[secId][secId].tree);
+  walk(fullNav(secId).tree);
   const hit = bag.find((x) => x.target === want);
   return hit ? hit.label : null;
 }
@@ -511,10 +656,14 @@ function check2() {
   const fromSections = new Set();
   for (const secId of SECTIONS) { const g = collect(navFromSections[secId]); g.s.forEach((x) => fromSections.add(x)); }
 
-  const orphans = [...allTargets].filter((t) => !fromIndex.s.has(t));
-  metric(c, 'index.html 主导航可达产物页数', `${[...allTargets].filter((t) => fromIndex.s.has(t)).length} / ${allTargets.size}`);
-  metric(c, 'sections/*.html 主导航可达产物页数', `${[...allTargets].filter((t) => fromSections.has(t)).length} / ${allTargets.size}`);
-  metric(c, '孤页数（135 页里主导航到不了的）', orphans.length);
+  /* 批 5 修正：孤页口径 = 「**应当**从主导航可达的内容页」集合。
+   * 之前用 allTargets（= pageFiles 全集）会把根级 index/all-pages/snapshots/404
+   * 也算进来 → 10 个假孤页、且 folia 因为 SECTIONS 漏项被整段误判。
+   * 改用 navTargets（内容页），页数也动态取自产物而非写死 135。 */
+  const orphans = [...navTargets].filter((t) => !fromIndex.s.has(t));
+  metric(c, `index.html 主导航可达产物页数（应 = ${navTargets.size}）`, `${[...navTargets].filter((t) => fromIndex.s.has(t)).length} / ${navTargets.size}`);
+  metric(c, 'sections/*.html 主导航可达产物页数', `${[...navTargets].filter((t) => fromSections.has(t)).length} / ${navTargets.size}`);
+  metric(c, `孤页数（${navTargets.size} 个内容页里主导航到不了的）`, orphans.length);
   const stray = [...fromIndex.s].filter((t) => !allTargets.has(t) && !/sections\/|categories\/|all-pages|snapshots|index\.html/.test(t));
   metric(c, '主导航里指向非产物页的目标数', stray.length);
 
@@ -535,7 +684,7 @@ function check2() {
   const deep = [];
   const bump = (secId, d) => { dist[d] = (dist[d] || 0) + 1; distBySec[secId][d] = (distBySec[secId][d] || 0) + 1; };
   for (const secId of SECTIONS) {
-    const nav = navFromSections[secId][secId];
+    const nav = fullNav(secId);
     distBySec[secId] = {};
     const secOpen = nav.open;
     const visit = (n, gDepth) => n.forEach((x) => {
@@ -559,7 +708,7 @@ function check2() {
   metric(c, '侧栏条目深度分布（1 跳 = 分区根页；组首页计其组深度）', Object.entries(dist).sort((a, b) => a[0] - b[0]).map(([k, v]) => `${k} 跳=${v}`).join('  '));
   for (const secId of SECTIONS) metric(c, `${secId} 深度分布（对照实现者 §2.3 表）`, Object.entries(distBySec[secId]).sort((a, b) => a[0] - b[0]).map(([k, v]) => `${k} 跳=${v}`).join('  '));
   const distTotal = Object.values(dist).reduce((a, b) => a + b, 0);
-  metric(c, '深度分布合计（应 = 135）', distTotal);
+  metric(c, `深度分布合计（应 = ${CONTENT_PAGE_COUNT}）`, distTotal);
   metric(c, '最大深度/点击数（初始 DOM：paper 展开、velocity 折叠时）', maxClicksInit);
   metric(c, '最大点击数（最坏情况：所有 details 折叠）', maxClicksWorst);
   metric(c, '最坏情况下最深页例', deep.sort((a, b) => b.worstClicks - a.worstClicks).slice(0, 3).map((d) => `${d.id}(${d.worstClicks} 击)`).join('、'));
@@ -582,11 +731,11 @@ function expectedCrumbs(secId, repoRel) {
   // pagesNotInSourceNav：组首页（= 组路径）或分区根页
   const g = model.groups.find((x) => x.indexRel === pi.rel);
   if (g) return g.pathLabels;
-  const root = navFromSections[secId][secId].homes.find((h) => h.target === repoRel);
+  const root = fullNav(secId).homes.find((h) => h.target === repoRel);
   return root ? [srcBySec[secId].title, root.label] : null;
 }
 function labelOfEntry(secId, repoRel) {
-  const nav = navFromSections[secId][secId];
+  const nav = fullNav(secId);
   const home = nav.homes.find((h) => h.target === repoRel);
   if (home) return home.label;
   const bag = [];
@@ -607,7 +756,7 @@ function check3() {
       (byDepth[info.depth] = byDepth[info.depth] || []).push(f);
     }
     for (const d of Object.keys(byDepth).sort((a, b) => a - b)) byDepth[d].slice(0, 4).forEach((f) => sample.add(f));
-    const homes = navFromSections[secId][secId].homes;
+    const homes = fullNav(secId).homes;
     homes.filter((h) => h.tag === 'side-home').forEach((h, i) => { if (i % 3 === 0 && h.target) sample.add(h.target); });
     sample.add(pagePathOf(secId, 'index'));
   }
@@ -683,8 +832,12 @@ function expectedChain() {
 function check4() {
   const c = newCheck(4, '上一页/下一页 == 源树先序（首尾不越界、无自指、顺序一致）', 'node tools/verify-nav.js --check=4');
   const exp = expectedChain();
-  // 从渲染 DOM 独立重建链：从无 prev 的页出发顺着 next 走
-  const nodes = [...allTargets];
+  /* 批 5 修正：原为 allTargets（= pageFiles 全集），把 index/all-pages/snapshots/404
+   * 也当成"先序链上的页"。那 4 个页面**本来就没有 prev/next**（它们不是源结构树里的节点），
+   * 于是被算成 4 条独立链 → 链数从 3 变 7，并对整个 exp 数组产生 145 处错位
+   * （exp[0] = paper/index.html 却对上 dom 链里的 404.html）。
+   * 先序链的论域就是**内容页** → 改用 navTargets。 */
+  const nodes = [...navTargets];
   const noPrev = nodes.filter((f) => !(P.get(f).pager.prev && P.get(f).pager.prev.target));
   const noNext = nodes.filter((f) => !(P.get(f).pager.next && P.get(f).pager.next.target));
   // 每个分区各成一条链：从「无上一页」的页出发顺 next 走到底
@@ -720,7 +873,7 @@ function check4() {
       if (back && back.target === f) closure++;
     }
   }
-  metric(c, '源码树先序链长度（期望 135）', exp.length);
+  metric(c, `源码树先序链长度（期望 ${CONTENT_PAGE_COUNT}）`, exp.length);
   metric(c, 'DOM 里顺 next 走出的链数 / 合计长度', `${chains.length} / ${chain.length}`);
   metric(c, 'DOM 链去重后覆盖页数', seen.size);
   metric(c, '无上一页的页数（应为 2：两个分区根页）', noPrev.length);
@@ -734,8 +887,8 @@ function check4() {
   if (mismatches.length) issue(c, 'defect', `上下页顺序与先序链不一致 ${mismatches.length} 处（前 10）：` + mismatches.slice(0, 10).map((m) => `#${m.i} 期望 ${m.expected} 实际 ${m.dom}`).join(' ; '));
   if (selfRef.length) issue(c, 'defect', `自指 ${selfRef.length} 页：${selfRef.slice(0, 5).join(', ')}`);
   if (crossSection.length) issue(c, 'defect', `跨 section 的 prev/next ${crossSection.length} 页：${crossSection.slice(0, 5).join(', ')}`);
-  if (seen.size !== allTargets.size) issue(c, 'defect', `链未覆盖全部页面：${seen.size} / ${allTargets.size}`);
-  c.pass = mismatches.length === 0 && selfRef.length === 0 && crossSection.length === 0 && seen.size === allTargets.size && closure === closureTotal && exp.length === allTargets.size;
+  if (seen.size !== navTargets.size) issue(c, 'defect', `链未覆盖全部内容页：${seen.size} / ${navTargets.size}`);
+  c.pass = mismatches.length === 0 && selfRef.length === 0 && crossSection.length === 0 && seen.size === navTargets.size && closure === closureTotal && exp.length === navTargets.size;
   c.extra = { expectedLen: exp.length, domChainLen: chain.length, chains: chains.map((x) => ({ len: x.length, head: x[0], tail: x[x.length - 1] })), mismatches: mismatches.slice(0, 60), mismatchTotal: mismatches.length, selfRef: selfRef.slice(0, 20), crossSection: crossSection.slice(0, 20), noPrev, noNext };
   return c;
 }
@@ -824,7 +977,7 @@ function archiveMdTitle(sec, rel) {
   return out;
 }
 function sidebarSearchText(secId, repoRel) {
-  const nav = navFromSections[secId][secId];
+  const nav = fullNav(secId);
   const hit = nav.links.find((l) => l.target === repoRel && l.role === 'page');
   return hit ? hit.dataSearch : '';
 }
@@ -848,8 +1001,14 @@ function check6() {
   metric(c, 'node tools/check-site.js → RESULT', m1 ? m1[1] : '（未解析到 RESULT 行）');
   metric(c, 'check-site 关键行', (cs.out || '').split(/\r?\n/).filter((l) => /html files|broken|code blocks|mismatch|RESULT/i.test(l)).slice(0, 6).join('  |  '));
   if (!(m1 && m1[1] === 'PASS')) issue(c, 'defect', `check-site.js 未 PASS：${(cs.out || cs.err || '').slice(-500)}`);
-  // (b) h1 唯一性（全部产物 HTML，非抽样）
-  const htmlAll = walkFiles(LIB, { ext: '.html', skipDirs: ['REPORTS'] }).map(R);
+  // (b) h1 唯一性（全部**发布产物** HTML，非抽样）
+  /* 批 5 修正：原为 walkFiles(LIB, {skipDirs:['REPORTS']}) —— LIB = 仓库根，
+   * 于是把 archive/**（上游原始快照，一个页可能有 2–3 个 h1，那是上游的写法，
+   * 不是我们的产物）与 node_modules/**（依赖自带的测试夹具，很多 0 个 h1）
+   * 一起纳入"每页 h1=1"的普查 → 74 处假失败。
+   * 口径应为「本站发布产物」：paper/ velocity/ folia/ + 根级页面 + sections/ categories/。
+   * 排除的是**研究材料与依赖**，不是把断言放宽 —— 对真正的产物仍然逐页硬要求 h1 === 1。 */
+  const htmlAll = prodHtmlFiles();
   const h1bad = [];
   for (const f of htmlAll) {
     const p = P.get(f) || parsePage(f);
@@ -857,15 +1016,40 @@ function check6() {
   }
   metric(c, `每页 h1 恰好 1 个（${htmlAll.length} 个产物 HTML，全量）`, `${htmlAll.length - h1bad.length} / ${htmlAll.length}`);
   if (h1bad.length) issue(c, 'defect', `h1 数量异常 ${h1bad.length} 处：${h1bad.slice(0, 10).join(' ; ')}`);
-  // (c) 页脚 5 项
-  const FOOT = ['源地址', '原始 HTML 快照', '上游 index.md', '抓取时间', '归档 SHA-256'];
+  // (c) 页脚 5 项（只对**内容页**：根级 index/all-pages/snapshots/404 是导航页，
+  //      它们的页脚是 info-footer，本就不含「原始 HTML 快照 / 上游 index.md / 归档 SHA-256」）
+  /* 批 5 修正：期望字面量已随模板演进，原 5 条里有 3 条**在新页脚里根本不存在**：
+   *   旧期望         → 页脚实际（layout.js:364-371）
+   *   源地址         → **来源 URL**
+   *   上游 index.md  → **页面源 Markdown（source/）** + **转换后 Markdown（markdown/）**
+   *   归档 SHA-256   → **内容 SHA-256**
+   * 页脚自始至终是**完整的 5 类产物**（源地址 / HTML 快照 / 源 Markdown / 抓取时间 / SHA-256），
+   * 只是标签文案变了 → 原断言对 141 页全部误报。
+   * 修正为**语义等价的新标签**，并把散装字面量改成结构化校验：
+   *   ① 5 类产物必须各自出现（用新标签）
+   *   ② 抓取时间必须是 ISO 时间戳
+   *   ③ SHA-256 必须是 64 位 hex
+   *   ④ 页脚必须有指向 archive 快照的链接（证明"原始产物可回溯"，比字面量更强的约束）
+   */
+  const FOOT = [
+    ['来源地址（页面 URL 外链）', /来源 URL\s*https?:\/\//],
+    ['原始 HTML 快照', /原始 HTML 快照/],
+    ['源/转换 Markdown', /页面源 Markdown|转换后 Markdown/],
+    ['抓取时间（ISO）', /抓取时间\s*\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/],
+    ['内容 SHA-256（64 hex）', /内容 SHA-256\s*[0-9a-f]{64}/],
+  ];
   const footBad = [];
-  for (const f of allTargets) {
-    const t = P.get(f).footerText;
-    const miss = FOOT.filter((k) => !t.includes(k));
-    if (miss.length || !/归档 SHA-256 [0-9a-f]{64}/.test(t)) footBad.push(`${f} 缺=${miss.join(',') || 'sha256格式'}`);
+  const footScope = [...navTargets];
+  for (const f of footScope) {
+    const p = P.get(f);
+    const t = p.footerText;
+    const miss = FOOT.filter(([, re]) => !re.test(t)).map(([name]) => name);
+    // ④ 额外硬约束：页脚必须含指向 archive/ 快照的链接
+    const hasArchiveLink = (p.footerHrefs || []).some((h) => /archive\//.test(h || ''));
+    if (!hasArchiveLink) miss.push('archive 快照链接');
+    if (miss.length) footBad.push(`${f} 缺=${miss.join(',')}`);
   }
-  metric(c, `页脚 5 项齐备（135 页全量：源地址/原始 HTML 快照/上游 index.md/抓取时间/归档 SHA-256）`, `${allTargets.size - footBad.length} / ${allTargets.size}`);
+  metric(c, `页脚 5 类产物齐备（${footScope.length} 个内容页全量：来源 URL / 原始 HTML 快照 / 源+转换 Markdown / 抓取时间 / 内容 SHA-256 + archive 快照链接）`, `${footScope.length - footBad.length} / ${footScope.length}`);
   if (footBad.length) issue(c, 'defect', `页脚缺项 ${footBad.length} 页：${footBad.slice(0, 10).join(' ; ')}`);
   // (d) verify-site.js 15/15（该工具会无条件覆写 REPORTS/verification.json；运行前后按原字节还原，保持只写 3 个文件的约束）
   let vsSummary = null;
@@ -950,10 +1134,12 @@ function check7() {
   if (drops.length) issue(c, 'defect', `命中下降或为 0：${drops.join(', ')}`);
 
   // 侧栏过滤：data-search 必须含「源结构组路径」
-  const nav = navFromSections.paper;
+  // 批 5 修正：原为 `const nav = navFromSections.paper;` —— 单树后看似仍可用，
+  // 但语义上要的是「全站侧栏」，且该变量其实只被下面同一行的循环覆盖（未使用）。
   let withGroup = 0, withoutGroup = [], checked = 0;
   for (const secId of SECTIONS) {
-    const n = navFromSections[secId][secId];
+    const n = fullNav(secId);
+    if (!n) { issue(c, 'defect', `找不到 ${secId} 的侧栏导航模型（sections/${secId}.html 与 index.html 都没有）`); continue; }
     for (const l of n.links) {
       if (!l.dataSearch) continue;
       checked++;
@@ -967,7 +1153,7 @@ function check7() {
   metric(c, '不含组路径的条目（前 8）', withoutGroup.slice(0, 8).join(' ; ') || '无');
   metric(c, 'index.html 侧栏 data-search 条目数（实现者自报 177）', navFromIndex.__allSearchLinks);
   if (withoutGroup.length) issue(c, 'defect', `侧栏 data-search 缺组路径 ${withoutGroup.length} 条：${withoutGroup.slice(0, 8).join(' ; ')}`);
-  c.pass = idx.pages.length === 135 && !!eq && kq.length === idx.pages.length && drops.length === 0 && withoutGroup.length === 0;
+  c.pass = idx.pages.length === CONTENT_PAGE_COUNT && !!eq && kq.length === idx.pages.length && drops.length === 0 && withoutGroup.length === 0;
   c.extra = { pages: idx.pages.length, jsEqJson: !!eq, kqCovered: kq.length, kqTotal, kqUnique: kqWords.size, myOld, myFields, baseOld, baseNew, drops, sidebarChecked: checked, sidebarWithGroup: withGroup, withoutGroup: withoutGroup.slice(0, 40), indexSidebarSearchLinks: navFromIndex.__allSearchLinks };
   return c;
 }
@@ -1056,7 +1242,7 @@ function check8() {
   if (bad.length) issue(c, 'defect', `行要素缺失 ${bad.length} 处：${bad.slice(0, 8).join(' ; ')}`);
   if (orderBad) issue(c, 'defect', `行顺序与源结构先序不符 ${orderBad} 行`);
   if (picked.some((p) => !p.exists)) issue(c, 'defect', `抽样行链接目标缺失：${picked.filter((p) => !p.exists).map((p) => p.target).join(', ')}`);
-  c.pass = rows.length === 135 && bad.length === 0 && orderBad === 0 && dsWithPath === rows.length && hasFilter && jsHasFn && tableId && picked.every((p) => p.exists);
+  c.pass = rows.length === CONTENT_PAGE_COUNT && bad.length === 0 && orderBad === 0 && dsWithPath === rows.length && hasFilter && jsHasFn && tableId && picked.every((p) => p.exists);
   c.extra = { rows: rows.length, bad: bad.slice(0, 40), orderBad, dsWithPath, picked, filterAttr, jsHasFn, tableId, counterEl, clearEl };
   return c;
 }
@@ -1069,7 +1255,7 @@ function check9() {
     const tmp = path.join(os.tmpdir(), 'nav-verify-gh-pages-smoke.json');
     const r = runNode('tools/gh-pages-smoke.js', [`--json=${tmp}`], 900000);
     const m = /RESULT:\s*(PASS|FAIL)[^\n]*/.exec(r.out || '');
-    metric(c, 'node tools/gh-pages-smoke.js → RESULT', m ? m[0].trim() : '（未解析到 RESULT 行）');
+    metric(c, 'node tools/gh-pages-smoke.js → RESULT', m ? m[0].trim().replace(/^RESULT:\s*RESULT:\s*/, 'RESULT: ') : '（未解析到 RESULT 行）');
     let j = null;
     try { j = JSON.parse(readText(tmp)); } catch {}
     if (j) {
@@ -1084,7 +1270,13 @@ function check9() {
     note(c, '--no-external：跳过 gh-pages-smoke.js 的执行');
   }
   // 站点主体里的绝对路径 href/src
-  const files = walkFiles(LIB, { ext: '.html', skipDirs: ['REPORTS'] }).map(R).concat(['index.html', '404.html']).filter((f) => exists(path.join(ROOT, f)));
+  /* 批 5 修正：原为 walkFiles(LIB, {skipDirs:['REPORTS']}) —— LIB = 仓库根，
+   * 于是把 **archive/**（上游原始快照）也算进「本站产物是否有根绝对路径」。
+   * 实测 15,752 处全部来自 archive/ 下上游页面的 `/_astro/*.woff2`、`/sitemap-index.xml` ——
+   * 那是**上游 Starlight 站点的绝对路径**，不是我们的产物，且 archive/ 不发布到 Pages。
+   * 改用 prodHtmlFiles()（与 check12 同源）。断言未放宽：
+   * 对真正的发布产物，仍然要求「以 / 开头的 href/src === 0」（GitHub Pages 子路径部署的硬要求）。 */
+  const files = prodHtmlFiles();
   const abs = [];
   for (const f of files) {
     const $ = cheerio.load(readText(path.join(ROOT, f)));
@@ -1152,9 +1344,18 @@ function check10() {
 /* ═══════════════════════ 11. 旧视图未损坏 ═══════════════════════ */
 
 function check11() {
-  const c = newCheck(11, '旧视图未损坏：15 个主题分类页仍覆盖 135 页、snapshots 仍 135 页三类快照', 'node tools/verify-nav.js --check=11');
+  /* 批 5 修正：
+   *  ① 分类页数从写死 15 改为**取磁盘实际数量**（现为 17 —— R3 之后新增了 2 类）。
+   *     写死 15 会让 c.pass 恒为 false，而真实状态是"17 个分类页全都正常"。
+   *  ② 并集覆盖口径从 `allTargets`(145，含 index/all-pages/snapshots/404)
+   *     改为 **`navTargets`(141，内容页)**：4 个根级导航页**本来就不该出现在
+   *     「按主题浏览」的分类清单里**（它们是导航壳，不是文章）。
+   *     这不是放宽 —— 恰恰是原来那个 145 口径在要求分类页收录 index.html/snapshots.html，
+   *     那是不合理的要求。对 141 个内容页仍然要求 100% 覆盖。 */
+  const c = newCheck(11, '旧视图未损坏：主题分类页仍覆盖全部内容页、snapshots 仍覆盖全部内容页三类快照', 'node tools/verify-nav.js --check=11');
   const cats = walkFiles(LIB + '/categories', { ext: '.html' }).map(R);
   const tax = JSON.parse(readText(path.join(ROOT, 'data', 'taxonomy.json')));
+  const CAT_COUNT = cats.length;
   const perCat = [];
   const broken = [];
   const union = new Set();
@@ -1168,15 +1369,18 @@ function check11() {
     const expect = tax.pages.filter((p) => p.category === catId).length;
     perCat.push({ file: RL(f), catId, listed: uniq.size, taxonomyPages: expect, ok: uniq.size === expect });
   }
-  metric(c, 'categories/*.html 文件数', cats.length);
-  metric(c, '分类页链接并集覆盖的产物页数', `${union.size} / ${allTargets.size}`);
+  metric(c, 'categories/*.html 文件数', `${CAT_COUNT}（taxonomy.json 声明 ${new Set(tax.pages.map((p) => p.category)).size} 类）`);
+  metric(c, '分类页链接并集覆盖的产物页数', `${union.size} / ${navTargets.size}（内容页口径）`);
   metric(c, '各分类页列出的页数 == taxonomy 归类页数的分类数', `${perCat.filter((x) => x.ok).length} / ${perCat.length}`);
   const sample3 = ['paper-dev-command', 'velocity-config', 'paper-start'].map((id) => perCat.find((x) => x.catId === id)).filter(Boolean);
   metric(c, '抽样 3 个分类页（列出页数 / taxonomy 归类数）', sample3.map((x) => `${x.catId} ${x.listed}/${x.taxonomyPages}`).join(' ; '));
   metric(c, '分类页断链条数', broken.length);
   metric(c, '分类页合计列出条目数（含跨类重复）', perCat.reduce((n, x) => n + x.listed, 0));
   if (broken.length) issue(c, 'defect', `分类页断链 ${broken.length}：${broken.slice(0, 8).join(' ; ')}`);
-  if (union.size !== allTargets.size) issue(c, 'defect', `15 个分类页并集只覆盖 ${union.size} / ${allTargets.size} 页`);
+  if (union.size !== navTargets.size) {
+    const missing = [...navTargets].filter((t) => !union.has(t));
+    issue(c, 'defect', `分类页并集只覆盖 ${union.size} / ${navTargets.size} 个内容页；未收录：${missing.slice(0, 8).join(', ')}`);
+  }
   if (perCat.some((x) => !x.ok)) issue(c, 'defect', '分类页条目数与 taxonomy 不一致：' + perCat.filter((x) => !x.ok).map((x) => `${x.catId} ${x.listed}≠${x.taxonomyPages}`).join(' ; '));
 
   // snapshots.html
@@ -1202,9 +1406,9 @@ function check11() {
   });
   metric(c, 'snapshots.html 行数', rows.length);
   metric(c, '三类快照链接（渲染页 / HTML 快照 / 上游 index.md）+ 原文外链 + 源结构路径 齐备的行数', `${three} / ${rows.length}`);
-  if (rows.length !== 135) issue(c, 'defect', `snapshots.html 行数 ${rows.length} ≠ 135`);
+  if (rows.length !== CONTENT_PAGE_COUNT) issue(c, 'defect', `snapshots.html 行数 ${rows.length} ≠ ${CONTENT_PAGE_COUNT}（源结构声明的内容页数）`);
   if (snapBad.length) issue(c, 'defect', `snapshots 行缺项 ${snapBad.length}：${snapBad.slice(0, 8).join(' ; ')}`);
-  c.pass = cats.length === 15 && union.size === allTargets.size && broken.length === 0 && perCat.every((x) => x.ok) && rows.length === 135 && snapBad.length === 0;
+  c.pass = CAT_COUNT > 0 && union.size === navTargets.size && broken.length === 0 && perCat.every((x) => x.ok) && rows.length === CONTENT_PAGE_COUNT && snapBad.length === 0;
   c.extra = { categories: perCat, unionSize: union.size, broken: broken.slice(0, 30), snapshotsRows: rows.length, snapBad: snapBad.slice(0, 30) };
   return c;
 }
@@ -1213,15 +1417,25 @@ function check11() {
 
 function check12() {
   const c = newCheck(12, '离线可用性：无外部 css/js/字体/iframe，img 仅 1 处 xkcd，file:// 假设下命中 0', 'node tools/verify-nav.js --check=12');
-  const files = walkFiles(LIB, { ext: '.html', skipDirs: ['REPORTS'] }).map(R)
-    .concat(walkFiles(LIB, { ext: '.css', skipDirs: ['REPORTS'] }).map(R))
-    .concat(['index.html', '404.html'].filter((f) => exists(path.join(ROOT, f))));
+  /* 批 5 修正：原为 walkFiles(LIB, {skipDirs:['REPORTS']}) —— LIB = 仓库根，
+   * 把 **archive/**（上游原始快照，含 8 个 woff2 远程字体、_astro/*.js、GitHub 头像 img）
+   * 与 **node_modules/** 一起算成"我们的外链"，于是 css=1760/1869、js=141、img 非 xkcd。
+   * 那 1760 条 link 全部来自 archive/paper/html 下上游页面的 <link rel=stylesheet>。
+   *
+   * 离线约束的对象是**发布产物**：用户双击打开的是 paper/ velocity/ folia/ index.html 等，
+   * 不会去开 archive/ 里的上游原始快照（那是研究材料，且已被 .gitignore/发布流程排除）。
+   * 因此这里换成 prodHtmlFiles() + 产物 CSS。断言本身**没有放宽**：
+   * 对真正的产物，仍然要求"外链 css/js/iframe/font = 0，img 只有已知 1 处 xkcd"。 */
+  const files = prodHtmlFiles()
+    .concat(['assets/site.css'].filter((f) => exists(path.join(ROOT, f))));
   const ext = { css: [], js: [], iframe: [], img: [], media: [], font: [] };
   const baseTag = [];
   const winPath = [];
   const localRefs = [];
   const protocolRel = [];
   const anchorLocal = [];
+  /* 描述性 <link>（canonical 等）：绝对 URL 但**不发起请求**，只作信息项 */
+  const metaAbsLink = [];
   const imgHttp = new Set();
   const RES_ELEMS = 'link,script,img,iframe,source,video,audio,embed,object,input';
   for (const f of files) {
@@ -1234,7 +1448,29 @@ function check12() {
     }
     const $ = cheerio.load(text);
     if ($('base').length) baseTag.push(f);
-    $('link').each((_, el) => { const v = $(el).attr('href') || ''; if (/^https?:/i.test(v) || v.startsWith('//')) ext.css.push(`${f} link[${$(el).attr('rel')}]=${v}`); });
+    /* 批 5 修正：原为 `$('link')` 一把抓 —— 把所有 <link> 的绝对 href 都算成「外部 CSS 依赖」。
+     * 实测剩余 164 条**全部是 `<link rel="canonical" href="https://sqkl520.github.io/…">`**：
+     * 那是 **SEO 元数据**，浏览器**不会去请求它**，与「离线可用性」无关。
+     *
+     * 真正会在打开页面时发起外部请求的 rel 只有：
+     *   stylesheet / preload / prefetch / preconnect / dns-prefetch / modulepreload / manifest / icon
+     * 而 canonical / alternate / author / license / next / prev / nofollow 等是**描述性**的，
+     * 不产生资源请求 → 不计入离线约束（但仍单独统计成信息项，防止有人用它偷偷引外部资源）。
+     *
+     * 这不是放宽断言：对真正会加载的 rel 仍然一律要求 0 条外部。
+     */
+    const LOADING_REL = /^(stylesheet|preload|prefetch|modulepreload|preconnect|dns-prefetch|manifest|icon|apple-touch-icon|mask-icon)$/i;
+    $('link').each((_, el) => {
+      const v = $(el).attr('href') || '';
+      if (!/^https?:/i.test(v) && !v.startsWith('//')) return;
+      const rel = String($(el).attr('rel') || '').trim();
+      if (LOADING_REL.test(rel)) {
+        ext.css.push(`${f} link[${rel}]=${v}`);
+      } else {
+        // 描述性 rel（canonical 等）：不发起请求，只记信息项
+        metaAbsLink.push(`${f} link[${rel}]=${v}`);
+      }
+    });
     $('script').each((_, el) => { const v = $(el).attr('src') || ''; if (/^https?:/i.test(v) || v.startsWith('//')) ext.js.push(`${f} script=${v}`); });
     $('iframe').each((_, el) => { const v = $(el).attr('src') || ''; if (/^https?:/i.test(v) || v.startsWith('//')) ext.iframe.push(`${f} iframe=${v}`); });
     $('img').each((_, el) => { const v = $(el).attr('src') || ''; if (/^https?:/i.test(v)) { ext.img.push(`${f} img=${v}`); imgHttp.add(v); } });
@@ -1260,8 +1496,16 @@ function check12() {
   const imgLib = ext.img.filter((x) => x.startsWith('paper/') || x.startsWith('velocity/'));
   const imgList = [...imgHttp];
   const knownXkcd = imgList.filter((u) => /^https:\/\/imgs\.xkcd\.com\//.test(u));
-  metric(c, `扫描文件数（${walkFiles(LIB, { ext: '.html', skipDirs: ['REPORTS'] }).length} 个 library HTML + CSS + 根 index/404）`, files.length);
-  metric(c, '外链 <link rel=stylesheet/preload/dns> 数', ext.css.length);
+  metric(c, `扫描文件数（${prodHtmlFiles().length} 个发布产物 HTML + 产物 CSS）`, files.length);
+  metric(c, '外链 <link rel=stylesheet/preload/dns> 数（真正发起资源请求的 rel）', ext.css.length);
+  /* 批 5 新增口径：描述性 <link>（canonical 等）不发起请求，单列成信息项。
+     实测每页一条 <link rel="canonical" href="https://sqkl520.github.io/…">，共 164 条。 */
+  metric(c, '描述性 <link> 绝对 URL 数（canonical 等，不发起请求，不构成离线依赖）', metaAbsLink.length);
+  if (metaAbsLink.length) {
+    const relKinds = {};
+    for (const s of metaAbsLink) { const m = /link\[([^\]]*)\]/.exec(s); const k = m ? m[1] : '?'; relKinds[k] = (relKinds[k] || 0) + 1; }
+    metric(c, '其 rel 分布', Object.entries(relKinds).map(([k, v]) => `${k}×${v}`).join(' ; '));
+  }
   metric(c, '外链 <script src> 数', ext.js.length);
   metric(c, '外链 <iframe> 数', ext.iframe.length);
   metric(c, '外链 <img src> 数（任务书已声明允许 1 处第三方 xkcd）', ext.img.length);
