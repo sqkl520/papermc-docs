@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "generated_at": "2026-10-26T12:53:57.402Z",
+  "generated_at": "2026-10-26T14:34:55.609Z",
   "scanner": "tools/privacy-scan.js",
   "root": "<repo>",
   "file_set": {
     "mode": "gitignore-walker",
     "include_ignored": false,
-    "files": 1414,
-    "scanned_text_files": 1341,
+    "files": 1451,
+    "scanned_text_files": 1378,
     "skipped_binary": 72,
     "skipped_too_large": 0,
     "skipped_self_output": 1,
@@ -16,12 +16,12 @@
   },
   "summary": {
     "must_fix": 0,
-    "public_url": 329,
-    "loopback_ok": 534,
+    "public_url": 331,
+    "loopback_ok": 542,
     "upstream": 86,
     "suppressed_must_fix": 4,
     "must_fix_files": 0,
-    "total_hits": 949
+    "total_hits": 959
   },
   "buckets": {
     "must-fix": "① 必须修复：我们自己写的代码 / 数据 / 产物里的本机痕迹",
@@ -69,9 +69,9 @@
     {
       "id": "owner-handle",
       "note": "账号 / 仓库所有者标识（出现在公网地址里属正当信息）",
-      "total": 329,
+      "total": 331,
       "must_fix": 0,
-      "public_url": 329,
+      "public_url": 331,
       "loopback_ok": 0,
       "upstream": 0
     },
@@ -87,10 +87,10 @@
     {
       "id": "localhost",
       "note": "回环地址 / 本机服务地址",
-      "total": 620,
+      "total": 628,
       "must_fix": 0,
       "public_url": 0,
-      "loopback_ok": 534,
+      "loopback_ok": 542,
       "upstream": 86
     },
     {
@@ -211,6 +211,14 @@
       "upstream": 0
     },
     {
+      "file": "tools/verify-nav.js",
+      "total": 9,
+      "must_fix": 0,
+      "public_url": 2,
+      "loopback_ok": 7,
+      "upstream": 0
+    },
+    {
       "file": "archive/velocity/html/getting-started/index.html",
       "total": 7,
       "must_fix": 0,
@@ -220,14 +228,6 @@
     },
     {
       "file": "tools/fa-forward.js",
-      "total": 7,
-      "must_fix": 0,
-      "public_url": 0,
-      "loopback_ok": 7,
-      "upstream": 0
-    },
-    {
-      "file": "tools/verify-nav.js",
       "total": 7,
       "must_fix": 0,
       "public_url": 0,
@@ -442,24 +442,6 @@
   },
   "history": [
     {
-      "at": "2026-10-26T11:34:06.274Z",
-      "files": 1400,
-      "must_fix": 44,
-      "public_url": 329,
-      "loopback_ok": 530,
-      "upstream": 86,
-      "clean": false
-    },
-    {
-      "at": "2026-10-26T11:36:52.641Z",
-      "files": 1358,
-      "must_fix": 48,
-      "public_url": 286,
-      "loopback_ok": 530,
-      "upstream": 86,
-      "clean": false
-    },
-    {
       "at": "2026-10-26T11:41:38.404Z",
       "files": 1404,
       "must_fix": 48,
@@ -528,6 +510,24 @@
       "must_fix": 0,
       "public_url": 329,
       "loopback_ok": 534,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-26T14:00:55.720Z",
+      "files": 1439,
+      "must_fix": 0,
+      "public_url": 329,
+      "loopback_ok": 539,
+      "upstream": 86,
+      "clean": true
+    },
+    {
+      "at": "2026-10-26T14:34:55.609Z",
+      "files": 1451,
+      "must_fix": 0,
+      "public_url": 331,
+      "loopback_ok": 542,
       "upstream": 86,
       "clean": true
     }

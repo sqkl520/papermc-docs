@@ -804,8 +804,13 @@
     var side = doc.getElementById('sidebar');
     var scrim = doc.getElementById('nav-scrim') || doc.querySelector('[data-nav-scrim], .nav-scrim, .nav-overlay');
     if (!toggle || !side) return;
-    /* 批 3（C3）：与 CSS 的 @media (min-width:1200px) 严格同源，改一处必须改另一处。 */
-    var wide = window.matchMedia('(min-width:1200px)');
+    /* 批 5c（变体 L）：抽屉的真相是「**侧栏**是否常驻」→ 跟 **1024**。
+       ⚠️ 与 TOC 的 matchMedia（下面 syncToc 的 tocWide）**不同源**，这是刻意的：
+       侧栏 @1024 常驻、右栏 TOC 仍 @1200。若两者都写 1024，1024–1199 会出现
+       「JS 认为 TOC 是右栏（不去移除 open）但 CSS 只有两列」→ TOC 掉到正文下方
+       并永久展开（= 441px 展开坑的变体）。
+       与 CSS 的 @media (min-width:1024px) 严格同源，改一处必须改另一处。 */
+    var wide = window.matchMedia('(min-width:1024px)');
     var supportsGutter = !!(window.CSS && window.CSS.supports && window.CSS.supports('scrollbar-gutter', 'stable'));
     function isWide() { return wide.matches; }
     function isOpen() { return doc.body.classList.contains('nav-open'); }
