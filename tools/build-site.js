@@ -49,6 +49,26 @@ function warn(kind, message, extra) {
   warnings.push(Object.assign({ kind, message }, extra || {}));
 }
 
+/* ───────── must-fix 级诊断（2026-10-26 新增） ─────────
+ * 背景：`selftest-ranker-load` 这条警告从 5d0831b（C3 断崖）起一直被忽略 ——
+ * 它导致 `search-index.json` 的 `kq` 字段**从未写入**，而 `verify-nav` 的搜索门禁
+ * 因此空转了 8 个月。根因是 `catch` 里只 `warn` 然后 `return null`，构建仍然 exit 0。
+ *
+ * 现在区分两级：
+ *   warn(kind, msg)      —— 可容忍的降级（缺图、上游标签变动…），构建继续，exit 0
+ *   mustFix(kind, msg)   —— **不可容忍的静默降级**（门禁据此判定的数据没有产出），
+ *                           构建跑完仍会写产物（便于人工查看），但 **exitCode = 1**
+ *
+ * `warn(kind, msg, { mustFix: true })` 也等价于 mustFix（便于就地改造旧调用）。
+ */
+const mustFixList = [];
+function mustFix(kind, message, extra) {
+  const rec = Object.assign({ kind, message, severity: 'must-fix' }, extra || {});
+  mustFixList.push(rec);
+  warnings.push(rec);
+  return rec;
+}
+
 // ---------------------------------------------------------------------------
 // 1. manifests
 // ---------------------------------------------------------------------------
@@ -1615,12 +1635,54 @@ function loadShippedRanker() {
   const snippet = src.slice(start, end);
   const phraseMap = {};
   for (const p of S.PHRASES) phraseMap[p.q] = p;
+  /* ⚠️ 2026-10-26 修复（批 5 期间由 verify-nav 的 check7 暴露）：
+   * 这个切片是用两个**函数名字符串**定位的（`function norm(s)` … `function setCount(`），
+   * 两者之间的范围随 SITE_JS 增长而变大。自 5d0831b（C3 断崖）起，这个区间里
+   * 混进了**顶层语句** `var searchRaf = window.requestAnimationFrame || …` 与
+   * `if (!(window.__LIBRARY_SEARCH__ …)) {`。
+   *
+   * `new Function(...)` 本身**只做语法检查**，这些语句在**调用**时才执行 →
+   * Node 里没有 window → ReferenceError → 被下面的 catch 吞掉 → 返回 null →
+   * build-site.js:2167 的 `if (shippedRanker)` 整块跳过 → **每页的 kq 字段从未写入**
+   * （只在 manifest 里留一条 selftest-ranker-load 警告，很容易被忽略）。
+   *
+   * 修复方式：给这段代码一个**最小 window/document 垫片**。
+   * 排序函数本身（score/termScore/partScore/compareHits/norm）不依赖任何 DOM，
+   * 这里补垫片只为让切片里的**无关顶层语句**能跑完，不改变排序语义。
+   * 同时显式断言 termScore 是函数 —— 若将来切片再次错位，会**明确报错**而不是静默降级。 */
+  const shim = {
+    requestAnimationFrame: (f) => setTimeout(f, 16),
+    cancelAnimationFrame: (h) => clearTimeout(h),
+    __LIBRARY_SEARCH__: null,
+    addEventListener() {}, removeEventListener() {},
+    matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }),
+    localStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+    sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+  };
+  const shimDoc = {
+    documentElement: { setAttribute() {}, getAttribute: () => null, classList: { add() {}, remove() {}, toggle() {}, contains: () => false }, style: {} },
+    body: { classList: { add() {}, remove() {}, toggle() {}, contains: () => false }, style: {}, appendChild() {} },
+    querySelector: () => null, querySelectorAll: () => [], getElementById: () => null,
+    addEventListener() {}, removeEventListener() {},
+    createElement: () => ({ style: {}, classList: { add() {}, remove() {} }, appendChild() {}, setAttribute() {} }),
+  };
   try {
     // eslint-disable-next-line no-new-func
-    return new Function('ALIASES', 'CJK', 'PHRASE_BY_Q', snippet
-      + '\nreturn { score: score, termScore: termScore, partScore: partScore, compareHits: compareHits };')(S.ALIASES, /[\u3400-\u9fff]/, phraseMap);
+    const factory = new Function('ALIASES', 'CJK', 'PHRASE_BY_Q', 'window', 'document', 'self', 'globalThis', snippet
+      + '\nreturn { score: score, termScore: termScore, partScore: partScore, compareHits: compareHits };');
+    const ranker = factory(S.ALIASES, /[\u3400-\u9fff]/, phraseMap, shim, shimDoc, shim, shim);
+    if (!ranker || typeof ranker.termScore !== 'function') {
+      mustFix('selftest-ranker-load',
+        '内置排序函数未能返回 termScore（SITE_JS 的切片标记 "function norm(s)" … "function setCount(" 可能已错位）：'
+        + 'kq 预计算被跳过。**这是 must-fix**：verify-nav 的「kq 覆盖」门禁依赖它，跳过会让该门禁静默空转。'
+        + '修法：调整 build-site.js 的切片边界，或扩大 window/document 垫片。');
+      return null;
+    }
+    return ranker;
   } catch (e) {
-    warn('selftest-ranker-load', '无法载入内置排序函数用于自测：' + e.message);
+    mustFix('selftest-ranker-load',
+      '无法载入内置排序函数用于自测：' + e.message
+      + '。**这是 must-fix**：kq 预计算会被跳过，verify-nav 的搜索门禁将静默失效。');
     return null;
   }
 }
@@ -2388,6 +2450,9 @@ function main() {
     warningCount: warnings.length,
     warningsByKind: warnings.reduce((acc, w) => { acc[w.kind] = (acc[w.kind] || 0) + 1; return acc; }, {}),
     warnings: warnings.slice(0, 500),
+    /* 2026-10-26：must-fix 级诊断单列，便于门禁与人工直接判红/判绿 */
+    mustFixCount: mustFixList.length,
+    mustFix: mustFixList,
     timing_ms: { total: Date.now() - T0 },
   };
 
@@ -2431,6 +2496,15 @@ function main() {
     for (const f of failed) log('  ✗ [' + f.page + '] ' + f.name + ' — ' + f.detail);
   }
   log('写入 data/build-manifest.json');
+  /* must-fix 收尾：有 must-fix 级诊断 → 构建**非 0 退出**。
+   * 产物仍然写出（便于人工查看），但 CI / 门禁会红。
+   * 这条机制是为 `selftest-ranker-load` 那类"静默降级 8 个月"的失效路径加的。 */
+  if (mustFixList.length) {
+    log('');
+    log('!!! must-fix 诊断 ' + mustFixList.length + ' 条（构建将以非 0 退出）：');
+    for (const m of mustFixList) log('  ✗ [' + m.kind + '] ' + m.message);
+    process.exitCode = 1;
+  }
   return manifest;
 }
 
